@@ -1,0 +1,9 @@
+*.log
+temp*
+web*
+!websocket*
+node_modules
+ld
+logs
+LazierServer*
+dist
