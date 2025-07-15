@@ -1,5 +1,6 @@
-import redirectApi from './send-redirectApi.js';
-import sendSameApi from './send-sameApi.js';
+import redirectApi from './sendRedirectApi.js';
+import sendSameApi from './sendSameApi.js';
+import plugins from './plugins.js';
 
 const sends = [
     sendSameApi,

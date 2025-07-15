@@ -1,6 +1,27 @@
 import Router from 'koa-router';
-import Config from './config.js';
+import bodyParser from 'koa-bodyparser';
+
+// const ET = require('./lib/init.js');
+// const fs = require('fs');
+// const Koa = require('koa');
+// const path = require('path');
+// const https = require('https');
+// const send = require('koa-send');
+// const cors = require('@koa/cors');
+// const Router = require('koa-router');
+// const bodyParser = require('koa-bodyparser');
+// const Downloader = require('nodejs-file-downloader');
+// const websocketServer = require('./lib/websocket-server.js');
+// const redirectApi = require('./lib/send-redirectApi.js')
+// const sendSameApi = require('./lib/send-sameApi.js')
+// const koaProxies = require('./lib/koaProxies.js')
+// const globalUtils = require('./lib/utils.js');
+// const plugins = require('./lib/index.js');
+// const Config = require('./lib/config.js');
+
+import { fs, path, config } from './config.js';
 import { addRouters, completeFile } from './addRouters.js';
+import koaProxies from './koaProxies.js';
 
 export default initKoa;
 
@@ -15,7 +36,7 @@ function initKoa(app) {
     // 启用信任代理ip
     app.proxy = true;
     // 加载插件与路由
-    if (Config.cors) app.use(cors());
+    if (config.cors) app.use(cors());
     app.use(bodyParser())
         .use(async (ctx, next) => {
             // 计数器插件
@@ -74,5 +95,5 @@ function initKoa(app) {
 }
 
 function moreLog(...args) {
-    if (Config.moreLog) console.log(...args)
+    if (config.moreLog) console.log(...args)
 }
