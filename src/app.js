@@ -13,7 +13,9 @@ console.info(config.showVersion());
 // 检测 proxy.js 是否生成，如果没有生成，那么指定代码进行生成
 if (!fs.existsSync(path.join(config['gen-proxy-targetDir'], 'proxy.js'))) {
     console.warn('开发环境插件 proxy.js 不存在，生成该插件');
-    import('./libs/genProxy.js').then(mod => mod('proxy.js'));
+    import('./libs/genProxy.js').then(mod => {
+        if (typeof mod == 'function') mod('proxy.js')
+    });
 }
 // 启动的目标文件夹，如果是开启了 allDir ，那么在实际读取的时候会重新扫描更新
 var domainList = config.domainList.map(domain => path.join(config.rootDir, domain));

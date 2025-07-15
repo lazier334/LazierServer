@@ -2,7 +2,7 @@ import * as baseImport from './baseImport.js';
 import defConfig from './configDef.js';
 const { fs, path } = baseImport;
 // 设定外部配置数据位置
-defConfig.ldConfigPath = path.join(process.cwd(), './ld/config.js');
+defConfig.ldConfigPath = path.join(process.cwd(), './ld/config.json');
 
 /** @type {defConfig} */
 var config = {

@@ -1,11 +1,18 @@
 import redirectApi from './sendRedirectApi.js';
 import sendSameApi from './sendSameApi.js';
 import plugins from './plugins.js';
+import { fs, path, config } from './config.js';
 
 const sends = [
     sendSameApi,
     redirectApi
 ];
+
+// 启动的目标文件夹，如果是开启了 allDir ，那么在实际读取的时候会重新扫描更新
+var domainList = config.domainList.map(domain => path.join(config.rootDir, domain));
+if (config.allDir) console.log(`已开启全文件夹扫描，将会扫描路径 ${config.rootDir} 里的所有文件夹`);
+else console.log('指定扫描文件夹列表', pushDir(domainList));
+
 
 export {
     addRouters,
@@ -26,7 +33,7 @@ function addRouters(router) {
         let api = ctx.path;
         let domainDirs = {};
         // 如果开启了全部文件夹，那么重新扫描
-        (Config.allDir ? (domainList = getAllDir(Config.rootDir)) : domainList).forEach(dir => {
+        (config.allDir ? (domainList = getAllDir(config.rootDir)) : domainList).forEach(dir => {
             let fp = path.join(dir, api);
             if (fs.existsSync(fp) || (fs.existsSync((fp = decodeURIComponent(fp))))) {
                 if (fs.statSync(fp).isFile()) domainDirs[dir] = fp;
@@ -39,7 +46,7 @@ function addRouters(router) {
             let fileFolder = Object.keys(domainDirs).find(d => filepath.includes(path.basename(d)));
             // 检测文件大小如果为0，或者文件不存在，那么就去下载
             if (fileFolder && (!fs.existsSync(filepath) || fs.readFileSync(filepath).length <= 0)) {
-                if (!(pushDir([]).includes(fileFolder) || !fileFolder.startsWith(Config.rootDir))) {
+                if (!(pushDir([]).includes(fileFolder) || !fileFolder.startsWith(config.rootDir))) {
                     // 尝试转成域名，规则查看 getAllDir() 和 pushDir() 
                     const domain = fileFolder.replace(/.*[\\/]/, '');
                     if (domain) {
@@ -76,10 +83,10 @@ function addRouters(router) {
     router.all('/system/autocomplete', ctx => {
         if (!ctx.query.get) {
             let status = ctx.query.status;
-            Config.autocomplete = status == undefined ? !Config.autocomplete : status;
+            config.autocomplete = status == undefined ? !config.autocomplete : status;
         }
-        console.info('当前自动补全的状态为', Config.autocomplete);
-        ctx.body = Config.autocomplete;
+        console.info('当前自动补全的状态为', config.autocomplete);
+        ctx.body = config.autocomplete;
     });
 
     // 接口：自动补全编辑页的文件匹配 /edit/vs/*
@@ -135,15 +142,15 @@ async function sendFile(ctx, filepath, opts) {
 
 /** 补全文件的koa插件，会使用 domains 里面的域名逐个尝试下载文件 */
 async function completeFile(ctx, next) {
-    if (Config.autocomplete) {
+    if (config.autocomplete) {
         let downloadedFile = null;
         const api = ctx.path;
         const url = new URL(ctx.request.href);
         url.port = "";
 
-        for (const domain of Config.autocompleteDomains) {
+        for (const domain of config.autocompleteDomains) {
             url.host = domain;
-            const localPath = path.join(Config.rootDir, url.hostname, api);
+            const localPath = path.join(config.rootDir, url.hostname, api);
             moreLog("[尝试下载]", url.href);
             downloadedFile = await downloadFileToPath(url.href, localPath);
             if (downloadedFile) {
@@ -171,11 +178,11 @@ async function downloadFileToPath(url, filepath, orgUrl) {
         fs.mkdirSync(path.dirname(filepath), { recursive: true });
         const downloader = new Downloader({
             url: url,
-            timeout: Config.timeout || 30 * 1000,
+            timeout: config.timeout || 30 * 1000,
             directory: path.dirname(filepath), // 保存文件的目录
             fileName: path.basename(filepath), // 保存文件的名称
             cloneFiles: false,
-            ...(Config.proxy ? { proxy: Config.proxy } : {})
+            ...(config.proxy ? { proxy: config.proxy } : {})
         });
         filepath = ((await downloader.download()).filePath || filepath).replace(/\\/g, '/');
         console.info(`[文件已下载至路径]: \x1b[32m%s\x1b[0m`, filepath);
@@ -187,7 +194,7 @@ async function downloadFileToPath(url, filepath, orgUrl) {
                 url.replace('http://', 'https://'), filepath, url);
         }
         const errMsg = error.message || (typeof error.stack == 'string' ? error.stack.split('\n').shift() : '');
-        console.error([`[下载文件出现异常]: 双协议均下载失败，代理(proxy)配置: ${Config.proxy ? Config.proxy : '未开启'}`, orgUrl, url, `主要错误信息 (${errMsg})`].join('\n'));
+        console.error([`[下载文件出现异常]: 双协议均下载失败，代理(proxy)配置: ${config.proxy ? config.proxy : '未开启'}`, orgUrl, url, `主要错误信息 (${errMsg})`].join('\n'));
         moreLog(error.stack);
     }
 }
@@ -223,7 +230,7 @@ function getAllDir(dir) {
     let re = [];
     try {
         re = fs.readdirSync(dir).filter((item) => fs.statSync(path.join(dir, item)).isDirectory())
-            .map(domain => path.join(Config.rootDir, domain));
+            .map(domain => path.join(config.rootDir, domain));
     } catch (err) {
         console.warn(`扫描目录时异常(目录: ${dir})`, err);
     }
@@ -232,7 +239,7 @@ function getAllDir(dir) {
 
 /** 添加其他文件夹访问路径 */
 function pushDir(arr) {
-    arr.push(Config['gen-proxy-targetDir']);    // 插件文件夹
+    arr.push(config['gen-proxy-targetDir']);    // 插件文件夹
     arr.push('src');    // 主文件夹
     return arr;
 }

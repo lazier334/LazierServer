@@ -1,4 +1,4 @@
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import path from 'path';
 
 /** 配置工具 */
@@ -528,22 +528,21 @@ function deepClone(obj) {
 
 /**
  * 判断当前脚本是被直接执行还是作为模块被引用
- * @param {string} [currentFileUrl=import.meta.url] 当前模块的完整路径，必须要传递
+ * @param {'file:///root/Project/LazierServer/src/libs/configDef.js'} [currentFileUrl=import.meta.url] 当前模块的完整路径，必须要传递
  * @param {NodeJS.Process} [proc=process] 全局对象
  * @returns {boolean} 
  */
 function isMainModule(currentFileUrl, proc = process) {
     if (currentFileUrl == null) throw new Error('需要传递 import.meta.url 变量')
-    console.log('proc.argv', proc.argv)
-    console.log('currentFileUrl', currentFileUrl)
-    const entryScriptPath = fileURLToPath(new URL(proc.argv[1])); // 入口脚本路径
-    const currentFilePath = fileURLToPath(new URL(currentFileUrl)); // 当前文件路径
+    const entryScriptPath = fileURLToPath(pathToFileURL(proc.argv[1]).href);// 入口脚本路径
+    const currentFilePath = fileURLToPath(new URL(currentFileUrl));         // 当前文件路径
     return entryScriptPath === currentFilePath;
 };
+
 /**
  * 获取当前的文件夹路径
- * @param {string} [url=import.meta.url] 当前模块的完整路径，必须要传递
- * @returns {string}
+ * @param {'file:///root/Project/LazierServer/src/libs/configDef.js'} [url=import.meta.url] 当前模块的完整路径，必须要传递
+ * @returns {'/root/Project/LazierServer/src/libs'}
  */
 function get__dirname(url) {
     return path.dirname(fileURLToPath(url))

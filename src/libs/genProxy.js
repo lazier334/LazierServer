@@ -112,11 +112,12 @@ ${funs.join("\n")}
     sufCode: ""
 };
 hostDef.excludeKeys = Object.keys(hostDef);
-
+var main = mainOrg;
 // 判断当前脚本是被直接执行还是作为模块被引用
 if (config.isMainModule(import.meta.url, process)) { // 直接执行
     console.info('直接运行')
     main(conf.proxyFile);
+    main = null;
 }
 // 作为模块被引用，导出一个 Promise，当传递参数进来的时候，总是开启开发模式
 export default main; // 导出为默认导出
@@ -130,7 +131,7 @@ export default main; // 导出为默认导出
  * 主程序
  * @param {string} proxyFileName 文件名
  */
-async function main(proxyFileName) {
+async function mainOrg(proxyFileName) {
     let isProxyJs = conf.proxyFile == "proxy.js";
     if (proxyFileName) {
         // 开发模式的配置项
