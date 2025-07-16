@@ -36,7 +36,8 @@
     "koa-router": "^13.1.1",
     "koa-send": "^5.0.1",
     "nodejs-file-downloader": "^4.13.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/koa": "^2.15.0",
