@@ -167,9 +167,9 @@ const config = {
     /** 导出插件-强制开启https，会让插件强制把所有请求转为https */
     genProxyForceHttps: true,
     /** 导出插件-存放的文件夹 */
-    genProxyTargetDir: "webScript",
+    genProxyTargetDir: "web/plugin",
     /** 导出插件-导出的文件名 */
-    genProxyProxyFile: "b41e93b2-009a-4be6-8d16-cb3c3e176620",
+    genProxyProxyFile: "proxy.js",
     /** 一键打包时是否生成新的插件 */
     genAllGenProxy: true,
     /** 本地开发使用生产环境模式 */

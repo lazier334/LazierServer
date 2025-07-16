@@ -1,13 +1,27 @@
 import { fs, path, config } from "./config.js";
 
-/** 空的阶段对象 */
-const NullStage = {
-    stage: 'null',
-    updateTime: Date.now(),
-    data: [],
+/**
+ * 阶段类
+ */
+class Stage {
+    /** 阶段名称 */
+    stage;
+    /** 更新时间 */
+    updateTime;
+    /** 插件列表 */
+    data = [];
+    /**
+     * 创建阶段对象
+     * @param {string} stage - 阶段名称
+     */
+    constructor(stage) {
+        this.stage = stage;          // 阶段标识
+        this.updateTime = Date.now(); // 初始化时间戳
+    }
+
     /** 
      * 使用函数，当返回 `{end:true, result:any}` 时停止后续执行并返回 `result` 数据
-     * @returns 
+     * @returns {any}
      */
     async use(...args) {
         if (this.data.length < 1) return console.warn(this.stage + ' 阶段的插件列表为空');
@@ -17,8 +31,9 @@ const NullStage = {
                 return re.result;
             }
         }
-    },
+    }
 };
+
 /**
  * 这是插件化的核心内容，提供各个阶段的插件，对外提供以下拓展项，编写插件使用前缀+任意+.js即可，例如 `sysStart-morePlugin.js`
  */
@@ -43,7 +58,7 @@ Object.entries(stages).forEach(([k, v]) => {
 });
 
 scanStages();
-export { plugins, scanStages, scanPlugin, importWarp, NullStage };
+export { plugins, scanStages, scanPlugin, importWarp, getPluginDirs, Stage, pathDeduplication };
 
 /**
  * 默认的扫描函数（ESM兼容版）
@@ -68,18 +83,18 @@ async function importWarp(filepath) {
  * 获取当前阶段的插件，如果到了更新间隔时间，会先更新后再返回
  * @param {string} stage 阶段名称
  * @param {number} step 设置间隔，需要大于0
- * @returns {NullStage} 响应实际的数据
+ * @returns {Promise<Stage>} 响应实际的数据
  */
-function plugins(stage, step) {
+async function plugins(stage, step) {
     // 获取当前阶段的插件列表，如果没有的话就返回空的数据
-    let re = createStage(stage);
-    /** @type {NullStage} 从缓存中读取 */
+    let re = new Stage(stage);
+    /** @type {Stage} 从缓存中读取 */
     let cacheStage = process.stagesCache?.[stage];
     // 检测是否需要更新数据
     if (!(0 < step)) step = config.pluginStagesUpdateStep;
     const ut = Date.now() - step;
     if (!cacheStage || cacheStage.updateTime < ut) {
-        cacheStage = scanPlugin(stage);
+        cacheStage = await scanPlugin(stage);
     }
 
     if (cacheStage) re = cacheStage;
@@ -90,17 +105,17 @@ function plugins(stage, step) {
  * 扫描阶段是否有更新
  * @returns {boolean} 是否进行了更新
  */
-function scanStages() {
+async function scanStages() {
     // 检查配置里的种类和当前的是否一致，如果不一致则重新扫描
     const cpsk = Object.keys(config.pluginStages).sort();
     const cpsks = cpsk.join('');
     const sks = Object.keys(stages).sort().join('');
     if (cpsks != sks) {
         // 触发扫描种类列表
-        cpsk.forEach(k => {
-            scanPlugin(k);
+        for (const k of cpsk) {
+            await scanPlugin(k);
             stages[k] = config.pluginStages[k];
-        });
+        }
         return true;
     }
     return false;
@@ -108,19 +123,23 @@ function scanStages() {
 /**
  * 扫描当前阶段的插件是否有更新
  * @param {string} stage 阶段名称
- * @returns {NullStage} 响应实际的数据
+ * @returns {Promise<Stage>} 响应实际的数据
  */
-function scanPlugin(stage) {
-    let newStage = createStage(stage);
+async function scanPlugin(stage) {
+    let newStage = new Stage(stage);
+    let importList = [];
     getPluginDirs().forEach(dir => {
         if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
-            fs.readdirSync(dir).filter(file => file.endsWith(stage + '.js')).forEach(file => {
+            fs.readdirSync(dir).filter(file => file.startsWith(stage) && file.endsWith('.js')).forEach(file => {
                 const filepath = path.join(dir, file);
-                // 使用默认导入
-                defScan(filepath, newStage.data);
+                importList.push(filepath);
             });
         }
     });
+    for (const filepath of importList) {
+        // 使用默认导入
+        await defScan(filepath, newStage.data);
+    }
 
     // 将当前的阶段数据保存到缓存中 `process.stagesCache`  
     if (!Array.isArray(process.stagesCache)) process.stagesCache = {};
@@ -164,14 +183,4 @@ function pathDeduplication(pluginDirs) {
     }
     const uniqueDirs = [...pathMap.values()];
     return uniqueDirs
-}
-/**
- * 创建一个阶段对象 
- * @param {string} stage 
- * @returns {NullStage}
- */
-function createStage(stage) {
-    let re = { ...NullStage };
-    re.stage = stage;
-    return re;
 }

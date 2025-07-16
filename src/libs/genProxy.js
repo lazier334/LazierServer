@@ -11,7 +11,7 @@ if (!(config['genProxyExportKeys'] instanceof Array)) {
 
 const conf = {
     devMode: false,
-    targetDir: config["genProxyTargetDir"] || "webScript",
+    targetDir: config["genProxyTargetDir"] || "web/plugin",
     proxyFile: config["genProxyProxyFile"] || "proxy.js",
     forceHttps: config["genProxyForceHttps"] || false,
 }
@@ -81,7 +81,7 @@ const hostDef = {
         let funAll = this;
         keys.forEach(k => {
             if (typeof funAll[k] != 'function') {
-                console.log(`导出函数时忽略${k}，因为他不是一个函数，他的类型是 ${typeof k}`)
+                console.log(`导出函数时忽略 ${k} ，因为他不是一个函数，他的类型是 ${typeof k}`)
             } else {
                 let funStr = funAll[k].toString();
                 // 清理 // 
@@ -141,7 +141,7 @@ async function mainOrg(proxyFileName) {
         hostDef.objName = isProxyJs ? "obj" : generateRandomString(5);
     }
     const startTime = Date.now();
-    const body = initHost({}).export();
+    const body = (await initHost({})).export();
     const targetPath = path.join(conf.targetDir, conf.proxyFile);
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
     if (isProxyJs) {
@@ -243,7 +243,7 @@ function warpFun(fun, host, funName) {
  * @param {hostDef} host 
  * @returns {hostDef}  
  */
-function initHost(host) {
+async function initHost(host) {
     host = genHost(host);
     // NOTE 前缀代码
     host.preCode = "(" + ((h) => {
@@ -314,7 +314,7 @@ function initHost(host) {
     // 调整是否开启强制https
     host.preCode = host.preCode.replace("C.forceHttps = false;", `C.forceHttps = ${!!conf.forceHttps};`);
 
-    let funs = getOrg()
+    let funs = await getOrg()
 
     for (const k in funs) {
         host.warpFun(funs[k])
@@ -334,6 +334,6 @@ function initHost(host) {
  * @param {hostDef} h 
  * @returns {{[key:string]: Function}}
  */
-function getOrg(h) {
-    return plugins('genProxy').use()
+async function getOrg(h) {
+    return await (await plugins('genProxy')).use() || {}
 }

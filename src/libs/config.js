@@ -16,7 +16,7 @@ var config = {
     outdir: "website",
     butsData: [],
     cryptoDataEnable: false,
-    pluginDirs: [],
+    pluginDirs: [process.cwd() + '/src/plugins'],
 };
 
 if (fs.existsSync(path.dirname(defConfig.ldConfigPath))) {

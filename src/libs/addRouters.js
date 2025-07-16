@@ -1,18 +1,13 @@
+import send from 'koa-send';
 import redirectApi from './sendRedirectApi.js';
 import sendSameApi from './sendSameApi.js';
-import { plugins } from './plugins.js';
+import { plugins, pathDeduplication } from './plugins.js';
 import { fs, path, config } from './config.js';
 
 const sends = [
     sendSameApi,
     redirectApi
 ];
-
-// 启动的目标文件夹，如果是开启了 allDir ，那么在实际读取的时候会重新扫描更新
-var domainList = config.domainList.map(domain => path.join(config.rootDir, domain));
-if (config.allDir) console.log(`已开启全文件夹扫描，将会扫描路径 ${config.rootDir} 里的所有文件夹`);
-else console.log('指定扫描文件夹列表', pushDir(domainList));
-
 
 export {
     addRouters,
@@ -23,9 +18,15 @@ export {
  * 添加接口路由，路由顺序为： 插件API > 文件API > 系统API
  * @param {import('@types/koa-router')} router 
  */
-function addRouters(router) {
+async function addRouters(router) {
+    // 启动的目标文件夹，如果是开启了 allDir ，那么在实际读取的时候会重新扫描更新
+    var domainList = config.domainList.map(domain => path.join(config.rootDir, domain));
+    if (config.allDir) console.log(`已开启全文件夹扫描，将会扫描路径 ${config.rootDir} 里的所有文件夹`);
+    else console.log('指定扫描文件夹列表', pushDir(domainList));
+
     // 接口：自定义的路由
-    plugins('router').use(router);
+    (await plugins('router')).use(router);
+
 
     // 这个接口放到前面是因为优先读取文件，再读取系统的接口，顺序为： 插件API > 文件API > 系统API
     // 接口：全局，所有没有被拦截的都将跳到这里发送文件
@@ -40,7 +41,7 @@ function addRouters(router) {
             }
         })
 
-        let filepath = selectFileByDomains(ctx, domainDirs, api);
+        let filepath = await selectFileByDomains(ctx, domainDirs, api);
         if (filepath) {
             // 拿到文件夹
             let fileFolder = Object.keys(domainDirs).find(d => filepath.includes(path.basename(d)));
@@ -206,12 +207,12 @@ async function downloadFileToPath(url, filepath, orgUrl) {
  * @param {"/assets/index.js"} api 请求的api
  * @returns {"api.demo.com/assets/index.js" | undefined} 选中的文件路径
  */
-function selectFileByDomains(ctx, domainsMap, api) {
+async function selectFileByDomains(ctx, domainsMap, api) {
     // 优先使用参数 ctx.query.dir 的
     // 其次使用插件选择的，但是插件里可以删除参数
     // 最后默认使用第一个
     let domains = Object.keys(domainsMap);
-    let selectFolder = plugins.selectFileByDomains.use(domains, domainsMap, ctx) || domains[0];
+    let selectFolder = await (await plugins('selectFileByDomains')).use(domains, domainsMap, ctx) || domains[0];
     if (ctx.query.dir) {
         let priorityDir = domains.find((item) => item === ctx.query.dir);
         if (priorityDir) selectFolder = priorityDir;
@@ -238,8 +239,9 @@ function getAllDir(dir) {
 }
 
 /** 添加其他文件夹访问路径 */
-function pushDir(arr) {
-    arr.push(config['genProxyTargetDir']);    // 插件文件夹
-    arr.push('src');    // 主文件夹
-    return arr;
+function pushDir(dirs) {
+    dirs.push(config['genProxyTargetDir']);    // 插件文件夹
+    dirs.push('public');    // 主文件夹
+    dirs = pathDeduplication(dirs);
+    return dirs;
 }

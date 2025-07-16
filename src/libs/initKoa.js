@@ -29,10 +29,10 @@ export default initKoa;
  * 初始化Koa
  * @param {import('@types/koa')} app 
  */
-function initKoa(app) {
+async function initKoa(app) {
     const router = new Router();
     // 添加路由
-    addRouters(router);
+    await addRouters(router);
     // 启用信任代理ip
     app.proxy = true;
     // 加载插件与路由
