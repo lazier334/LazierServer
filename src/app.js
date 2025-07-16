@@ -1,8 +1,6 @@
-import fs from 'fs';
 import Koa from 'koa';
-import path from 'path';
 import https from 'https';
-import { config } from './libs/config.js';
+import { fs, path, config } from './libs/config.js';
 import initKoa from './libs/initKoa.js';
 import websocketServer from './libs/websocketServer.js';
 
@@ -11,7 +9,7 @@ if (!process.G) process.G = {};
 console.info(config.showVersion());
 
 // 检测 proxy.js 是否生成，如果没有生成，那么指定代码进行生成
-if (!fs.existsSync(path.join(config['gen-proxy-targetDir'], 'proxy.js'))) {
+if (!fs.existsSync(path.join(config['genProxyTargetDir'], 'proxy.js'))) {
     console.warn('开发环境插件 proxy.js 不存在，生成该插件');
     import('./libs/genProxy.js').then(mod => {
         if (typeof mod == 'function') mod('proxy.js')
@@ -26,9 +24,9 @@ else console.log('指定扫描文件夹列表', pushDir(domainList));
 const app = new Koa();
 initKoa(app);
 // 创建 HTTPS 服务器
-https.createServer(config.SSLOptions, app.callback()).listen(config['port-https'],
-    () => console.log(`https 服务器已运行，访问地址:  \x1b[33m https://localhost:${config['port-https']} \x1b[0m`));
+https.createServer(config.SSLOptions, app.callback()).listen(config['portHttps'],
+    () => console.log(`https 服务器已运行，访问地址:  \x1b[33m https://localhost:${config['portHttps']} \x1b[0m`));
 // 创建 HTTP 服务器
-app.listen(config['port-http'], () => console.log(`http  服务器已运行，访问地址:    http://localhost:${config['port-http']}`));
+app.listen(config['portHttp'], () => console.log(`http  服务器已运行，访问地址:    http://localhost:${config['portHttp']}`));
 // 创建 WebSocket 服务器
 websocketServer(config);

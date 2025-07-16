@@ -12,9 +12,12 @@
 ```c
 LazierServer
 ├─ bin          // 脚本工具
-├─ public       // 公开的资源
+├─ public       // 公开的资源，默认站点
 ├─ web          // 项目资源站
-├─ webScript    // 插件资源站
+│  ├─ plugin    // 文件夹 站点，插件示例站点
+│  ├─ example   // 文件夹 站点，示例站点
+│  ├─ a.com.har // 文件 站点，har站点
+│  └─ other     // 其他站点，名字自取
 ├─ ld           // 本地数据、配置、插件等 
 ├─ src          // 代码
 │  ├─ app.js    // 主程序

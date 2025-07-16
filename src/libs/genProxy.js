@@ -1,7 +1,7 @@
 import { fs, path, config } from './config.js';
-import plugins from './plugins.js';
-if (!(config['gen-proxy-exportKeys'] instanceof Array)) {
-    config['gen-proxy-exportKeys'] = [
+import { plugins } from './plugins.js';
+if (!(config['genProxyExportKeys'] instanceof Array)) {
+    config['genProxyExportKeys'] = [
         'proxyXHRAndFetch',
         'proxyDocmentHeadAppendChild',
         'navigatorServiceWorkerRegister',
@@ -11,9 +11,9 @@ if (!(config['gen-proxy-exportKeys'] instanceof Array)) {
 
 const conf = {
     devMode: false,
-    targetDir: config["gen-proxy-targetDir"] || "webScript",
-    proxyFile: config["gen-proxy-proxyFile"] || "proxy.js",
-    forceHttps: config["gen-proxy-forceHttps"] || false,
+    targetDir: config["genProxyTargetDir"] || "webScript",
+    proxyFile: config["genProxyProxyFile"] || "proxy.js",
+    forceHttps: config["genProxyForceHttps"] || false,
 }
 if (conf.devMode) {
     // 开发模式导出文件名固定为 proxy.js
@@ -23,7 +23,7 @@ if (conf.devMode) {
 const hostDef = {
     warpFun,
     /** 导出的key */
-    exportKeys: [...config["gen-proxy-exportKeys"]],
+    exportKeys: [...config["genProxyExportKeys"]],
     /** 默认值是排除默认对象中的所有属性 */
     excludeKeys: [],
     /** 提供提示信息用，实际并未使用 */
@@ -335,5 +335,5 @@ function initHost(host) {
  * @returns {{[key:string]: Function}}
  */
 function getOrg(h) {
-    return plugins.genProxy.use()
+    return plugins('genProxy').use()
 }

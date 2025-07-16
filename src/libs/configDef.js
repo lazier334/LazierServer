@@ -145,20 +145,19 @@ const config = {
     /** 显示版本banner信息 */
     showVersion,
     /** banner显示模版 */
-    "versionBanner": `当前服务器版本 v.{version} - {detail}`,
+    versionBanner: `当前服务器版本 v.{version} - {detail}`,
     /** 版本信息 */
-    "version": {
+    version: {
         "1.0(25071500)": `快速构建一个服务器站点`
     },
     /** 输入路径 */
-    "rootDir": process.cwd().endsWith('/') || process.cwd().endsWith('\\')
-        ? process.cwd() + 'web' : process.cwd() + '/web',
+    rootDir: process.cwd() + '/web',
     /** 输出路径 */
-    "outdir": "html",
+    outdir: "html",
     /** 打包时插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
-    "gen-insert-insertCode": "<script src=\"/b41e93b2-009a-4be6-8d16-cb3c3e176620\"></script>",
+    genInsertInsertCode: "<script src=\"/b41e93b2-009a-4be6-8d16-cb3c3e176620\"></script>",
     /** 生成插件时导出的函数列表，根据需求选择导出 */
-    "gen-proxy-exportKeys": [
+    genProxyExportKeys: [
         "proxyXHRAndFetch",
         "proxyDocmentHeadAppendChild",
         "navigatorServiceWorkerRegister",
@@ -166,41 +165,41 @@ const config = {
         "clearLoopDebugger"
     ],
     /** 导出插件-强制开启https，会让插件强制把所有请求转为https */
-    "gen-proxy-forceHttps": true,
+    genProxyForceHttps: true,
     /** 导出插件-存放的文件夹 */
-    "gen-proxy-targetDir": "webScript",
+    genProxyTargetDir: "webScript",
     /** 导出插件-导出的文件名 */
-    "gen-proxy-proxyFile": "b41e93b2-009a-4be6-8d16-cb3c3e176620",
+    genProxyProxyFile: "b41e93b2-009a-4be6-8d16-cb3c3e176620",
     /** 一键打包时是否生成新的插件 */
-    "gen-all-gen-proxy": true,
+    genAllGenProxy: true,
     /** 本地开发使用生产环境模式 */
-    "index-use-prod-mode": false,
+    indexUseProdMode: false,
     /** 本地开发环境中插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
-    "index-insertCode": "<script src=\"/proxy.js\"></script>",
+    indexInsertCode: "<script src=\"/proxy.js\"></script>",
     /** http 服务器端口 */
-    "port-http": 3000,
+    portHttp: 3000,
     /** https 服务器端口 */
-    "port-https": 3001,
+    portHttps: 3001,
     /** websocket 服务器端口 */
-    "port-ws": 3010,
+    portWS: 3010,
     /** websockets 服务器端口 */
-    "port-wss": 3011,
+    portWSS: 3011,
     /** 自动补全超时时间 */
-    "timeout": 30 * 1000,
+    timeout: 30 * 1000,
     /** 代理地址，用于下载文件进行文件自动补全 */
-    "proxy": "http://localhost:7890",
+    proxy: "http://localhost:7890",
     /** 自动补全的域名列表 */
-    "autocompleteDomains": [],
+    autoCompleteDomains: [],
     /** 自动补齐的固定地址列表，在访问新版首页的时候将会被触发补全机制 */
-    "fixUrls": [],
+    fixUrls: [],
     /** 是否开启自动补全，自动补全并不会影响0大小文件的自动补全 */
-    "autocomplete": true,
+    autoComplete: true,
     /** 扫描全部文件夹，开启后会扫描web中的所有文件夹 */
-    "allDir": true,
+    allDir: true,
     /** 不扫描全部文件夹时指定仅扫描web文件夹里的哪些文件夹 */
-    "domainList": [],
+    domainList: [],
     /** https的证书 */
-    "SSLOptions": {
+    SSLOptions: {
         key: `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCz2PDKUlnc2Tbv
 /BzJRmeCu8vhR8/0SkNIdFsLa0o4z64s+yLhskyb1N5Mw46ODOmRbZDfNupHtUvK
@@ -266,7 +265,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
      *      },
      *  }]}
      */
-    "butsData": [
+    butsData: [
         {
             avatarText: 'fix',
             text: '补齐文件',
@@ -360,12 +359,11 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         },
     ],
     /** 插件目录列表 */
-    pluginDirs: [],
+    pluginDirs: [process.cwd() + '/src/plugins'],
     /** 外部配置路径，改文件所在的 ld 目录也用于存放自定义插件 */
-    ldConfigPath: 'config.js',
+    ldConfigPath: 'config.json',
     /** 数据路径 */
-    dataPath: process.cwd().endsWith('/') || process.cwd().endsWith('\\')
-        ? process.cwd() + ldDirName : process.cwd() + '/' + ldDirName,
+    dataPath: process.cwd() + '/' + ldDirName,
     /** debug模式 */
     debugMode: true,
     /** 加密时使用的key */
@@ -383,6 +381,10 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     },
     /** 更多日志 */
     moreLog: false,
+    /** 插件的各个阶段 */
+    pluginStages: {},
+    /** 插件的阶段自动更新时间间隔 */
+    pluginStagesUpdateStep: 60 * 1000,
 };
 {   // 添加版本号按钮
     const ver = readVersion();

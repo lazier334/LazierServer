@@ -1,6 +1,6 @@
 import redirectApi from './sendRedirectApi.js';
 import sendSameApi from './sendSameApi.js';
-import plugins from './plugins.js';
+import { plugins } from './plugins.js';
 import { fs, path, config } from './config.js';
 
 const sends = [
@@ -25,7 +25,7 @@ export {
  */
 function addRouters(router) {
     // 接口：自定义的路由
-    plugins.router.use(router);
+    plugins('router').use(router);
 
     // 这个接口放到前面是因为优先读取文件，再读取系统的接口，顺序为： 插件API > 文件API > 系统API
     // 接口：全局，所有没有被拦截的都将跳到这里发送文件
@@ -83,10 +83,10 @@ function addRouters(router) {
     router.all('/system/autocomplete', ctx => {
         if (!ctx.query.get) {
             let status = ctx.query.status;
-            config.autocomplete = status == undefined ? !config.autocomplete : status;
+            config.autoComplete = status == undefined ? !config.autoComplete : status;
         }
-        console.info('当前自动补全的状态为', config.autocomplete);
-        ctx.body = config.autocomplete;
+        console.info('当前自动补全的状态为', config.autoComplete);
+        ctx.body = config.autoComplete;
     });
 
     // 接口：自动补全编辑页的文件匹配 /edit/vs/*
@@ -142,13 +142,13 @@ async function sendFile(ctx, filepath, opts) {
 
 /** 补全文件的koa插件，会使用 domains 里面的域名逐个尝试下载文件 */
 async function completeFile(ctx, next) {
-    if (config.autocomplete) {
+    if (config.autoComplete) {
         let downloadedFile = null;
         const api = ctx.path;
         const url = new URL(ctx.request.href);
         url.port = "";
 
-        for (const domain of config.autocompleteDomains) {
+        for (const domain of config.autoCompleteDomains) {
             url.host = domain;
             const localPath = path.join(config.rootDir, url.hostname, api);
             moreLog("[尝试下载]", url.href);
@@ -239,7 +239,7 @@ function getAllDir(dir) {
 
 /** 添加其他文件夹访问路径 */
 function pushDir(arr) {
-    arr.push(config['gen-proxy-targetDir']);    // 插件文件夹
+    arr.push(config['genProxyTargetDir']);    // 插件文件夹
     arr.push('src');    // 主文件夹
     return arr;
 }

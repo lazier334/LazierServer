@@ -6,16 +6,17 @@ defConfig.ldConfigPath = path.join(process.cwd(), './ld/config.json');
 
 /** @type {defConfig} */
 var config = {
-    'SSLOptions': {
+    SSLOptions: {
         key: fs.readFileSync(path.join(process.cwd(), './src/localhost.key')),
         cert: fs.readFileSync(path.join(process.cwd(), './src/localhost.crt'))
     },
     /** 打包时插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
-    "gen-insert-insertCode": `<script>(()=>{var xhr=new XMLHttpRequest();xhr.open('GET',src=((url,name3)=>{url=new URL(url);let hs=url.host.split('.');if(3<=hs.length)hs[0]=name3;return url.href.replace(url.host,hs.join('.'))})(window.location.origin,'static')+'proxy.js?timestamp='+Date.now(),false);xhr.send(null);eval(xhr.responseText)})()</script>`,
-    "pluginDirs": [/* 由下面的代码添加 path.dirname(defConfig.ldConfigPath) */],
-    "outdir": "website",
-    "butsData": [],
-    "cryptoDataEnable": false,
+    genInsertInsertCode: `<script>(()=>{var xhr=new XMLHttpRequest();xhr.open('GET',src=((url,name3)=>{url=new URL(url);let hs=url.host.split('.');if(3<=hs.length)hs[0]=name3;return url.href.replace(url.host,hs.join('.'))})(window.location.origin,'static')+'proxy.js?timestamp='+Date.now(),false);xhr.send(null);eval(xhr.responseText)})()</script>`,
+    pluginDirs: [/* 由下面的代码添加 path.dirname(defConfig.ldConfigPath) */],
+    outdir: "website",
+    butsData: [],
+    cryptoDataEnable: false,
+    pluginDirs: [],
 };
 
 if (fs.existsSync(path.dirname(defConfig.ldConfigPath))) {
@@ -45,7 +46,7 @@ if (config.debugMode != undefined ? !config.debugMode : !defConfig.debugMode) {
 }
 
 // 替换插入的代码中的 proxy.js 为实际配置的文件名
-config['gen-insert-insertCode'] = config['gen-insert-insertCode'].replaceAll('proxy.js', config['gen-proxy-proxyFile']);
+config.genInsertInsertCode = config.genInsertInsertCode.replaceAll('proxy.js', config['genProxyProxyFile']);
 // 读取 banner.txt 文件内容
 const bannerPath = path.join(process.cwd(), 'banner.txt');
 if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
