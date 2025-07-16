@@ -1,5 +1,4 @@
-const fs = require("fs");
-const path = require("path");
+import { fs, path } from '../libs/baseImport.js';
 const ls = {
     releaseDirs: [
         'src',
@@ -12,15 +11,11 @@ const ls = {
         'LICENSE',
     ],
 }
-
-module.exports = {
-    releaseDirs,
-    /** 释放默认文件目录到当前的运行目录 */
-    releaseDefault: () => {
-        releaseDirs(path.join(__dirname, '..'), process.cwd(), ls.releaseDirs);
-        releaseFiles(path.join(__dirname, '..'), process.cwd(), ls.releaseFiles);
-    }
+const releaseDefault = () => {
+    releaseDirs(path.join(__dirname, '..'), process.cwd(), ls.releaseDirs);
+    releaseFiles(path.join(__dirname, '..'), process.cwd(), ls.releaseFiles);
 }
+export { releaseDirs, releaseDefault }
 
 /**
  * 释放指定文件夹

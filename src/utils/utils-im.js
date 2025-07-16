@@ -1,10 +1,8 @@
-const vm = require("vm");
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const globalUtils = require('./utils.js');
-const Config = require('./config.js');
-const SubscriptionManager = require('./classes/SubscriptionManager.js');
+import vm from 'vm';
+import { config, fs, path } from '../libs/config.js';
+import crypto from 'crypto';
+import globalUtils from './utils.js';
+import SubscriptionManager from '../classes/SubscriptionManager.js';
 
 const sm = new SubscriptionManager();
 const dblog = (...args) => console.log('[db]', ...args);
@@ -13,9 +11,9 @@ const deadlineMax = new Date('2099-12-31');
 /** 因为im是作为插件提供，所以不添加进全局配置 */
 const imConfig = {
     /** 数据库加密密码，32个字符 */
-    cryptoKey: Config.cryptoKey.substring(0, 32).padEnd(32, '3'),
+    cryptoKey: config.cryptoKey.substring(0, 32).padEnd(32, '3'),
     BASEAPI: '/im',
-    dbDir: path.join(Config.dataPath, 'imdbs'),
+    dbDir: path.join(config.dataPath, 'imdbs'),
     sessionKey: 'im-session',
     SESSION_MAX_AGE: 3 * 24 * 60 * 60 * 1000, // 设置 Cookie 有效期为 3 天
     intervals: {
@@ -274,7 +272,7 @@ const db = initDB();
 // 初始化数据库
 db.readDB();
 // 检测如果开启了加密，那么强制保存一次
-if (Config.cryptoDataEnable) {
+if (config.cryptoDataEnable) {
     db.saveDB(true)
 }
 // 检测如果一个账号都没有那么设置默认账号
@@ -314,14 +312,13 @@ const inteId5s = setInterval(() => {
     }
 }, 5 * 1000);
 
-
-module.exports = {
+export default {
     userType,
     sessionType,
     messageType,
     topicType,
     ...utils,
-    Config,
+    Config: config,
     imConfig,
     db,
 }
@@ -1139,7 +1136,7 @@ function initAccountDB() {
             return this.addSession(newUser);
         },
         passwordSalt(password) {
-            if (password != null) return crypto.createHash('md5').update(password + Config.serverSeed).digest('hex');
+            if (password != null) return crypto.createHash('md5').update(password + config.serverSeed).digest('hex');
         },
         dePassword(password) {
             return decryptBase64(password)

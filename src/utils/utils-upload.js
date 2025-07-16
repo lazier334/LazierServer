@@ -4,20 +4,19 @@
     3. 分享
     4. 连接im服务（提供拓展服务）
  */
-const fs = require('fs');
-const path = require('path');
-const globalUtils = require('./utils.js');
-const Config = require('./config.js');
+import { fs, path, config } from '../libs/config.js';
+import * as globalUtils from './utils.js';
+
 const userType = globalUtils.userType;
 
 /** 因为upload是作为插件提供，所以不添加进全局配置 */
 const lc = {
     /** 数据库加密密码，32个字符 */
-    cryptoKey: Config.cryptoKey.substring(0, 32).padEnd(32, '3'),
+    cryptoKey: config.cryptoKey.substring(0, 32).padEnd(32, '3'),
     /** 基础路由 */
     BASEAPI: '/uploads',
     /** 上传路径 */
-    dbDir: path.join(Config.dataPath, 'uploads'),
+    dbDir: path.join(config.dataPath, 'uploads'),
     /** 配置文件名 */
     dbName: 'map.json',
     xxhashSeed: 8866,
@@ -91,9 +90,9 @@ const inteId5s = setInterval(() => {
     }
 }, 5 * 1000);
 
-module.exports = {
+export {
     globalUtils,
-    Config,
+    config,
     lc,
     db
 }

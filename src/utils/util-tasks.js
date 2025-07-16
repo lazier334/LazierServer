@@ -37,6 +37,7 @@ const Tasks = {
     }
 }
 
-module.exports = {
+export default Tasks;
+export {
     Tasks
 };

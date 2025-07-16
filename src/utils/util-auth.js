@@ -16,11 +16,12 @@ const allowAdmin = {
     /** 是否是超级管理员 */
     "superAdmin": true
 }
+const userType = allowAdmin;
 
-module.exports = {
+export {
     authUser,
-    userType: allowAdmin
-};
+    userType
+}
 /**
  * 默认本机发起的请求信息全都是超级管理员
  * @param {*} ctx 

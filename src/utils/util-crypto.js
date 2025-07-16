@@ -1,5 +1,5 @@
-const crypto = require('crypto');
-const Config = require('./config.js');
+import crypto from 'crypto';
+import { config } from '../libs/config.js';
 
 /** 加解密对象 */
 class SymmetricEncryptor {
@@ -73,38 +73,39 @@ class SymmetricEncryptor {
 }
 
 const encryptor = new SymmetricEncryptor();
-module.exports = {
-    encryptor,
-    /**
-     * 解密
-     * 如果没有开启加解密功能就先尝试解密，解不出来就返回原始数据
-     * @param {string} data 
-     * @param {string} key 
-     */
-    decodeText(data, key) {
+
+export { encryptor, decodeText, encodeText }
+
+/**
+ * 解密
+ * 如果没有开启加解密功能就先尝试解密，解不出来就返回原始数据
+ * @param {string} data 
+ * @param {string} key 
+ */
+function decodeText(data, key) {
+    try {
         try {
-            try {
-                // 尝试直接明文解码
-                JSON.parse(data);
-                return data;
-            } catch (err) {
-                // 使用秘钥解码
-                return encryptor.decrypt(data, key);
-            }
-        } catch (error) {
-            if (Config.cryptoDataEnable) throw error;
+            // 尝试直接明文解码
+            JSON.parse(data);
+            return data;
+        } catch (err) {
+            // 使用秘钥解码
+            return encryptor.decrypt(data, key);
         }
-        return data;
-    },
-    /**
-     * 加密
-     * @param {string} data 
-     * @param {string} key 
-     */
-    encodeText(data, key) {
-        if (Config.cryptoDataEnable) {
-            return encryptor.encrypt(data, key)
-        }
-        return data;
+    } catch (error) {
+        if (config.cryptoDataEnable) throw error;
     }
+    return data;
+}
+
+/**
+ * 加密
+ * @param {string} data 
+ * @param {string} key 
+ */
+function encodeText(data, key) {
+    if (config.cryptoDataEnable) {
+        return encryptor.encrypt(data, key)
+    }
+    return data;
 }
