@@ -1,7 +1,7 @@
 /**
  * @param {import('../libs/config.js')}
  */
-async function sysStartCommon({ fs, path, config }) {
+export default async function sysStartCommon({ fs, path, config }) {
     // 挂载全局对象
     if (!process.G) process.G = {};
     console.info(config.showVersion());
@@ -11,6 +11,4 @@ async function sysStartCommon({ fs, path, config }) {
         console.warn('开发环境插件 proxy.js 不存在，生成该插件');
         await (await import('../libs/genProxy.js')).default('proxy.js');
     }
-
 }
-export default sysStartCommon;

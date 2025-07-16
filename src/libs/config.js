@@ -7,8 +7,8 @@ defConfig.ldConfigPath = path.join(process.cwd(), './ld/config.json');
 /** @type {defConfig} */
 var config = {
     SSLOptions: {
-        key: fs.readFileSync(path.join(process.cwd(), './src/localhost.key')),
-        cert: fs.readFileSync(path.join(process.cwd(), './src/localhost.crt'))
+        key: fs.readFileSync(path.join(process.cwd(), './public/localhost.key')),
+        cert: fs.readFileSync(path.join(process.cwd(), './public/localhost.crt'))
     },
     /** 打包时插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
     genInsertInsertCode: `<script>(()=>{var xhr=new XMLHttpRequest();xhr.open('GET',src=((url,name3)=>{url=new URL(url);let hs=url.host.split('.');if(3<=hs.length)hs[0]=name3;return url.href.replace(url.host,hs.join('.'))})(window.location.origin,'static')+'proxy.js?timestamp='+Date.now(),false);xhr.send(null);eval(xhr.responseText)})()</script>`,
