@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor Config</title>
+    <link rel="stylesheet" href="vs/editor/editor.main.min.css">
+    <style>
+        #app {}
+
+        #editor {
+            height: 80vh;
+            border: 2px solid #ccc;
+            border-radius: 2px;
+        }
+
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls button {
+            padding: 5px 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+
+        .controls button:active {
+            background-color: #004080;
+        }
+
+        #filepath {
+            width: 50%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div>
+            文件路径: <input type="text" id="filepath" placeholder="文件路径" value="lib/config.js"></input>
+        </div>
+        <div id="editor"></div>
+        <div class="controls">
+            <button onclick="getFile()" title="从服务器下载数据到当前输入框">读取文件</button>
+            <button onclick="setFile()" title="将输入框数据写入到服务器">写入文件</button>
+            <button id="logBut" onclick="hideE(this)" title="日志信息">日志</button>
+        </div>
+    </div>
+    <script type="module">
+        import { Workbox } from '/res/workbox/releases/7.3.0/workbox-window.prod.mjs';
+
+        if ('serviceWorker' in navigator) {
+            const wb = new Workbox('/sw.js');
+
+            wb.register().then(registration => console.log('SW 注册成功'))
+                .catch(err => console.error('SW 注册失败:', err));;
+        }
+    </script>
+    <script src="vs/loader.min.js"></script>
+    <script>
+        var logButE = document.getElementById('logBut');
+        var filepathE = document.getElementById('filepath');
+        var editor;
+        // 原始路径 https://unpkg.com/monaco-editor@0.33.0/min/vs
+        require.config({ paths: { 'vs': 'vs' } });
+
+        require(['vs/editor/editor.main'], function () {
+
+            editor = monaco.editor.create(document.getElementById('editor'), {
+                value: '// Type your JavaScript code here\n',
+                language: 'javascript',
+                theme: 'vs',
+                automaticLayout: true,
+                minimap: {
+                    enabled: false
+                }
+            });
+        });
+        window.onload = function () {
+            const url = new URL(location.href);
+            const filepath = url.searchParams.get('filepath');
+            if (typeof filepath == 'string' && 0 < filepath.length) filepathE.value = filepath;
+            getFile()
+        };
+
+        function readText() {
+            var content = editor.getValue();
+            return content
+        }
+
+        function writeText(text) {
+            editor.setValue(text);
+        }
+
+        function getFile() {
+            warpFetch(fetch('/system/getFile?filepath=' + filepathE.value), '获取配置').then(text => {
+                showLog('获取成功: ' + text.length);
+                writeText(text);
+            })
+        }
+
+        function setFile() {
+            warpFetch(fetch('/system/setFile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    filepath: filepathE.value,
+                    filebody: readText()
+                })
+            }), '写入配置').then(text => {
+                console.log('写入成功', text)
+                showLog('写入成功: ' + text);
+            })
+        }
+        function warpFetch(fetchPromise, msg) {
+            if (typeof window.requesting != 'object' || window.requesting == null) requesting = {};
+            if (requesting[msg]) return;
+            requesting[msg] = true;
+
+            showLog('请求中...' + msg);
+            return fetchPromise.then(async response => {
+                // 检查响应是否成功
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                showLog('请求完成' + msg);
+                // 将响应解析为文本
+                return await response.text();
+            }).catch(function (error) {
+                console.error((msg || '请求失败!'), error);
+                showLog('请求失败!' + msg);
+            }).finally((res) => requesting[msg] = false);
+        }
+
+        function hideE(e) {
+            e.style.display = 'none';
+        }
+
+        function showLog(msg) {
+            logButE.style.display = 'block';
+            logButE.innerText = '[日志] ' + msg;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalServer</title>
+    <script type="module">
+        import { Workbox } from '/res/workbox/releases/7.3.0/workbox-window.prod.mjs';
+        let openWorkbox = true;
+        try {
+            openWorkbox = JSON.parse(localStorage.getItem('workboxStatus'));
+        } catch (error) { }
+        if (openWorkbox) {
+            if ('serviceWorker' in navigator) {
+                const wb = new Workbox('/sw.js');
+
+                wb.register().then(registration => console.log('SW 注册成功'))
+                    .catch(err => console.error('SW 注册失败:', err));;
+            }
+        } else {
+            // 注销所有 workbox
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (const registration of registrations) {
+                        registration.unregister().then(success => {
+                            if (success) {
+                                console.log('SW 注销成功:', registration.scope);
+                            } else {
+                                console.warn('SW 注销失败:', registration.scope);
+                            }
+                        });
+                    }
+                }).catch(err => {
+                    console.error('获取 SW 注册信息失败:', err);
+                });
+            }
+        }
+    </script>
+    <!-- 引入Vue3 -->
+    <script src="res/vue.global.prod.js"></script>
+    <!-- 引入vue-router -->
+    <!-- <script src="res/vue-router.global.js"></script> -->
+    <!-- 引入element-plus样式文件 -->
+    <link rel="stylesheet" href="res/index.css" />
+    <!-- 引入element-plus组件库 -->
+    <script src="res/index.full.js"></script>
+    <!-- 引入axios -->
+    <script src="res/axios.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <el-row v-if="title">
+            <el-col :span="24" class="text-center">
+                <el-input v-if="title!=''" v-model="title" placeholder="显示数据用的框">
+                    <template #append>
+                        <el-button @click="title=''">
+                            <el-text type="primary">清理</el-text>
+                        </el-button>
+                    </template>
+                </el-input>
+            </el-col>
+        </el-row>
+
+        <div class="but-s-container">
+            <el-tooltip effect="dark" :content="`刷新数据、搜索、关闭侧窗`" placement="bottom">
+                <div class="but-s-item operate" @click="resetPage">
+                    <el-avatar class="but-s-item-avatar">reset</el-avatar>
+                    <el-text class="but-s-item-text" type="primary" size="large">重置</el-text>
+                </div>
+            </el-tooltip>
+
+            <el-tooltip effect="dark" :content="`自动补全`" placement="bottom">
+                <div class="but-s-item operate" @click="setAutoComplete()">
+                    <el-avatar class="but-s-item-avatar">{{autoCompleteStatus}}</el-avatar>
+                    <el-text class="but-s-item-text" type="primary" size="large">自动补全</el-text>
+                </div>
+            </el-tooltip>
+
+            <el-tooltip effect="dark" :content="`点击按钮将复制链接且不打开链接`" placement="bottom">
+                <div class="but-s-item operate" @click="changeCopyLinkStatus">
+                    <el-avatar class="but-s-item-avatar">{{copyLinkStatus}}</el-avatar>
+                    <el-text class="but-s-item-text" type="primary" size="large">复制链接</el-text>
+                </div>
+            </el-tooltip>
+
+            <el-tooltip effect="dark" :content="`开启或关闭基于workbox的worker缓存`" placement="bottom">
+                <div class="but-s-item operate" @click="changeWorkboxStatus">
+                    <el-avatar class="but-s-item-avatar">{{workboxStatus}}</el-avatar>
+                    <el-text class="but-s-item-text" type="primary" size="large">全局缓存</el-text>
+                </div>
+            </el-tooltip>
+
+            <el-tooltip v-for="(item, index) in butsData" :key="index" :content="item.tooltip || '无描述'" effect="dark"
+                placement="bottom">
+                <div class="but-s-item operate" @click="clickBut(item)">
+                    <el-avatar class="but-s-item-avatar" :style="{ backgroundColor: item.color }">{{
+                        item.avatarText || '' }}</el-avatar>
+                    <el-text class="but-s-item-text" type="primary" size="large">
+                        {{ item.text || ('按钮' + index) }}</el-text>
+                </div>
+            </el-tooltip>
+        </div>
+        <el-row class="but-s-container">
+            <el-col :span="7">
+                <el-input v-model="store.searchKeyword" @input="debouncedHandleData" placeholder="项目/备注包含的文字">
+                    <template #append>
+                        <el-button @click="expandMoreButs(searchKeywordButs,true)"
+                            title="打开关键词快捷按钮列表打开关键词快捷按钮列表">⌵</el-button>
+                    </template>
+                </el-input>
+            </el-col>
+            <div style="margin: 0 10px;"></div>
+            <el-col :span="7">
+                <el-input v-model="store.searchButtom" @input="debouncedHandleData" placeholder="选项按钮包含的文字">
+                    <template #prepend>
+                        <el-button @click="expandMoreButs(searchButtomButs)" title="打开关键词快捷按钮列表">⌵</el-button>
+                    </template>
+                </el-input>
+            </el-col>
+        </el-row>
+
+        <div class="more-buts-container">
+            <div class="more-buts-item" @click="changemoreButs(value)" v-for="(value, index) in moreButs" :key="index">
+                <el-text type="primary" size="large">{{ value }}</el-text>
+            </div>
+        </div>
+
+        <div class="data-container">
+            <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                :current-page="currentPage" :page-sizes="pageSizes" :page-size="pageSize"
+                layout="total, sizes, prev, pager, next, jumper" :total="data.length">
+            </el-pagination>
+            <div style="margin: 5px 0; width: 100%;"></div>
+            <el-table :data="paginatedData" border style="width: 70%">
+                <el-table-column label="项目" width="200">
+                    <template #default="{row}">
+                        <div style="text-align: left;" @click="openMain(row)">
+                            <!-- <el-image style="width: 50px; height: 50px" :src="row.icon" fit="cover"></el-image> -->
+                            <!-- <br> -->
+                            <el-text class="mx-1 cursor" type="primary">{{row.name}}</el-text>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="备注" prop="mark"></el-table-column>
+                <el-table-column fixed="right" label="选项" min-width="180">
+                    <template #default="{ row }">
+                        <el-scrollbar style="max-height: 100px; overflow: hidden;">
+                            <div style="max-height: 100px; overflow-y: auto;">
+                                <span v-for="(url, index) in row.urls" :key="index">
+                                    <el-button type="success" size="small" v-if="url.show != false" style="margin: 2px;"
+                                        @click="openUrl(url.url)">
+                                        {{ (url.text || url.url).substring(0, 10) }}
+                                    </el-button>
+                                </span>
+                            </div>
+                        </el-scrollbar>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+
+        <!-- 版权栏 -->
+        <div class="copyright">
+            <iframe src="/system/copyright" frameborder="0" scrolling="no" style="width: 100%; height: 50px;"></iframe>
+        </div>
+
+        <!-- 回到顶部按钮 -->
+        <div id="back-to-top" class="back-to-top hidden">
+            <el-tooltip effect="dark" :content="`返回页面顶部`" placement="bottom">
+                <div class="but-s-item operate" @click="scrollToTop">
+                    <el-avatar class="but-s-item-avatar">↑</el-avatar>
+                    <el-text class="but-s-item-text" type="primary" size="large">回到顶部</el-text>
+                </div>
+            </el-tooltip>
+        </div>
+    </div>
+
+    <div id="floating-window" class="hidden">
+        <!-- 控制按钮 -->
+        <div class="controls">
+            <button onclick="setFloatPage('3vw')">收起</button>
+            <button onclick="setFloatPage('100vw')">全屏</button>
+            <button onclick="openInWindow()">新页面</button>
+            <button onclick="clsoeFloatPage()">关闭</button>
+        </div>
+        <!-- 悬浮窗口内容 -->
+        <iframe id="floatingIframe" src="" style="margin-top: 40px;"></iframe>
+    </div>
+</body>
+
+</html>
+
+
+
+<style>
+    .more-buts-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .more-buts-item {
+        display: inline-flex;
+        border-radius: 10px;
+        border: 2px solid #ccc;
+        cursor: pointer;
+        margin: 5px;
+        padding: 2px 5px;
+        transition: background-color 0.1s ease, border 0.1s ease, transform 0.05s ease;
+        white-space: nowrap;
+    }
+
+    .more-buts-item:hover {
+        background-color: #94f9f9;
+        border: 2px solid rgb(255, 132, 0);
+    }
+
+    .more-buts-item:active {
+        background-color: #ffb83e;
+        transform: scale(0.9);
+    }
+
+    .select-more-buts {
+        background-color: rgb(171, 255, 176);
+        transition: all 0.1s ease;
+    }
+
+    .select-more-buts:hover {
+        background-color: rgb(171, 255, 176);
+    }
+</style>
+<style>
+    .back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 3;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .back-to-top>.but-s-item {
+        margin: 0;
+    }
+
+    .back-to-top.hidden {
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .back-to-top.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+</style>
+<style>
+    .but-s-item-avatar {
+        background-color: #67c23a;
+    }
+
+    .but-s-item-text {
+        margin-left: 4px;
+    }
+
+    .but-s-item {
+        display: inline-flex;
+        border-radius: 10px;
+        border: 2px solid #ccc;
+        cursor: pointer;
+        margin: 5px;
+        padding: 2px 5px;
+        transition: background-color 0.5s ease, border 0.5s ease, transform 0.05s ease;
+        white-space: nowrap;
+    }
+
+    .unselectable,
+    .but-s-item * {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .but-s-item:hover {
+        background-color: #94f9f9;
+        border: 2px solid rgb(255, 132, 0);
+    }
+
+    .but-s-item:active {
+        background-color: #ffb83e;
+        transform: scale(0.9);
+    }
+
+    .but-s-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    body {
+        padding: 1%;
+        margin: 0;
+        display: flex;
+        height: 100vh;
+    }
+
+    .cursor {
+        cursor: pointer;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .data-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 1%;
+        justify-content: center;
+    }
+
+    #floating-window {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 1000;
+        width: 40%;
+        height: 100vh;
+        background-color: #fff;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    #floating-window iframe {
+        flex: 1;
+        border: none;
+    }
+
+    .controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+        display: flex;
+        gap: 10px;
+    }
+
+    .controls button {
+        padding: 5px 10px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+
+    .controls button:hover {
+        background-color: #0056b3;
+    }
+
+    .controls button:active {
+        background-color: #004080;
+    }
+
+    /* 隐藏悬浮窗口的样式 */
+    #floating-window.hidden {
+        display: none;
+    }
+
+    /* 全屏悬浮窗口的样式 */
+    #floating-window.fullscreen {
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        right: 0;
+        z-index: 1000;
+    }
+</style>
+
+
+<script>
+    var appE = document.getElementById('app');
+    var floatPageE = document.getElementById('floating-window');
+    var floatIframeE = document.getElementById('floatingIframe');
+    var defConfig = {
+        'floatPageE.style.width': '30vw'
+    }
+
+    function getData() {
+        let openWorkbox = true;
+        try {
+            openWorkbox = JSON.parse(localStorage.getItem('workboxStatus'));
+        } catch (error) { }
+
+        return {
+            workboxStatus: !!openWorkbox,
+            copyLinkStatus: false,
+            autoCompleteStatus: false,
+            currentPage: 1,
+            pageSize: 10,
+            pageSizes: [10, 20, 30, 40, 100, 200, 300, 500, 1000, 3000, 5000, 10000],
+            title: "",  // 未使用，在顶部增加一行文字
+            loading: {},
+            store: {
+                searchKeyword: "",
+                searchButtom: "",
+            },
+            data: [],
+            dataOrg: [
+                {
+                    "icon": "图标地址",
+                    "name": "显示名字",
+                    "mark": "备注信息",
+                    "urls": [
+                        {
+                            "text": "打开",
+                            "url": "打开会跳转的地址1"
+                        },
+                        {
+                            "text": "官方打开",
+                            "url": "打开会跳转的地址2"
+                        }
+                    ]
+                }
+            ],
+            butsData: [
+                {
+                    avatarText: '...',
+                    text: '加载中...',
+                    tooltip: '按钮数据加载中...',
+                    fun() {
+                        ElMessage('按钮数据加载中...')
+                    }
+                }
+            ],
+            inputToInfo: true,
+            moreButs: [],
+            searchKeywordButs: [],
+            searchButtomButs: [],
+            cmdsData: [],
+            cmds: {}
+        }
+    }
+</script>
+<script>
+    function openInWindow() {
+        const url = floatIframeE.src;
+        console.log("url", url);
+        if (url) {
+            window.open(url, '_blank');
+        } else {
+            ElMessage.error('没有打开的页面!');
+        }
+    }
+    /**
+     * 设置悬浮窗口的宽度
+     * @param {'200px' | '20%' | '30vw'} size 
+     */
+    function setFloatPage(size, open) {
+        floatPageE.classList.remove('hidden');
+        if (size == undefined) size = defConfig['floatPageE.style.width'];
+        if (!open && floatPageE.style.width == size) {
+            size = defConfig['floatPageE.style.width'];
+        }
+
+        if (floatPageE.style.width != size) {
+            floatPageE.style.width = size;
+        }
+        appE.style.width = calc100(floatPageE.style.width) + 'vw';
+    }
+
+    function clsoeFloatPage() {
+        floatPageE.classList.add('hidden');
+        floatIframeE.src = '';
+        appE.style.width = '100%';
+    }
+
+    function calc100(str) {
+        const max = 100;
+        let num = max - parseInt(str);
+        if (num < 0) num = 0;
+        if (isNaN(num) || num > max) num = max;
+        return num;
+    }
+
+    function openFloatPage(url) {
+        setFloatPage(floatPageE.style.width || defConfig['floatPageE.style.width'], true);
+        floatIframeE.src = url;
+    }
+</script>
+<script>
+    const { createApp, ref } = Vue;
+    const { ElMessage, ElMessageBox } = ElementPlus;
+
+    createApp({
+        data: getData,
+        setup() {
+            return {
+            }
+        },
+        mounted() {
+            this.resetPage();
+            window.addEventListener('scroll', this.handleScroll);
+        },
+        beforeUnmount() {
+            window.removeEventListener('scroll', this.handleScroll);
+        },
+        computed: {
+            paginatedData() {
+                const start = (this.currentPage - 1) * this.pageSize;
+                const end = this.currentPage * this.pageSize;
+                return this.data.slice(start, end);
+            },
+        },
+        methods: {
+            getIndexData(callback) {
+                this.warpAxios(axios.get('/system/indexData').then((res) => {
+                    this.dataOrg = res.data;
+                    this.handleData();
+                }), "获取数据列表失败").finally(() => {
+                    if (typeof callback == 'function') {
+                        callback();
+                    }
+                })
+            },
+            getIndexButsData(callback) {
+                this.warpAxios(axios.get('/system/butsData').then((res) => {
+                    res.data.forEach(but => {
+                        but.fun = new Function(`return (${but.fun})`);
+                    });
+                    this.butsData = res.data;
+                }), "获取按钮数据列表失败", true).finally(() => {
+                    if (typeof callback == 'function') callback();
+                })
+            },
+            clickBut(item) {
+                try {
+                    item.fun.apply(this);
+                } catch (error) {
+                    ElMessage.error('执行动态按钮时异常!按钮名:' + item.text);
+                    console.error(error);
+                }
+            },
+            warpAxios(axiosPromise, msg, notShowOperationSuccessful, notShowError) {
+                if (this.loading[msg]) return;
+                this.loading[msg] = true;
+                return axiosPromise.then(res => {
+                    if (!notShowOperationSuccessful) {
+                        ElMessage.success('操作成功');
+                    }
+                    return res;
+                }).catch(function (error) {
+                    if (notShowError) return;
+                    ElMessage.error((msg || '请求失败!') + error);
+                    console.error(error);
+                }).finally((res) => this.loading[msg] = false);
+            },
+            getFixUrls() {
+                this.warpAxios(axios.get('/system/fixUrls').then(function (response) {
+                    ElMessage.success('需要补齐的接口数量为: ' + response.data.length)
+                    response.data.forEach(function (url) {
+                        axios.get(url)
+                    });
+                }), "获取资源列表失败", true)
+            },
+            /**
+             * 规范化 URL：
+             * - 如果缺少协议，自动补全 `https://`
+             * - 处理类似 `/path` 或 `?query` 的相对路径（附加到当前域名）
+             */
+            normalizeUrl(rawUrl) {
+                if (!rawUrl) return '';
+
+                // 已经是完整 URL（http/https/ftp 等开头）
+                if (/^(https?|ftp|file):\/\//i.test(rawUrl)) {
+                    return rawUrl;
+                }
+
+                // 以 `//` 开头的 URL（自动补全协议）
+                if (rawUrl.startsWith('//')) {
+                    return location.protocol + rawUrl;
+                }
+
+                // 处理路径形式的 URL（/path 或 ?query）
+                if (rawUrl.startsWith('/') || rawUrl.startsWith('?')) {
+                    return location.origin + rawUrl;
+                }
+
+                // 其他情况（如 `example.com` 或 `localhost:8080`）补全协议
+                return 'https://' + rawUrl;
+            },
+            openUrl(url) {
+                url = this.normalizeUrl(url);
+                if (this.copyLinkStatus) this.copyText(url);
+                else if (url.includes('openApi')) this.warpAxios(axios(url).then(res => {
+                    ElMessage.success('操作成功: ' + res.data.msg);
+                }), '打开链接失败', true);
+                else if (url.includes('openInIframe')) openFloatPage(url);
+                else if (url.includes('openInNowWindow')) location.href = url;
+                else window.open(url);
+            },
+            openPage(url) {
+                openFloatPage(url);
+            },
+            copyText(str) {
+                this.title = str;
+                navigator.clipboard.writeText(str)
+                    .then(res => ElMessage.success('复制成功: ' + str))
+                    .catch(err => {
+                        console.error('复制内容', str);
+                        console.error('复制失败', err);
+                        ElMessage.error('复制失败: ' + err.message);
+                    })
+            },
+            openMain(row) {
+                this.openUrl(row.urls[0].url)
+            },
+            handleData() {
+                this.updateStore();
+                let that = this;
+                let ds = [];
+                [...that.dataOrg, ...that.cmdsData].forEach(d => {
+                    if (that.store.searchKeyword == ""
+                        || -1 < d.name.toLocaleLowerCase().indexOf(that.store.searchKeyword.toLocaleLowerCase())
+                        || -1 < d.mark.toLocaleLowerCase().indexOf(that.store.searchKeyword.toLocaleLowerCase())) {
+                        ds.push(d)
+                    }
+                })
+                that.data = ds;
+                that.handleButton();
+            },
+            handleButton() {
+                this.updateStore();
+                let that = this;
+                this.data.forEach(d => {
+                    d.urls.forEach(url => (
+                        url.show = that.store.searchButtom == ""
+                        || (-1 < url.text.toLocaleLowerCase().indexOf(that.store.searchButtom.toLocaleLowerCase()))
+                    ))
+                })
+            },
+            resetPage() {
+                this.loadStore();
+                setFloatPage();
+                clsoeFloatPage();
+                this.moreButs = [];
+                this.getCmds();
+                this.getIndexData(() => {
+                    this.handleData();
+                });
+                this.getIndexButsData();
+                this.getSearchButsData();
+            },
+            handleSizeChange(val) {
+                this.pageSize = val;
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+            },
+            debouncedHandleData() {
+                clearTimeout(this.debounceDataTimer);
+                this.debounceDataTimer = setTimeout(() => {
+                    this.handleData();
+                }, 300);
+            },
+            loadStore() {
+                const storedData = localStorage.getItem('store');
+                if (storedData) {
+                    this.store = JSON.parse(storedData);
+                }
+            },
+            updateStore() {
+                localStorage.setItem('store', JSON.stringify(this.store));
+            },
+            changeCopyLinkStatus() {
+                this.copyLinkStatus = !this.copyLinkStatus;
+                ElMessage.success('复制链接状态 ' + this.copyLinkStatus)
+            },
+            changeWorkboxStatus() {
+                this.workboxStatus = !this.workboxStatus;
+                localStorage.setItem('workboxStatus', JSON.stringify(this.workboxStatus));
+                ElMessage.success('刷新后生效，全局缓存状态 ' + this.workboxStatus)
+            },
+            setAutoComplete(get) {
+                if (get != true) get = undefined;
+                this.warpAxios(axios.get('/system/autocomplete?' + (get ? 'get=true' : "")).then((response) => {
+                    this.autoCompleteStatus = response.data;
+                    ElMessage.success((get ? '获取' : '设置') + '自动补全状态成功 ' + this.autoCompleteStatus)
+                }), (get ? '获取' : '设置') + '自动补全状态失败', true);
+            },
+            async getSystemId(notShowError) {
+                return await this.warpAxios(axios.get('/system/systemId').then((response) => response.data), '获取服务器系统id', true, notShowError);
+            },
+            systemRestart() {
+                let that = this;
+                ElMessageBox.confirm('确定要重启服务器吗？', '重启服务器', {
+                    confirmButtonText: '重启',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                }).then(async () => {
+                    // 用户确认后，发送请求
+                    const lastSystemId = await this.getSystemId();
+                    that.warpAxios(axios.get('/system/restart').then((response) => {
+                        ElMessage.warning(response.data);
+
+                        const endTime = Date.now() + 60 * 1000;
+                        const inteId = setInterval(() => {
+                            if (endTime < Date.now()) {
+                                ElMessage.error('服务器重启超时');
+                                clearInterval(inteId);
+                                return;
+                            }
+
+                            this.getSystemId(true).then(systemId => {
+                                if (systemId && systemId != lastSystemId) {
+                                    ElMessage.success('服务器重启完成');
+                                    clearInterval(inteId);
+                                } else {
+                                    throw new Error('服务器重启中...');
+                                }
+                            }).catch((err) => { });
+                        }, 1000);
+                    }), '重启服务器', true);
+                }).catch(() => {
+                    // 用户取消操作，不执行任何操作
+                });
+            },
+            systemShutdown() {
+                let that = this;
+                ElMessageBox.confirm('确定要关闭服务器吗？', '关闭服务器', {
+                    confirmButtonText: '关机',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                }).then(async () => {
+                    that.warpAxios(axios.get('/system/waitrestart').then((response) => {
+                        ElMessage.warning(response.data);
+                    }), '重启服务器', true);
+                }).catch(() => { });
+            },
+            scrollToTop() {
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // 平滑滚动到顶部
+            },
+            getSearchButsData() {
+                this.warpAxios(axios.get('/system/searchButsData').then((res) => {
+                    this.searchKeywordButs = res.data.searchKeywordButs;
+                    this.searchButtomButs = res.data.searchButtomButs;
+                }), "获取按钮数据列表失败")
+            },
+            handleScroll() {
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const backToTopButton = document.getElementById('back-to-top');
+                if (scrollTop > 100) {
+                    backToTopButton.classList.remove('hidden');
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                    backToTopButton.classList.add('hidden');
+                }
+            },
+            expandMoreButs(buts, inputToInfo) {
+                inputToInfo = !!inputToInfo;
+                if (this.inputToInfo == inputToInfo && 0 < this.moreButs.length) {
+                    this.moreButs = [];
+                } else {
+                    this.moreButs = buts;
+                    this.inputToInfo = inputToInfo;
+                }
+            },
+            changemoreButs(value) {
+                if (value == '清空数据') value = '';
+                if (this.inputToInfo) this.store.searchKeyword = value;
+                else this.store.searchButtom = value;
+            },
+            handleCmds() {
+                // 将 cmds 转成项目 cmdsData
+                this.cmdsData.splice(0, this.cmdsData.length);
+                Object.entries(this.cmds.apis).forEach(([key, value]) => {
+                    this.cmdsData.push({
+                        name: 'cmd - ' + key,
+                        mark: value.description,
+                        urls: [
+                            {
+                                text: '执行',
+                                url: '/system/cmd?openApi=true&cmd=' + key,
+                            },
+                            {
+                                text: '新窗口执行',
+                                url: '/system/cmd?cmd=' + key
+                            }
+                        ]
+                    });
+                });
+            },
+            getCmds() {
+                this.warpAxios(axios.get('/system/cmds').then((response) => {
+                    this.cmds = response.data;
+                    this.handleCmds();
+                }), "获取命令列表失败", true)
+            },
+            runCmd(cmd) {
+                this.warpAxios(axios.get('/system/cmd?cmd=' + cmd).then((response) => {
+                    ElMessage.success('执行命令结果: ' + response.data);
+                }), "运行命令失败", true)
+            },
+        },
+    }).use(ElementPlus).mount('#app');
+
+</script>

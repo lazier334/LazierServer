@@ -377,7 +377,15 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     /** 版权信息 */
     copyright: {
         /** 公司名字 */
-        companyName: 'LocalServer'
+        companyName: 'LazierServer',
+        /** 版权人名称 */
+        copyright: 'LazierServer',
+        /** 联系方式 */
+        contact: 'lazier334@lazier334.com',
+        /** 隐私政策 */
+        privacy: '隐私政策',
+        /** 使用条款 */
+        terms: '使用条款',
     },
     /** 更多日志 */
     moreLog: false,

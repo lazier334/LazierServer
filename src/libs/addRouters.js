@@ -1,12 +1,14 @@
 import send from 'koa-send';
-import redirectApi from './sendRedirectApi.js';
+import sendRedirectApi from './sendRedirectApi.js';
 import sendSameApi from './sendSameApi.js';
+import sendSystemApi from './sendSystem.js';
 import { plugins, pathDeduplication } from './plugins.js';
 import { fs, path, config } from './config.js';
 
 const sends = [
     sendSameApi,
-    redirectApi
+    sendRedirectApi,
+    sendSystemApi
 ];
 
 export {

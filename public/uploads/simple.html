@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Koa 小文件上传</title>
+</head>
+
+<body>
+    <h1>小文件上传，限制100MB</h1>
+    <h2>单文件上传</h2>
+    <form action="single" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" />
+        <button type="submit">上传</button>
+    </form>
+
+    <h2>多文件上传</h2>
+    <form action="multiple" method="post" enctype="multipart/form-data">
+        <input type="file" name="files" multiple />
+        <button type="submit">上传</button>
+    </form>
+
+    <a href="index.html" style="color: inherit;">
+        <h2>大文件上传（＜100MB）</h2>
+    </a>
+</body>
+
+</html>
