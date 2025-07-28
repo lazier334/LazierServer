@@ -6,7 +6,8 @@ import Stage from '../classes/Stage.js';
  */
 const stages = {
     sysStart: '系统启动阶段',
-    router: '接口路由',
+    koaPlugin: 'koa插件',
+    koaRouter: '接口路由',
     selectFileByDomains: '选择域名',
     genProxy: '构建网页插件的函数插件',
     indexData: '首页列表数据',

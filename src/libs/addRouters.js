@@ -27,7 +27,7 @@ async function addRouters(router) {
     else console.log('指定扫描文件夹列表', pushDir(domainList));
 
     // 接口：自定义的路由
-    (await plugins('router')).use(router);
+    (await plugins('koaRouter')).use(router);
 
 
     // 这个接口放到前面是因为优先读取文件，再读取系统的接口，顺序为： 插件API > 文件API > 系统API

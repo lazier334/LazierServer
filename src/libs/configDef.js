@@ -387,8 +387,13 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         /** 使用条款 */
         terms: '使用条款',
     },
-    /** 更多日志 */
-    moreLog: false,
+    /** 日志配置 */
+    logger: {
+        /** 请求记录 */
+        req: false,
+        /** 响应记录 */
+        resp: true,
+    },
     /** 插件的各个阶段 */
     pluginStages: {},
     /** 插件的阶段自动更新时间间隔 */
