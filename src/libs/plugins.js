@@ -129,7 +129,7 @@ async function getAllPlugin(stage) {
             fileList.push(filepath);
         });
     });
-    return fileList;
+    return fileList.sort();
 }
 
 /**
