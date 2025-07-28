@@ -396,8 +396,10 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     },
     /** 插件的各个阶段 */
     pluginStages: {},
-    /** 插件的阶段自动更新时间间隔 */
-    pluginStagesUpdateStep: 60 * 1000,
+    /** 插件的阶段自动更新时间间隔 10分钟 */
+    pluginStagesUpdateStep: 10 * 60 * 1000,
+    /** 排除的插件列表 */
+    excludePlugins: [],
 };
 {   // 添加版本号按钮
     const ver = readVersion();

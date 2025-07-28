@@ -2,5 +2,6 @@
     "portHttp": 3030,
     "portHttps": 3031,
     "portWS": 3033,
-    "portWSS": 3034
+    "portWSS": 3034,
+    "pluginStagesUpdateStep": 3000
 }

@@ -35,12 +35,20 @@ export { plugins, scanStages, scanPlugin, importWarp, getPluginDirs, Stage, path
  */
 async function importWarp(filepath) {
     try {
-        // 动态导入插件模块
-        const pluginModule = await import(filepath);
+        // 读取文件的更新时间，将更新时间作为后缀，如果是特殊插件会无法使用 fs 读取，所以就将其包裹起来
+        let timestamp = 0;
+        try {
+            const stat = fs.statSync(filepath);
+            timestamp = stat.mtimeMs;
+        } catch (err) {
+            console.warn(err)
+        }
+        console.debug('导入插件', filepath + '?timestamp=' + timestamp)
+        // 使用文件修改时间作为查询参数动态导入插件模块
+        const pluginModule = await import(filepath + '?timestamp=' + timestamp);
 
         // 处理默认导出：优先使用 default 导出
         const plugin = pluginModule.default || pluginModule;
-
         return plugin;
     } catch (error) {
         console.error(`加载插件失败: ${filepath}`, error);
@@ -95,15 +103,7 @@ async function scanStages() {
  */
 async function scanPlugin(stage) {
     let newStage = new Stage(stage);
-    let importList = [];
-    getPluginDirs().forEach(dir => {
-        if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
-            fs.readdirSync(dir).filter(file => file.startsWith(stage) && file.endsWith('.js')).forEach(file => {
-                const filepath = path.join(dir, file);
-                importList.push(filepath);
-            });
-        }
-    });
+    let importList = (await getAllPlugin(stage)).filter(filepath => !config.excludePlugins.includes(filepath));
     for (const filepath of importList) {
         // 使用默认导入
         await defScan(filepath, newStage.data);
@@ -113,6 +113,23 @@ async function scanPlugin(stage) {
     if (!Array.isArray(process.stagesCache)) process.stagesCache = {};
     process.stagesCache[stage] = newStage;
     return newStage;
+}
+
+/**
+ * 获取所有的插件，可以指定阶段名称
+ * @param {string} stage 阶段名称
+ */
+async function getAllPlugin(stage) {
+    let fileList = [];
+    getPluginDirs().filter(dir => {
+        return fs.existsSync(dir) && fs.statSync(dir).isDirectory()
+    }).forEach(dir => {
+        fs.readdirSync(dir).filter(file => file.endsWith('.js') && (!stage || file.startsWith(stage))).forEach(file => {
+            const filepath = path.join(dir, file);
+            fileList.push(filepath);
+        });
+    });
+    return fileList;
 }
 
 /**

@@ -3,6 +3,6 @@
  * @param {import('koa').Next} next
  */
 export default async function koaPluginDemo(ctx, next) {
-    ctx.body = 'hello world! -- by demo';
+    // ctx.body = 'hello world! -- by demo';
     return next();
 }
