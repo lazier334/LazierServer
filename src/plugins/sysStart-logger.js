@@ -19,14 +19,12 @@ export default async function sysStartLogger({ fs, path, config }) {
             level: config.logger.consoleLevel,  // 只处理 log 及以上级别
             format: winston.format.combine(
                 winston.format.colorize(),
-                winston.format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss' }),
+                winston.format.timestamp({ format: config.logger.globalTimeFormat }),
                 logFormat
             )
         })
     ];
-    config.logger.dailyRotateFileList.forEach(conf => {
-        transports.push(new DailyRotateFile(conf))
-    });
+    config.logger.dailyRotateFileList.forEach(conf => transports.push(new DailyRotateFile(conf)));
 
     // 创建 winston logger
     const logger = winston.createLogger({
@@ -36,7 +34,7 @@ export default async function sysStartLogger({ fs, path, config }) {
             winston.format.timestamp({ format: config.logger.globalTimeFormat }),
             logFormat
         ),
-        transports: transports
+        transports
     });
 
     console.log = (...args) => logger.verbose(args.join(' '));
