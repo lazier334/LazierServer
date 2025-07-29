@@ -57,6 +57,8 @@ if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
 }
 config = defConfig.useConfig(config, defConfig);
 const getNowFileStorage = config.getNowFileStorage;
+// 添加config到全局
+process.G.config = config;
 
 export {
     config,

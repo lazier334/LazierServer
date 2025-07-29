@@ -1,6 +1,6 @@
 import Koa from 'koa';
 import https from 'https';
-import { fs, path, config } from './libs/config.js';
+import { fs, path, config, getNowFileStorage } from './libs/config.js';
 import initKoa from './libs/initKoa.js';
 import websocketServer from './libs/websocketServer.js';
 import { plugins } from './libs/plugins.js';

@@ -585,14 +585,19 @@ function get__dirname(url) {
 }
 
 /**
- * 获取当前文件的储存空间，可以通过 process.G.getNowFileStorage 使用，参数不能传递 'getNowFileStorage' 
- * @param {string} filepath [import.meta.filename] 可以直接传路径，不能传递 'getNowFileStorage' 
+ * 获取当前文件的储存空间，可以通过 process.G.getNowFileStorage 使用  
+ * 参数传递  
+ *  - getNowFileStorage - 会获得当前函数  
+ *  - config - 会获得配置对象  
+ * @param {string} filepath [import.meta.filename] 可以直接传路径
  * @returns {object}
  */
 function getNowFileStorage(filepath) {
     // let fn = filepath.split('/').pop().split('\\').pop();
     // 直接使用文件路径作为 key
     let fn = filepath;
-    if (typeof process.G[fn] != 'object' || process.G[fn] == null) process.G[fn] = {};
+    if (!['getNowFileStorage', 'config'].includes(fn)) {
+        if (typeof process.G[fn] != 'object' || process.G[fn] == null) process.G[fn] = {};
+    }
     return process.G[fn];
 }
