@@ -4,7 +4,7 @@ import DailyRotateFile from 'winston-daily-rotate-file';
 /**
  * @param {import('../libs/config.js')}
  */
-export default async function sysStartCommon({ fs, path, config }) {
+export default async function sysStartLogger({ fs, path, config }) {
     // 日志格式：加上等级和时间前缀
     const logFormat = winston.format.printf(({ level, message, timestamp }) => {
         // level: 日志级别（如 info、debug、error）
