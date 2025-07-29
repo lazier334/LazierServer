@@ -14,6 +14,7 @@ const stages = {
     websocketMsgs: 'websocket消息',
     websocketApis: 'websocket接口',
     cmd: '命令工具',
+    send: '发送文件的处理',
 };
 if (typeof config.pluginStages != 'object') {
     config.pluginStages = {}
@@ -114,7 +115,7 @@ async function scanPlugin(stage) {
     }
 
     // 将当前的阶段数据保存到缓存中 `process.stagesCache`  
-    if (!Array.isArray(process.stagesCache)) process.stagesCache = {};
+    if (typeof process.stagesCache != 'object' || process.stagesCache == null) process.stagesCache = {};
     process.stagesCache[stage] = newStage;
     return newStage;
 }

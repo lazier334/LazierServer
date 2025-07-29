@@ -1,4 +1,4 @@
-import { fs, path, config } from './config.js';
+import { fs, path, config } from '../libs/config.js';
 
 const lc = {
     redirectFileName: '.300',
@@ -17,7 +17,7 @@ const lc = {
  * @param {SendOptions}  sendOptions
  * @returns {SendOptions}
  */
-export default async function redirectApi(sendOptions) {
+export default async function sendSystem(sendOptions) {
     const { ctx, filename, opts } = sendOptions;
     if (ctx.path.startsWith('/system/')) {
         try {

@@ -1,23 +1,18 @@
 import send from 'koa-send';
-import sendRedirectApi from './sendRedirectApi.js';
-import sendSameApi from './sendSameApi.js';
-import sendSystemApi from './sendSystem.js';
 import { plugins, pathDeduplication, getAllPlugin, getPlguinUpdateTime } from './plugins.js';
-import { fs, path, config } from './config.js';
+import { fs, path, config, getNowFileStorage } from './config.js';
 import Router from 'koa-router';
 
-const sends = [
-    sendSameApi,
-    sendRedirectApi,
-    sendSystemApi
-];
-const ls = process.G.getNowFileStorage(import.meta.filename);
+const ls = getNowFileStorage(import.meta.filename);
 /** 文件列表缓存 */
 ls.apListCache = [];
 /** 文件列表的时间戳映射 */
 ls.apListMap = {};
-/** 路由缓存 */
-ls.routersCache = {};
+/**
+ * 路由缓存
+ * @type {import('koa-router')}
+ */
+ls.routersCache = null;
 /** 上次刷新时间 */
 ls.lastRefreshTime = 0;
 
@@ -33,13 +28,17 @@ export {
  */
 async function readKoaRouters() {
     let apList = await getAllPlugin('koaRouter');
+
+    // 检测路由插件是否有新增或删除
     let refresh = apList.length != ls.apListCache.length;
+
+    // 检测路由插件是否有更名
     if (!refresh) {
         apList.join();
         refresh = apList.join() != ls.apListCache.join();
     }
 
-    // 刷新路由文件时间戳缓存，为了降低性能消耗，10秒钟扫描一次
+    // 检测路由文件更新时间是否有变动，为了降低性能消耗，10秒钟扫描一次
     if (ls.lastRefreshTime + config.times.koaRouterPlugin < Date.now()) {
         const alm = ls.apListMap;
         ls.apListMap = {};
@@ -53,11 +52,16 @@ async function readKoaRouters() {
     // 刷新路由
     if (refresh) {
         const koaRouters = await plugins('koaRouter');
-        // TODO 这里推荐清空 router 然后重新添加，而不是重新创建
-        const router = new Router();
-        // router.stack 可能是这个
+        // 清空 router 后重新添加，如果没有缓存则创建
+        const router = ls.routersCache || new Router();
+        // 清空路由列表
+        router.stack.splice(0, router.stack.length);
+        // 使用路由插件添加路由
         koaRouters.use(router);
+        // 保存路由缓存
         ls.routersCache = router;
+        // 保存路由文件列表缓存
+        ls.apListCache = apList;
     }
     return ls.routersCache;
 }
@@ -172,6 +176,7 @@ async function sendFile(ctx, filepath, opts) {
     }
 
     const sendOptions = { ctx, filename: filepath, opts };
+    const sends = (await plugins('send')).data;
     for (const s of sends) {
         if (await s(sendOptions) === true) return;
     }

@@ -1,4 +1,3 @@
-import './base.js';
 import Koa from 'koa';
 import https from 'https';
 import { fs, path, config } from './libs/config.js';

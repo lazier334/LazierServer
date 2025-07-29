@@ -8,8 +8,13 @@ export default function koaRouterDemo(router) {
         ctx.body = 'hello demo';
         next()
     });
+    router.all('/proxy.js', async (ctx, next) => {
+        ctx.body = 'hello demo';
+        // 可以使用 ctx.next 继续运行后面的路由
+        ctx.next = true;
+    });
     router.all(/^\/demo.*$/, async (ctx) => {
-        ctx.body += ' hello demo2';
+        ctx.body = (ctx.body ?? '') + ' hello demo2';
     });
     return router
 }

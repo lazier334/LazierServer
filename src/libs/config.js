@@ -1,6 +1,7 @@
 import * as baseImport from './baseImport.js';
 import defConfig from './configDef.js';
 const { fs, path } = baseImport;
+
 // 设定外部配置数据位置
 defConfig.ldConfigPath = path.join(process.cwd(), './ld/config.json');
 
@@ -55,8 +56,10 @@ if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
     config.versionBanner = fs.readFileSync(bannerPath, 'utf8')
 }
 config = defConfig.useConfig(config, defConfig);
+const getNowFileStorage = config.getNowFileStorage;
 
 export {
-    config
+    config,
+    getNowFileStorage
 };
 export * from './baseImport.js';

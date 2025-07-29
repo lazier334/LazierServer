@@ -1,6 +1,9 @@
 import { fileURLToPath, pathToFileURL } from 'url';
 import path from 'path';
 
+// 挂载全局对象
+if (!process.G) process.G = { getNowFileStorage };
+
 /** 配置工具 */
 const ConfigUtils = {
     readObj,
@@ -10,6 +13,7 @@ const ConfigUtils = {
     readVersion,
     isMainModule,
     get__dirname,
+    getNowFileStorage,
 }
 /** ld 文件夹名称 */
 const ldDirName = 'ld';
@@ -409,7 +413,12 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         genAllGenProxy: true,
         /** 本地开发使用生产环境模式 */
         indexUseProdMode: false,
-    }
+    },
+    /** 
+     * 额外的路由，用于挂载对象
+     * @type {import('koa-router')}
+     */
+    AdditionalRouter: null,
 };
 {   // 添加版本号按钮
     const ver = readVersion();
@@ -573,4 +582,17 @@ function isMainModule(currentFileUrl, proc = process) {
  */
 function get__dirname(url) {
     return path.dirname(fileURLToPath(url))
+}
+
+/**
+ * 获取当前文件的储存空间，可以通过 process.G.getNowFileStorage 使用，参数不能传递 'getNowFileStorage' 
+ * @param {string} filepath [import.meta.filename] 可以直接传路径，不能传递 'getNowFileStorage' 
+ * @returns {object}
+ */
+function getNowFileStorage(filepath) {
+    // let fn = filepath.split('/').pop().split('\\').pop();
+    // 直接使用文件路径作为 key
+    let fn = filepath;
+    if (typeof process.G[fn] != 'object' || process.G[fn] == null) process.G[fn] = {};
+    return process.G[fn];
 }

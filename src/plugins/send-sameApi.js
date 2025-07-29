@@ -1,4 +1,4 @@
-import { fs, path } from './baseImport.js';
+import { fs, path } from '../libs/config.js';
 
 const ApiMapType = dataType();
 const RequestType = getRequestType();

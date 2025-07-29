@@ -1,4 +1,4 @@
-import { fs, path } from './baseImport.js';
+import { fs, path } from '../libs/config.js';
 const lc = {
     redirectFileName: '.300',
 }
@@ -16,7 +16,7 @@ const lc = {
  * @param {SendOptions}  sendOptions
  * @returns {SendOptions}
  */
-export default async function redirectApi(sendOptions) {
+export default async function sendRedirectApi(sendOptions) {
     const { ctx, filename, opts } = sendOptions;
     try {
         const fp300 = path.join(opts.root, filename + lc.redirectFileName);
