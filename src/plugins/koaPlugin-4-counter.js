@@ -1,10 +1,11 @@
 import { config } from '../libs/config.js';
 
 /**
+ * koa中间件 计数器 插件
  * @param {import('koa').Context} ctx
  * @param {import('koa').Next} next
  */
-export default async function koaPluginDemo(ctx, next) {
+export default async function koaPluginCounter(ctx, next) {
     // 计数器插件
     const start = Date.now();
     const reqInfo = {

@@ -2,8 +2,7 @@
  * @param {import('../libs/config.js')}
  */
 export default async function sysStartCommon({ fs, path, config }) {
-    // 挂载全局对象
-    if (!process.G) process.G = {};
+    // 打印版本日志
     console.info(config.showVersion());
 
     // 检测 proxy.js 是否生成，如果没有生成，那么指定代码进行生成

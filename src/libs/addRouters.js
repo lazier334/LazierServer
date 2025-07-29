@@ -2,19 +2,65 @@ import send from 'koa-send';
 import sendRedirectApi from './sendRedirectApi.js';
 import sendSameApi from './sendSameApi.js';
 import sendSystemApi from './sendSystem.js';
-import { plugins, pathDeduplication } from './plugins.js';
+import { plugins, pathDeduplication, getAllPlugin, getPlguinUpdateTime } from './plugins.js';
 import { fs, path, config } from './config.js';
+import Router from 'koa-router';
 
 const sends = [
     sendSameApi,
     sendRedirectApi,
     sendSystemApi
 ];
+const ls = process.G.getNowFileStorage(import.meta.filename);
+/** 文件列表缓存 */
+ls.apListCache = [];
+/** 文件列表的时间戳映射 */
+ls.apListMap = {};
+/** 路由缓存 */
+ls.routersCache = {};
+/** 上次刷新时间 */
+ls.lastRefreshTime = 0;
 
 export {
     addRouters,
-    completeFile
+    completeFile,
+    readKoaRouters,
 };
+
+/**
+ * 获取动态的路由
+ * @returns {Router}
+ */
+async function readKoaRouters() {
+    let apList = await getAllPlugin('koaRouter');
+    let refresh = apList.length != ls.apListCache.length;
+    if (!refresh) {
+        apList.join();
+        refresh = apList.join() != ls.apListCache.join();
+    }
+
+    // 刷新路由文件时间戳缓存，为了降低性能消耗，10秒钟扫描一次
+    if (ls.lastRefreshTime + config.times.koaRouterPlugin < Date.now()) {
+        const alm = ls.apListMap;
+        ls.apListMap = {};
+        apList.forEach(fp => {
+            let time = getPlguinUpdateTime(fp);
+            if (alm[fp] != time) refresh = true;
+            ls.apListMap[fp] = time;
+        });
+    }
+
+    // 刷新路由
+    if (refresh) {
+        const koaRouters = await plugins('koaRouter');
+        // TODO 这里推荐清空 router 然后重新添加，而不是重新创建
+        const router = new Router();
+        // router.stack 可能是这个
+        koaRouters.use(router);
+        ls.routersCache = router;
+    }
+    return ls.routersCache;
+}
 
 /** 
  * 添加接口路由，路由顺序为： 插件API > 文件API > 系统API
@@ -23,12 +69,8 @@ export {
 async function addRouters(router) {
     // 启动的目标文件夹，如果是开启了 allDir ，那么在实际读取的时候会重新扫描更新
     var domainList = config.domainList.map(domain => path.join(config.rootDir, domain));
-    if (config.allDir) console.log(`已开启全文件夹扫描，将会扫描路径 ${config.rootDir} 里的所有文件夹`);
+    if (config.switch.allDir) console.log(`已开启全文件夹扫描，将会扫描路径 ${config.rootDir} 里的所有文件夹`);
     else console.log('指定扫描文件夹列表', pushDir(domainList));
-
-    // 接口：自定义的路由
-    (await plugins('koaRouter')).use(router);
-
 
     // 这个接口放到前面是因为优先读取文件，再读取系统的接口，顺序为： 插件API > 文件API > 系统API
     // 接口：全局，所有没有被拦截的都将跳到这里发送文件
@@ -36,7 +78,7 @@ async function addRouters(router) {
         let api = ctx.path;
         let domainDirs = {};
         // 如果开启了全部文件夹，那么重新扫描
-        (config.allDir ? (domainList = getAllDir(config.rootDir)) : domainList).forEach(dir => {
+        (config.switch.allDir ? (domainList = getAllDir(config.rootDir)) : domainList).forEach(dir => {
             let fp = path.join(dir, api);
             if (fs.existsSync(fp) || (fs.existsSync((fp = decodeURIComponent(fp))))) {
                 if (fs.statSync(fp).isFile()) domainDirs[dir] = fp;
@@ -86,10 +128,10 @@ async function addRouters(router) {
     router.all('/system/autocomplete', ctx => {
         if (!ctx.query.get) {
             let status = ctx.query.status;
-            config.autoComplete = status == undefined ? !config.autoComplete : status;
+            config.switch.autoComplete = status == undefined ? !config.switch.autoComplete : status;
         }
-        console.info('当前自动补全的状态为', config.autoComplete);
-        ctx.body = config.autoComplete;
+        console.info('当前自动补全的状态为', config.switch.autoComplete);
+        ctx.body = config.switch.autoComplete;
     });
 
     // 接口：自动补全编辑页的文件匹配 /edit/vs/*
@@ -145,7 +187,7 @@ async function sendFile(ctx, filepath, opts) {
 
 /** 补全文件的koa插件，会使用 domains 里面的域名逐个尝试下载文件 */
 async function completeFile(ctx, next) {
-    if (config.autoComplete) {
+    if (config.switch.autoComplete) {
         let downloadedFile = null;
         const api = ctx.path;
         const url = new URL(ctx.request.href);
@@ -181,7 +223,7 @@ async function downloadFileToPath(url, filepath, orgUrl) {
         fs.mkdirSync(path.dirname(filepath), { recursive: true });
         const downloader = new Downloader({
             url: url,
-            timeout: config.timeout || 30 * 1000,
+            timeout: config.times.timeout || 30 * 1000,
             directory: path.dirname(filepath), // 保存文件的目录
             fileName: path.basename(filepath), // 保存文件的名称
             cloneFiles: false,

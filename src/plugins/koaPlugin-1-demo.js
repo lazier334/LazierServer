@@ -1,4 +1,5 @@
 /**
+ * koa中间件示例插件
  * @param {import('koa').Context} ctx
  * @param {import('koa').Next} next
  */

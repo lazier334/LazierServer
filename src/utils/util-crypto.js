@@ -93,7 +93,7 @@ function decodeText(data, key) {
             return encryptor.decrypt(data, key);
         }
     } catch (error) {
-        if (config.cryptoDataEnable) throw error;
+        if (config.switch.cryptoDataEnable) throw error;
     }
     return data;
 }
@@ -104,7 +104,7 @@ function decodeText(data, key) {
  * @param {string} key 
  */
 function encodeText(data, key) {
-    if (config.cryptoDataEnable) {
+    if (config.switch.cryptoDataEnable) {
         return encryptor.encrypt(data, key)
     }
     return data;

@@ -11,9 +11,9 @@ if (!(config['genProxyExportKeys'] instanceof Array)) {
 
 const conf = {
     devMode: false,
-    targetDir: config["genProxyTargetDir"] || "web/plugin",
-    proxyFile: config["genProxyProxyFile"] || "proxy.js",
-    forceHttps: config["genProxyForceHttps"] || false,
+    targetDir: config.genProxyTargetDir || "web/plugin",
+    proxyFile: config.genProxyProxyFile || "proxy.js",
+    forceHttps: config.switch.genProxyForceHttps || false,
 }
 if (conf.devMode) {
     // 开发模式导出文件名固定为 proxy.js

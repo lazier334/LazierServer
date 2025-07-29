@@ -26,7 +26,17 @@ Object.entries(stages).forEach(([k, v]) => {
 });
 
 scanStages();
-export { plugins, scanStages, scanPlugin, importWarp, getPluginDirs, Stage, pathDeduplication };
+export {
+    plugins,
+    scanStages,
+    scanPlugin,
+    importWarp,
+    getPluginDirs,
+    Stage,
+    pathDeduplication,
+    getAllPlugin,
+    getPlguinUpdateTime
+};
 
 /**
  * 默认的扫描函数（ESM兼容版）
@@ -36,13 +46,7 @@ export { plugins, scanStages, scanPlugin, importWarp, getPluginDirs, Stage, path
 async function importWarp(filepath) {
     try {
         // 读取文件的更新时间，将更新时间作为后缀，如果是特殊插件会无法使用 fs 读取，所以就将其包裹起来
-        let timestamp = 0;
-        try {
-            const stat = fs.statSync(filepath);
-            timestamp = stat.mtimeMs;
-        } catch (err) {
-            console.warn(err)
-        }
+        let timestamp = getPlguinUpdateTime(filepath);
         console.debug('导入插件', filepath + '?timestamp=' + timestamp)
         // 使用文件修改时间作为查询参数动态导入插件模块
         const pluginModule = await import(filepath + '?timestamp=' + timestamp);
@@ -67,7 +71,7 @@ async function plugins(stage, step) {
     /** @type {Stage} 从缓存中读取 */
     let cacheStage = process.stagesCache?.[stage];
     // 检测是否需要更新数据
-    if (!(0 < step)) step = config.pluginStagesUpdateStep;
+    if (!(0 < step)) step = config.times.pluginStagesUpdateStep;
     const ut = Date.now() - step;
     if (!cacheStage || cacheStage.updateTime < ut) {
         cacheStage = await scanPlugin(stage);
@@ -103,7 +107,7 @@ async function scanStages() {
  */
 async function scanPlugin(stage) {
     let newStage = new Stage(stage);
-    let importList = (await getAllPlugin(stage)).filter(filepath => !config.excludePlugins.includes(filepath));
+    let importList = await getAllPlugin(stage);
     for (const filepath of importList) {
         // 使用默认导入
         await defScan(filepath, newStage.data);
@@ -129,7 +133,22 @@ async function getAllPlugin(stage) {
             fileList.push(filepath);
         });
     });
-    return fileList.sort();
+    return fileList.sort().filter(filepath => !config.excludePlugins.includes(filepath));
+}
+
+/**
+ * 获取插件更新时间
+ * @param {string} filepath 插件路径
+ */
+function getPlguinUpdateTime(filepath) {
+    let timestamp = 0;
+    try {
+        const stat = fs.statSync(filepath);
+        timestamp = stat.mtimeMs;
+    } catch (err) {
+        console.warn(err)
+    }
+    return timestamp
 }
 
 /**

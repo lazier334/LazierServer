@@ -1,8 +1,9 @@
 /**
+ * koa中间件 sw.js工作服务产生重定向时的处理 插件
  * @param {import('koa').Context} ctx
  * @param {import('koa').Next} next
  */
-export default async function koaPluginDemo(ctx, next) {
+export default async function koaPluginSWjs302Fix(ctx, next) {
     // 用于解决 sw.js 导致无法进行 302 跨域跳转的问题
     if (ctx.query.redirectApi == 'html') {
         ctx.redirect = function (url) {

@@ -15,7 +15,9 @@ var config = {
     pluginDirs: [/* 由下面的代码添加 path.dirname(defConfig.ldConfigPath) */],
     outdir: "website",
     butsData: [],
-    cryptoDataEnable: false,
+    switch: {
+        cryptoDataEnable: false,
+    },
     pluginDirs: [process.cwd() + '/src/plugins'],
 };
 
@@ -41,7 +43,7 @@ defConfig.dataPath = path.dirname(defConfig.ldConfigPath);
 config?.butsData?.forEach(but => defConfig.butsData.push(but));
 delete config.butsData;
 // 检测是否关闭了 debug 模式，如果已关闭调试模式则不开启编辑文件功能
-if (config.debugMode != undefined ? !config.debugMode : !defConfig.debugMode) {
+if (config.switch.debugMode != undefined ? !config.switch.debugMode : !defConfig.switch.debugMode) {
     defConfig.butsData = defConfig.butsData.filter(but => !but.debugMode);
 }
 

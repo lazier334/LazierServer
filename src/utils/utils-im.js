@@ -272,7 +272,7 @@ const db = initDB();
 // 初始化数据库
 db.readDB();
 // 检测如果开启了加密，那么强制保存一次
-if (config.cryptoDataEnable) {
+if (config.switch.cryptoDataEnable) {
     db.saveDB(true)
 }
 // 检测如果一个账号都没有那么设置默认账号

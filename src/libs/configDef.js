@@ -164,16 +164,10 @@ const config = {
         "removeScriptElement",
         "clearLoopDebugger"
     ],
-    /** 导出插件-强制开启https，会让插件强制把所有请求转为https */
-    genProxyForceHttps: true,
     /** 导出插件-存放的文件夹 */
     genProxyTargetDir: "web/plugin",
     /** 导出插件-导出的文件名 */
     genProxyProxyFile: "proxy.js",
-    /** 一键打包时是否生成新的插件 */
-    genAllGenProxy: true,
-    /** 本地开发使用生产环境模式 */
-    indexUseProdMode: false,
     /** 本地开发环境中插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
     indexInsertCode: "<script src=\"/proxy.js\"></script>",
     /** http 服务器端口 */
@@ -184,18 +178,12 @@ const config = {
     portWS: 3010,
     /** websockets 服务器端口 */
     portWSS: 3011,
-    /** 自动补全超时时间 */
-    timeout: 30 * 1000,
     /** 代理地址，用于下载文件进行文件自动补全 */
     proxy: "http://localhost:7890",
     /** 自动补全的域名列表 */
     autoCompleteDomains: [],
     /** 自动补齐的固定地址列表，在访问新版首页的时候将会被触发补全机制 */
     fixUrls: [],
-    /** 是否开启自动补全，自动补全并不会影响0大小文件的自动补全 */
-    autoComplete: true,
-    /** 扫描全部文件夹，开启后会扫描web中的所有文件夹 */
-    allDir: true,
     /** 不扫描全部文件夹时指定仅扫描web文件夹里的哪些文件夹 */
     domainList: [],
     /** https的证书 */
@@ -364,14 +352,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     ldConfigPath: 'config.json',
     /** 数据路径 */
     dataPath: process.cwd() + '/' + ldDirName,
-    /** debug模式 */
-    debugMode: true,
     /** 加密时使用的key */
     cryptoKey: '',
-    /** 是否开启数据加密 */
-    cryptoDataEnable: true,
-    /** 允许跨域 */
-    cors: false,
     /** 服务器种子种子用于各模块生成自己的秘钥 */
     serverSeed: '3344',
     /** 版权信息 */
@@ -396,10 +378,38 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     },
     /** 插件的各个阶段 */
     pluginStages: {},
-    /** 插件的阶段自动更新时间间隔 10分钟 */
-    pluginStagesUpdateStep: 10 * 60 * 1000,
     /** 排除的插件列表 */
     excludePlugins: [],
+    /** 时间（间隔）相关 */
+    times: {
+        /** 自动补全超时时间 */
+        timeout: 30 * 1000,
+        /** koaRouter 插件的新版本扫描间隔 */
+        koaRouterPlugin: 10 * 1000,
+        /** 插件的阶段自动更新时间间隔 10分钟 */
+        pluginStagesUpdateStep: 10 * 60 * 1000,
+    },
+    /** 开关 */
+    switch: {
+        /** debug模式 */
+        debugMode: true,
+        /** 动态路由 */
+        dynamicRouter: true,
+        /** 是否开启数据加密 */
+        cryptoDataEnable: true,
+        /** 允许跨域 */
+        cors: true,
+        /** 是否开启自动补全，自动补全并不会影响0大小文件的自动补全 */
+        autoComplete: true,
+        /** 扫描全部文件夹，开启后会扫描web中的所有文件夹 */
+        allDir: true,
+        /** 导出插件-强制开启https，会让插件强制把所有请求转为https */
+        genProxyForceHttps: true,
+        /** 一键打包时是否生成新的插件 */
+        genAllGenProxy: true,
+        /** 本地开发使用生产环境模式 */
+        indexUseProdMode: false,
+    }
 };
 {   // 添加版本号按钮
     const ver = readVersion();
