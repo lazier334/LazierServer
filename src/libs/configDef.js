@@ -375,10 +375,34 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     },
     /** 日志配置 */
     logger: {
+        /** 全局日志级别 */
+        globalTimeFormat: 'YYYY/MM/DD HH:mm:ss',
+        globalLevel: 'debug',
+        consoleLevel: 'verbose',
         /** 请求记录 */
         req: false,
         /** 响应记录 */
         resp: true,
+        dailyRotateFileList: [
+            // info 及以上级别（info, warn、error）写入 ${config.dataPath}/logs/info-%DATE%.log
+            {
+                filename: path.join(ldDirName, 'logs', 'info-%DATE%.log'),
+                datePattern: 'YYYY-MM-DD', // 按天切割
+                level: 'info',             // 只处理 info 及以上级别
+                maxSize: '100m',           // 单文件最大 100MB
+                maxFiles: '14d',           // 最多保留 14 天
+                zippedArchive: true        // 超过保留天数的日志压缩归档
+            },
+            // debug 及以上级别（debug、verbose、info、warn、error）写入 ${config.dataPath}/logs/debug-%DATE%.log
+            {
+                filename: path.join(ldDirName, 'logs', 'debug-%DATE%.log'),
+                datePattern: 'YYYY-MM-DD',
+                level: 'debug',            // 只处理 debug 及以上级别
+                maxSize: '300m',
+                maxFiles: '14d',
+                zippedArchive: true
+            }
+        ]
     },
     /** 插件的各个阶段 */
     pluginStages: {},
@@ -589,7 +613,7 @@ function get__dirname(url) {
  * 参数传递  
  *  - getNowFileStorage - 会获得当前函数  
  *  - config - 会获得配置对象  
- * @param {string} filepath [import.meta.filename] 可以直接传路径
+ * @param {'config'} filepath [import.meta.filename] 可以直接传路径
  * @returns {object}
  */
 function getNowFileStorage(filepath) {
