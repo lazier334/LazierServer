@@ -1,9 +1,11 @@
 /**
  * @param {import('../libs/config.js') & { app: import('koa') }}
  */
-export default async function sysStartAddAppStackc({ fs, path, config, app }) {
+export default async function sysStartAddAppStack({ fs, path, config, app }) {
     // 方案：覆写 response.body 的 setter
-    const originalBodySetter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(app.response), 'body').set;
+    const originalBody = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(app.response), 'body')
+    const Setter = originalBody.set;
+    const Getter = originalBody.get;
     const lc = {
         errorName: 'Stack Information',
         stackKeyName: 'x-set-stack',
@@ -12,20 +14,25 @@ export default async function sysStartAddAppStackc({ fs, path, config, app }) {
     }
 
     Object.defineProperty(app.response, 'body', {
+        get() {
+            return Getter.call(this);
+        },
         set(value) {
-            let stack = new Error(lc.errorName).stack;
-            try {
-                // 拿到当前的文件路径
-                stack = encodeURIComponent(stack);
-                if (stack.length <= lc.headerMaxLen) {
-                    this.ctx.set(lc.stackKeyName, stack);
-                } else {
-                    this.ctx.cookies.set(lc.stackKeyName, stack, { httpOnly: true, maxAge: lc.cookieMaxAge });
+            if (config.switch.openAddAppStack) {
+                let stack = new Error(lc.errorName).stack;
+                try {
+                    // 拿到当前的文件路径
+                    stack = encodeURIComponent(stack);
+                    if (stack.length <= lc.headerMaxLen) {
+                        this.ctx.set(lc.stackKeyName, stack);
+                    } else {
+                        this.ctx.cookies.set(lc.stackKeyName, stack, { httpOnly: true, maxAge: lc.cookieMaxAge });
+                    }
+                } catch (e) {
+                    console.error('Hook Stack Error:', e);
                 }
-            } catch (e) {
-                console.error('Hook Stack Error:', e);
             }
-            originalBodySetter.call(this, value);
+            return Setter.call(this, value);
         },
         configurable: true,
         enumerable: true

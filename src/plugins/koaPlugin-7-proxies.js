@@ -30,5 +30,5 @@ export default async function koaPluginProxies(ctx, next) {
         })(ctx, next);
     }
 
-    await next();
+    return await next();
 }

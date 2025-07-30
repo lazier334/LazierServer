@@ -24,6 +24,7 @@
     "restart": "node src/lib/sys-restart.js",
     "gen": "node src/lib/gen-all.js",
     "build": "pkg . --targets node18-win-x64,node18-linux-x64 --output dist/",
+    "buildLinux": "pkg . --targets node18-linux-x64 --output dist/",
     "buildAll": "pkg . --targets node18-win-x64,node18-linux-x64,node18-linux-arm64,node18-macos-x64,node18-macos-arm64 --output dist/"
   },
   "dependencies": {

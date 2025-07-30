@@ -437,6 +437,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         genAllGenProxy: true,
         /** 本地开发使用生产环境模式 */
         indexUseProdMode: false,
+        /** 开启添加栈追踪 */
+        openAddAppStack: true,
     },
     /** 
      * 额外的路由，用于挂载对象
