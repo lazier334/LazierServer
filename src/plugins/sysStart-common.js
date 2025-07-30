@@ -1,7 +1,7 @@
 /**
- * @param {import('../libs/config.js')}
+ * @param {import('../libs/config.js') & { app: import('koa') }}
  */
-export default async function sysStartCommon({ fs, path, config }) {
+export default async function sysStartCommon({ fs, path, config, app }) {
     // 打印版本日志
     console.info(config.showVersion());
 

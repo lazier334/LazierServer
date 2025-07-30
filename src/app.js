@@ -6,9 +6,9 @@ import websocketServer from './libs/websocketServer.js';
 import { plugins } from './libs/plugins.js';
 
 (async () => {
-    await (await plugins('sysStart')).use({ fs, path, config });
-
     const app = new Koa();
+    await (await plugins('sysStart')).use({ fs, path, config, app });
+
     await initKoa(app);
     // 创建 HTTPS 服务器
     https.createServer(config.SSLOptions, app.callback()).listen(config['portHttps'],

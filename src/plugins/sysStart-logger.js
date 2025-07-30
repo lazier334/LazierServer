@@ -2,9 +2,9 @@ import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
 /**
- * @param {import('../libs/config.js')}
+ * @param {import('../libs/config.js') & { app: import('koa') }}
  */
-export default async function sysStartLogger({ fs, path, config }) {
+export default async function sysStartLogger({ fs, path, config, app }) {
     // 日志格式：加上等级和时间前缀
     const logFormat = winston.format.printf(({ level, message, timestamp }) => {
         // level: 日志级别（如 info、debug、error）
@@ -32,16 +32,29 @@ export default async function sysStartLogger({ fs, path, config }) {
         level: config.logger.globalLevel,
         format: winston.format.combine(
             winston.format.timestamp({ format: config.logger.globalTimeFormat }),
+            // 启用堆栈捕获
+            winston.format.errors({ stack: true }),
             logFormat
         ),
         transports
     });
 
-    console.log = (...args) => logger.verbose(args.join(' '));
-    console.info = (...args) => logger.info(args.join(' '));
-    console.warn = (...args) => logger.warn(args.join(' '));
-    console.error = (...args) => logger.error(args.join(' '));
-    console.debug = (...args) => logger.debug(args.join(' '));
+    /** 读取并整合参数 */
+    function readArgs(...args) {
+        return args.map(e => {
+            // NOTE 手动处理堆栈信息
+            if (e instanceof Error) {
+                return e.stack.includes(e.message) ? (e.stack) : (e.message + '\n' + e.stack)
+            }
+            return e
+        }).join(' ')
+    }
+
+    console.log = (...args) => logger.verbose(readArgs(...args));
+    console.info = (...args) => logger.info(readArgs(...args));
+    console.warn = (...args) => logger.warn(readArgs(...args));
+    console.error = (...args) => logger.error(readArgs(...args));
+    console.debug = (...args) => logger.debug(readArgs(...args));
 
     return logger
 } 
