@@ -1,5 +1,6 @@
 import { fs, path, config } from "./config.js";
 import Stage from '../classes/Stage.js';
+import { pathToFileURL } from 'url';
 
 /**
  * 这是插件化的核心内容，提供各个阶段的插件，对外提供以下拓展项，编写插件使用前缀+任意+.js即可，例如 `sysStart-morePlugin.js`
@@ -46,6 +47,8 @@ export {
  */
 async function importWarp(filepath) {
     try {
+        // 解决文件路径异常的问题
+        filepath = pathToFileURL(filepath);
         // 读取文件的更新时间，将更新时间作为后缀，如果是特殊插件会无法使用 fs 读取，所以就将其包裹起来
         let timestamp = getPlguinUpdateTime(filepath);
         console.debug('导入插件', filepath + '?timestamp=' + timestamp)
