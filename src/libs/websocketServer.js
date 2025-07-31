@@ -37,19 +37,23 @@ function createWebSocketServer(config) {
                 ].forEach(handle => {
                     try {
                         msg = handle(msg)
-                    } catch (err) { }
+                    } catch (err) {
+                        console.debug('处理ws消息时异常', err)
+                    }
                 });
-                plugins('websocketApis').then(mod => mod.use(msg, ws));
+                plugins('websocketApis').then(mod => mod.use(msg, message, ws))
             });
             ws.on('close', function close() {
-                console.log('客户端断开连接');
+                console.log('客户端断开连接')
             });
             ws.on('error', function error(err) {
-                console.error('WebSocket 错误:', err);
+                console.error('WebSocket 错误:', err)
             });
 
             // 连接上之后自动响应数据
-            sendData(ws, Symbol(ws), await (await plugins('websocketMsgs')).use());
+            const data = [];
+            await (await plugins('websocketMsgs')).use(data);
+            sendData(ws, Symbol(ws), data);
         });
 
         return WS;
@@ -60,7 +64,7 @@ function createWebSocketServer(config) {
      * 
      * @param {WebSocket} wsc WebSocket 客户端连接实例
      * @param {symbol} id 客户端连接的唯一标识符
-     * @param {[  {
+     * @param {[{
      *   "type": "receive",
      *   "time": 1740470525901,
      *   "opcode": 2,
@@ -81,7 +85,7 @@ function createWebSocketServer(config) {
                 sendData(wsc, id, msgs);
             }, msg.step < 1 ? 1 : msg.step);
         } else {
-            console.log(msgs.length + '条消息发送结束');
+            console.log(msgs.length + '条消息发送结束')
         }
     }
 }

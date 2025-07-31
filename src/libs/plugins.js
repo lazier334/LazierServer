@@ -43,14 +43,15 @@ export {
 /**
  * 默认的扫描函数（ESM兼容版）
  * @param {string} filepath - 插件文件路径（需包含扩展名）
+ * @param {number} timestamp - 如果不传则使用文件的更新时间，传了固定的可以固定版本
  * @returns {Promise<Object|Function>} 返回加载的插件对象
  */
-async function importWarp(filepath) {
+async function importWarp(filepath, timestamp) {
     try {
         // 解决文件路径异常的问题
         filepath = pathToFileURL(filepath);
         // 读取文件的更新时间，将更新时间作为后缀，如果是特殊插件会无法使用 fs 读取，所以就将其包裹起来
-        let timestamp = getPlguinUpdateTime(filepath);
+        if (timestamp == null) timestamp = getPlguinUpdateTime(filepath);
         console.debug('导入插件', filepath + '?timestamp=' + timestamp)
         // 使用文件修改时间作为查询参数动态导入插件模块
         const pluginModule = await import(filepath + '?timestamp=' + timestamp);
