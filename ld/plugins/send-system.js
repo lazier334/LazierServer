@@ -1,8 +1,7 @@
-import { fs, path, config } from '../libs/config.js';
+import { fs, path } from './_baseImport.js';
+/** @type {import('../../src/libs/config.js')} */
+const { config } = process.G;
 
-const lc = {
-    redirectFileName: '.300',
-}
 /**
  * @typedef {{
  *  ctx: import('koa').ParameterizedContext,    //koa的上下文对象

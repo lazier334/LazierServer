@@ -1,4 +1,5 @@
-import { config } from '../libs/config.js';
+/** @type {import('../../src/libs/config.js')} */
+const { config } = process.G;
 
 /**
  * koa中间件 计数器 插件

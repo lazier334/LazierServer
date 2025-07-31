@@ -1,5 +1,5 @@
 /**
- * @param {import('../libs/config.js') & { app: import('koa') }}
+ * @param {import('../../src/libs/config.js') & { app: import('koa') }}
  */
 export default async function sysStartAddAppStack({ fs, path, config, app }) {
     // 方案：覆写 response.body 的 setter

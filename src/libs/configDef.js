@@ -16,7 +16,7 @@ const ConfigUtils = {
     getNowFileStorage,
 }
 /** ld 文件夹名称 */
-const ldDirName = 'ld';
+const ldDirName = process.cwd() + '/ld';
 /** 系统配置 */
 const system = {
     /** 系统状态 */
@@ -138,8 +138,34 @@ const ObfuscatorOptions = {
     log: false,
 };
 const config = {
+    /**
+     * 更新本地数据文件夹路径
+     * @param {string} newLdDirName 本地数据文件夹路径
+     * @returns {boolean}
+     */
+    updateLdDirName(newLdDirName) {
+        const oldName = this.ldDirName;
+        if (typeof newLdDirName != 'string' || newLdDirName == '' || oldName == newLdDirName) return false;
+
+        /** ld 文件夹名称 */
+        this.ldDirName = newLdDirName;
+        /** 输入路径 */
+        this.rootDir = this.rootDir.replace(oldName, newLdDirName);
+        /** 导出插件-存放的文件夹 */
+        this.genProxyTargetDir = this.genProxyTargetDir.replace(oldName, newLdDirName);
+        /** 插件目录列表 */
+        this.pluginDirs.forEach((e, i) => this.pluginDirs[i] = e.replace(oldName, newLdDirName));
+        /** 外部配置路径，改文件所在的 ld 目录也用于存放自定义插件 */
+        this.ldConfigPath = this.ldConfigPath.replace(oldName, newLdDirName);
+        /** 数据路径 */
+        this.dataPath = this.dataPath.replace(oldName, newLdDirName);
+        /** 日志输出管道列表 */
+        this.logger.dailyRotateFileList.forEach(e => e.filename = e.filename.replace(oldName, newLdDirName));
+
+        return true;
+    },
     /** ld 文件夹名称 */
-    ldDirName,
+    ldDirName: ldDirName,
     /** 系统配置 */
     system,
     /** 配置工具 */
@@ -155,7 +181,7 @@ const config = {
         "1.0(25071500)": `快速构建一个服务器站点`
     },
     /** 输入路径 */
-    rootDir: process.cwd() + '/web',
+    rootDir: `${ldDirName}/web`,
     /** 输出路径 */
     outdir: "html",
     /** 打包时插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
@@ -169,7 +195,7 @@ const config = {
         "clearLoopDebugger"
     ],
     /** 导出插件-存放的文件夹 */
-    genProxyTargetDir: "web/plugin",
+    genProxyTargetDir: `${ldDirName}/web/plugin`,
     /** 导出插件-导出的文件名 */
     genProxyProxyFile: "proxy.js",
     /** 本地开发环境中插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
@@ -351,11 +377,11 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         },
     ],
     /** 插件目录列表 */
-    pluginDirs: [process.cwd() + '/src/plugins'],
+    pluginDirs: [`${ldDirName}/plugins`],
     /** 外部配置路径，改文件所在的 ld 目录也用于存放自定义插件 */
-    ldConfigPath: 'config.json',
+    ldConfigPath: `${ldDirName}/config.json`,
     /** 数据路径 */
-    dataPath: process.cwd() + '/' + ldDirName,
+    dataPath: ldDirName,
     /** 加密时使用的key */
     cryptoKey: '',
     /** 服务器种子种子用于各模块生成自己的秘钥 */
@@ -383,6 +409,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         req: false,
         /** 响应记录 */
         resp: true,
+        /** 日志输出管道列表 */
         dailyRotateFileList: [
             // info 及以上级别（info, warn、error）写入 ${config.dataPath}/logs/info-%DATE%.log
             {
@@ -445,6 +472,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
      * @type {import('koa-router')}
      */
     AdditionalRouter: null,
+    /** 配置所在的文件夹路径 */
+    configDirPath: import.meta.dirname,
 };
 {   // 添加版本号按钮
     const ver = readVersion();
@@ -627,3 +656,4 @@ function getNowFileStorage(filepath) {
     }
     return process.G[fn];
 }
+

@@ -3,7 +3,8 @@ temp*
 web*
 !websocket*
 node_modules
-ld
+ld/logs
+!ld/web
 logs
 LazierServer*
 dist
