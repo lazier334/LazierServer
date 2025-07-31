@@ -21,6 +21,30 @@ export {
     downloadFileToPath,
 };
 
+/** 补全文件的koa插件，会使用 domains 里面的域名逐个尝试下载文件 */
+async function completeFile(ctx, next) {
+    if (config.switch.autoComplete) {
+        let downloadedFile = null;
+        const api = ctx.path;
+        const url = new URL(ctx.request.href);
+        url.port = "";
+
+        for (const domain of config.autoCompleteDomains) {
+            url.host = domain;
+            const localPath = path.join(config.rootDir, url.hostname, api);
+            moreLog("[尝试下载]", url.href);
+            downloadedFile = await downloadFileToPath(url.href, localPath);
+            if (downloadedFile) {
+                return await sendFile(ctx, path.basename(downloadedFile), {
+                    root: path.dirname(downloadedFile),
+                    hidden: true
+                });
+            }
+        }
+    }
+    await next();
+}
+
 /**
  * 获取动态的路由
  * @returns {Router}
@@ -99,29 +123,3 @@ async function downloadFileToPath(url, filepath, orgUrl) {
         moreLog(error.stack);
     }
 }
-
-
-/** 补全文件的koa插件，会使用 domains 里面的域名逐个尝试下载文件 */
-async function completeFile(ctx, next) {
-    if (config.switch.autoComplete) {
-        let downloadedFile = null;
-        const api = ctx.path;
-        const url = new URL(ctx.request.href);
-        url.port = "";
-
-        for (const domain of config.autoCompleteDomains) {
-            url.host = domain;
-            const localPath = path.join(config.rootDir, url.hostname, api);
-            moreLog("[尝试下载]", url.href);
-            downloadedFile = await downloadFileToPath(url.href, localPath);
-            if (downloadedFile) {
-                return await sendFile(ctx, path.basename(downloadedFile), {
-                    root: path.dirname(downloadedFile),
-                    hidden: true
-                });
-            }
-        }
-    }
-    await next();
-}
-
