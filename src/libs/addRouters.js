@@ -20,6 +20,7 @@ export {
     addRouters,
     completeFile,
     readKoaRouters,
+    downloadFileToPath,
 };
 
 /**

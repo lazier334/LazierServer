@@ -25,6 +25,15 @@ const system = {
         restarting: false,
         /** 系统id-也是系统启动时间 */
         systemId: Date.now()
+    },
+    /** 重启 */
+    restart: {
+        /** mac 重启命令 */
+        restartCmdMac: 'npm start',
+        /** windows 重启命令 */
+        restartCmdWin: 'npm start',
+        /** linux 重启命令 */
+        restartCmdLinux: 'npm start',
     }
 }
 /** Obfuscator混淆配置 */
