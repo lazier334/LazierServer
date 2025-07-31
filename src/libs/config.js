@@ -1,6 +1,6 @@
-import * as baseImport from './baseImport.js';
+import fs from 'fs';
+import path from 'path';
 import defConfig from './configDef.js';
-const { fs, path } = baseImport;
 
 // 设定外部配置数据位置
 defConfig.ldConfigPath = path.join(process.cwd(), './ld/config.json');
@@ -61,7 +61,8 @@ const getNowFileStorage = config.getNowFileStorage;
 process.G.config = config;
 
 export {
+    fs,
+    path,
     config,
     getNowFileStorage
 };
-export * from './baseImport.js';
