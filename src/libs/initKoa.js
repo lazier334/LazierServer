@@ -2,7 +2,7 @@ import Router from 'koa-router';
 import koaCompose from './koaCompose.js';
 
 import { fs, path, config } from './config.js';
-import { addRouters, completeFile, readKoaRouters } from './addRouters.js';
+import { completeFile, readKoaRouters } from './utils.js';
 import { plugins } from './plugins.js';
 
 /** 额外的路由 */
@@ -19,9 +19,7 @@ export default initKoa;
  * @param {import('@types/koa')} app 
  */
 async function initKoa(app) {
-    const router = new Router();
     // 添加路由
-    await addRouters(router);
     app.use(async (ctx, next) => await koaCompose((await plugins('koaPlugin')).data)(ctx, next))
         .use(async (ctx, next) => {
             // 动态路由
@@ -30,8 +28,7 @@ async function initKoa(app) {
             if (ctx.path == '/system/getAllRouter') {
                 // 读取所有的路由规则
                 let re = readRouterLayers(routers.stack)                // 动态路由
-                    .concat(readRouterLayers(AdditionalRouter.stack))   // 额外路由
-                    .concat(readRouterLayers(router.stack));            // 固定路由
+                    .concat(readRouterLayers(AdditionalRouter.stack));  // 额外路由
                 return ctx.body = re;
             }
             if (config.switch.dynamicRouter && routers.match(ctx.path, ctx.method).route) {
@@ -43,10 +40,7 @@ async function initKoa(app) {
             }
             // 路由匹配失败或者存在 ctx.next 时，走传统路由
             return await next();
-        })
-        .use(router.routes())
-        .use(router.allowedMethods())
-        .use(completeFile);
+        }).use(completeFile);
 }
 
 /**

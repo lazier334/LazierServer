@@ -4,7 +4,9 @@ web*
 !websocket*
 node_modules
 ld/logs
-!ld/web
+!ld/web/example
+!ld/web/plugin
+!ld/web/index
 logs
 LazierServer*
 dist

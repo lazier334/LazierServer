@@ -6,5 +6,10 @@ import app from 'koa';
 const { config } = process.G;
 
 export {
-    fs, path, config, app
+    fs, path, config, app, importSysModule
+}
+
+
+async function importSysModule(mod) {
+    return await import(path.join(config.configDirPath, mod));
 }

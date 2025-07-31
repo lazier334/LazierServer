@@ -45,16 +45,33 @@ export default async function sysStartLogger({ fs, path, config, app }) {
             // NOTE 手动处理堆栈信息
             if (e instanceof Error) {
                 return e.stack.includes(e.message) ? (e.stack) : (e.message + '\n' + e.stack)
+            } else if (typeof e == 'object' && e != null) {
+                try {
+                    return JSON.stringify(e)
+                } catch (error) {
+                    try {
+                        return e.toString()
+                    } catch (err) {
+                        console.debug('解析对象失败', err)
+                    }
+                }
             }
             return e
         }).join(' ')
     }
 
-    console.log = (...args) => logger.verbose(readArgs(...args));
-    console.info = (...args) => logger.info(readArgs(...args));
-    console.warn = (...args) => logger.warn(readArgs(...args));
-    console.error = (...args) => logger.error(readArgs(...args));
-    console.debug = (...args) => logger.debug(readArgs(...args));
+    console.org = {
+        log: console.log,
+        info: console.info,
+        warn: console.warn,
+        error: console.error,
+        debug: console.debug,
+    }
+    console.log = (...args) => { logger.verbose(readArgs(...args)) };
+    console.info = (...args) => { logger.info(readArgs(...args)) };
+    console.warn = (...args) => { logger.warn(readArgs(...args)) };
+    console.error = (...args) => { logger.error(readArgs(...args)) };
+    console.debug = (...args) => { logger.debug(readArgs(...args)) };
 
     return logger
 } 
