@@ -1,7 +1,6 @@
 import cors from '@koa/cors';
 const corsMiddleware = cors();
-/** @type {import('../../src/libs/config.js')} */
-const { config } = process.G;
+import { config } from './libs/baseImport.js';
 
 /**
  * koa中间件 跨域cors 插件

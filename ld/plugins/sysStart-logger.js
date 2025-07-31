@@ -2,7 +2,7 @@ import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
 /**
- * @param {import('../../src/libs/config.js') & { app: import('koa') }}
+ * @param {import('./libs/baseImport.js')}}
  */
 export default async function sysStartLogger({ fs, path, config, app }) {
     // 日志格式：加上等级和时间前缀

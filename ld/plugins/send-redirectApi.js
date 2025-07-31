@@ -1,4 +1,4 @@
-import { fs, path } from './_baseImport.js';
+import { fs, path } from './libs/baseImport.js';
 const lc = {
     redirectFileName: '.300',
 }

@@ -1,6 +1,4 @@
-import { fs, path } from './_baseImport.js';
-/** @type {import('../../src/libs/config.js')} */
-const { config } = process.G;
+import { fs, path, config } from './libs/baseImport.js';
 
 /**
  * @typedef {{

@@ -1,5 +1,5 @@
 /**
- * @param {import('../../src/libs/config.js') & { app: import('koa') }}
+ * @param {import('./libs/baseImport.js')}}
  */
 export default async function sysStartCommon({ fs, path, config, app }) {
     // 打印版本日志
