@@ -1,5 +1,5 @@
 import { fs, path, config } from "./config.js";
-import Stage from '../classes/Stage.js';
+import Stage from './StageClass.js';
 import { pathToFileURL } from 'url';
 
 /**

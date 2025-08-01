@@ -11,19 +11,22 @@
 # 文件夹说明
 ```c
 LazierServer
-├─ bin          // 脚本工具
-├─ public       // 公开的资源，默认站点
-├─ web          // 项目资源站
-│  ├─ plugin    // 文件夹 站点，插件示例站点
-│  ├─ example   // 文件夹 站点，示例站点
-│  ├─ a.com.har // 文件 站点，har站点
-│  └─ other     // 其他站点，名字自取
-├─ ld           // 本地数据、配置、插件等 
-├─ src          // 代码
-│  ├─ app.js    // 主程序
-│  ├─ libs      // 库、包
-│  └─ plugins   // 插件
-└─ tests        // 测试项
+├─ bin              // 脚本工具
+├─ ld               // 本地数据，主要
+│  ├─ banner.txt    // banner图
+│  ├─ config.json   // 本地配置
+│  ├─ plugins       // 本地插件，以及插件的相关代码
+│  └─ web           // 项目资源站
+│     ├─ example    // 文件夹 站点，示例站点
+│     ├─ index      // 文件夹 站点，主站点
+│     ├─ plugin     // 文件夹 站点，插件示例站点
+│     ├─ a.com.har  // 文件   站点，har站点
+│     └─ other      // 其他站点，名字自取
+├─ public           // 系统公开的资源
+├─ src              // 代码
+│  ├─ app.js        // 主程序
+│  └─ libs          // 系统库(包)
+└─ tests            // 测试项
 ```
 
 > # <a id="文档目录" href="#文档顶部">文档顶部↗</a>
