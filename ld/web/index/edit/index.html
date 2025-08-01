@@ -105,9 +105,9 @@
         }
 
         function getFile() {
-            warpFetch(fetch('/system/getFile?filepath=' + filepathE.value), '获取配置').then(text => {
-                showLog('获取成功: ' + text.length);
-                writeText(text);
+            warpFetch(fetch('/system/getFile?filepath=' + filepathE.value), '获取配置').then(data => {
+                showLog('获取成功: ' + data.data.length);
+                writeText(data.data);
             })
         }
 
@@ -121,9 +121,9 @@
                     filepath: filepathE.value,
                     filebody: readText()
                 })
-            }), '写入配置').then(text => {
-                console.log('写入成功', text)
-                showLog('写入成功: ' + text);
+            }), '写入配置').then(data => {
+                console.log('写入成功', data.data)
+                showLog('写入成功: ' + data.data);
             })
         }
         function warpFetch(fetchPromise, msg) {
@@ -139,7 +139,7 @@
                 }
                 showLog('请求完成' + msg);
                 // 将响应解析为文本
-                return await response.text();
+                return await response.json();
             }).catch(function (error) {
                 console.error((msg || '请求失败!'), error);
                 showLog('请求失败!' + msg);
