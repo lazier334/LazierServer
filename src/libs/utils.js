@@ -1,6 +1,7 @@
 import { plugins, getAllPlugin, getPlguinUpdateTime } from './plugins.js';
 import { fs, path, config, getNowFileStorage } from './config.js';
 import Router from 'koa-router';
+import Downloader from 'nodejs-file-downloader';
 
 /** 本地存储 LocalStorage */
 const ls = getNowFileStorage(import.meta.filename);
@@ -16,11 +17,51 @@ ls.routersCache = null;
 /** 上次刷新时间 */
 ls.lastRefreshTime = 0;
 
+const AdminUser = {
+    /** 用户id */
+    "userId": 0,
+    /** 状态 */
+    "status": "在线",
+    /** 用户名 */
+    "username": "admin",
+    /** 密码 */
+    "password": "-",
+    /** 最后登录时间 */
+    "lastUpdateTime": 1745751359079,
+    /** 账号失效时间 */
+    "deadline": 4102358400000,
+    /** 是否是管理员 */
+    "isAdmin": true,
+    /** 是否是超级管理员 */
+    "superAdmin": true
+}
+
 export {
+    authUser,
+    allowLocalOnly,
     completeFile,
     readKoaRouters,
     downloadFileToPath,
 };
+/**
+ * 默认本机发起的请求信息全都是超级管理员
+ * @param {*} ctx 
+ * @returns {AdminUser} 用户信息
+ */
+function authUser(ctx) {
+    try {
+        if (allowLocalOnly(ctx)) return AdminUser;
+    } catch (error) {
+        console.log('权限校验失败', error)
+    }
+}
+
+// 仅允许本机请求的中间件
+function allowLocalOnly(ctx) {
+    const ip = ctx.ip || ctx.request.ip;
+    return ip === '::1' || ip === '127.0.0.1';
+}
+
 
 /** 补全文件的koa插件，会使用 domains 里面的域名逐个尝试下载文件 */
 async function completeFile(ctx, next) {
@@ -33,7 +74,7 @@ async function completeFile(ctx, next) {
         for (const domain of config.autoCompleteDomains) {
             url.host = domain;
             const localPath = path.join(config.rootDir, url.hostname, api);
-            moreLog("[尝试下载]", url.href);
+            console.debug("[尝试下载]", url.href);
             downloadedFile = await downloadFileToPath(url.href, localPath);
             if (downloadedFile) {
                 return await sendFile(ctx, path.basename(downloadedFile), {
@@ -122,6 +163,6 @@ async function downloadFileToPath(url, filepath, orgUrl) {
         }
         const errMsg = error.message || (typeof error.stack == 'string' ? error.stack.split('\n').shift() : '');
         console.error([`[下载文件出现异常]: 双协议均下载失败，代理(proxy)配置: ${config.proxy ? config.proxy : '未开启'}`, orgUrl, url, `主要错误信息 (${errMsg})`].join('\n'));
-        moreLog(error.stack);
+        console.debug(error.stack);
     }
 }

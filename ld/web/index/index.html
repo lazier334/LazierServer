@@ -520,7 +520,7 @@
         methods: {
             getIndexData(callback) {
                 this.warpAxios(axios.get('/system/indexData').then((res) => {
-                    this.dataOrg = res.data;
+                    this.dataOrg = res.data.data;
                     this.handleData();
                 }), "获取数据列表失败").finally(() => {
                     if (typeof callback == 'function') {
@@ -530,10 +530,10 @@
             },
             getIndexButsData(callback) {
                 this.warpAxios(axios.get('/system/butsData').then((res) => {
-                    res.data.forEach(but => {
+                    res.data.data.forEach(but => {
                         but.fun = new Function(`return (${but.fun})`);
                     });
-                    this.butsData = res.data;
+                    this.butsData = res.data.data;
                 }), "获取按钮数据列表失败", true).finally(() => {
                     if (typeof callback == 'function') callback();
                 })
@@ -562,8 +562,8 @@
             },
             getFixUrls() {
                 this.warpAxios(axios.get('/system/fixUrls').then(function (response) {
-                    ElMessage.success('需要补齐的接口数量为: ' + response.data.length)
-                    response.data.forEach(function (url) {
+                    ElMessage.success('需要补齐的接口数量为: ' + response.data.data.length)
+                    response.data.data.forEach(function (url) {
                         axios.get(url)
                     });
                 }), "获取资源列表失败", true)
@@ -649,7 +649,8 @@
                 setFloatPage();
                 clsoeFloatPage();
                 this.moreButs = [];
-                this.getCmds();
+                // XXX 计划去除 cmds 模块，改用插件管理来代替
+                // this.getCmds();
                 this.getIndexData(() => {
                     this.handleData();
                 });
@@ -689,12 +690,12 @@
             setAutoComplete(get) {
                 if (get != true) get = undefined;
                 this.warpAxios(axios.get('/system/autocomplete?' + (get ? 'get=true' : "")).then((response) => {
-                    this.autoCompleteStatus = response.data;
+                    this.autoCompleteStatus = response.data.data;
                     ElMessage.success((get ? '获取' : '设置') + '自动补全状态成功 ' + this.autoCompleteStatus)
                 }), (get ? '获取' : '设置') + '自动补全状态失败', true);
             },
             async getSystemId(notShowError) {
-                return await this.warpAxios(axios.get('/system/systemId').then((response) => response.data), '获取服务器系统id', true, notShowError);
+                return await this.warpAxios(axios.get('/system/systemId').then((response) => response.data.data), '获取服务器系统id', true, notShowError);
             },
             systemRestart() {
                 let that = this;
@@ -737,7 +738,7 @@
                     cancelButtonText: '取消',
                     type: 'warning',
                 }).then(async () => {
-                    that.warpAxios(axios.get('/system/waitrestart').then((response) => {
+                    that.warpAxios(axios.get('/system/shutdown').then((response) => {
                         ElMessage.warning(response.data);
                     }), '重启服务器', true);
                 }).catch(() => { });
@@ -747,8 +748,8 @@
             },
             getSearchButsData() {
                 this.warpAxios(axios.get('/system/searchButsData').then((res) => {
-                    this.searchKeywordButs = res.data.searchKeywordButs;
-                    this.searchButtomButs = res.data.searchButtomButs;
+                    this.searchKeywordButs = res.data.data.searchKeywordButs;
+                    this.searchButtomButs = res.data.data.searchButtomButs;
                 }), "获取按钮数据列表失败")
             },
             handleScroll() {
@@ -796,6 +797,7 @@
                     });
                 });
             },
+            // XXX 计划去除 cmds 模块，改用插件管理来代替
             getCmds() {
                 this.warpAxios(axios.get('/system/cmds').then((response) => {
                     this.cmds = response.data;

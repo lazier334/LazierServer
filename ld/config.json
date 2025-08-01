@@ -5,5 +5,6 @@
     "portWSS": 3034,
     "times": {
         "pluginStagesUpdateStep": 10000
-    }
+    },
+    "proxy": ""
 }

@@ -170,6 +170,8 @@ const config = {
         this.dataPath = this.dataPath.replace(oldName, newLdDirName);
         /** 日志输出管道列表 */
         this.logger.dailyRotateFileList.forEach(e => e.filename = e.filename.replace(oldName, newLdDirName));
+        /** 临时下载的文件的目录 */
+        this.tempDownDir = this.tempDownDir.replace(oldName, newLdDirName);
 
         return true;
     },
@@ -491,7 +493,9 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         fileFrom: 'ls-file-from',
         /** 设置body时的堆栈信息 */
         setStack: 'ls-set-stack',
-    }
+    },
+    /** 临时下载的文件的目录 */
+    tempDownDir: `${ldDirName}/web/temporary`
 };
 {   // 添加版本号按钮
     const ver = readVersion();
