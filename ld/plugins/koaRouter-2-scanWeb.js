@@ -116,8 +116,9 @@ async function selectFileByDomains(ctx, domainsMap, api) {
 
     // 当存在多个文件夹时进行日志信息高亮，"黄色" 是当前选中的文件夹，"绿色" 是其他文件夹
     if (1 < domains.length) {
-        console.info(`<=${domains.length}= [有${domains.length}个目录存在文件] ${api} (\x1b[32m%s\x1b[0m)`,
-            domains.join(", ").replace(selectFolder, `\x1b[33m${selectFolder}\x1b[0m\x1b[32m`));
+        console.info(`<=${domains.length}= [有${domains.length}个目录存在文件] ${api} (\x1b[32m{msg}\x1b[0m)`
+            .replace('{msg}', domains.join(", ").replace(selectFolder, `\x1b[33m${selectFolder}\x1b[0m\x1b[32m`))
+        );
     }
     return domainsMap[selectFolder];
 }

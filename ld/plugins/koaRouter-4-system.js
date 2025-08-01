@@ -22,7 +22,8 @@ export default function koaRouterSystem(router) {
 
     // 接口：根目录重定向
     router.all(['/', '/index'], ctx => {
-        ctx.redirect('/index.html?dir=src');
+        const idnexPath = path.join(config.dataPath, 'web/index');
+        ctx.redirect('/index.html?dir=' + idnexPath);
     });
 
     // 接口：首页按钮数据

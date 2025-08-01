@@ -112,7 +112,7 @@ async function downloadFileToPath(url, filepath, orgUrl) {
             ...(config.proxy ? { proxy: config.proxy } : {})
         });
         filepath = ((await downloader.download()).filePath || filepath).replace(/\\/g, '/');
-        console.info(`[文件已下载至路径]: \x1b[32m%s\x1b[0m`, filepath);
+        console.info(`[文件已下载至路径]: \x1b[32m${filepath}\x1b[0m`);
         return filepath;
     } catch (error) {
         if (!orgUrl) {
