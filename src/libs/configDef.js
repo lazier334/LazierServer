@@ -488,9 +488,9 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     /** 请求/响应 头名字 */
     headerNames: {
         /** 文件来源 */
-        fileFrom: 'x-file-from',
+        fileFrom: 'ls-file-from',
         /** 设置body时的堆栈信息 */
-        setStack: 'x-set-stack',
+        setStack: 'ls-set-stack',
     }
 };
 {   // 添加版本号按钮
