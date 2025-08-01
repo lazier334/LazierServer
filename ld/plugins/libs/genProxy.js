@@ -1,13 +1,7 @@
-import { fs, path, config } from './config.js';
-import { plugins } from './plugins.js';
-if (!(config['genProxyExportKeys'] instanceof Array)) {
-    config['genProxyExportKeys'] = [
-        'proxyXHRAndFetch',
-        'proxyDocmentHeadAppendChild',
-        'navigatorServiceWorkerRegister',
-        'clearLoopDebugger',
-    ]
-}
+import { fs, path, config, getPluginsModule } from './baseImport.js';
+console.log('config.configDirPath', config.configDirPath)
+const { plugins } = await getPluginsModule();
+console.log(config.genProxyExportKeys)
 
 const conf = {
     devMode: false,
@@ -23,7 +17,7 @@ if (conf.devMode) {
 const hostDef = {
     warpFun,
     /** 导出的key */
-    exportKeys: [...config["genProxyExportKeys"]],
+    exportKeys: [...config.genProxyExportKeys],
     /** 默认值是排除默认对象中的所有属性 */
     excludeKeys: [],
     /** 提供提示信息用，实际并未使用 */
