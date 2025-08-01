@@ -2,6 +2,7 @@ import { plugins, getAllPlugin, getPlguinUpdateTime } from './plugins.js';
 import { fs, path, config, getNowFileStorage } from './config.js';
 import Router from 'koa-router';
 
+/** 本地存储 LocalStorage */
 const ls = getNowFileStorage(import.meta.filename);
 /** 文件列表缓存 */
 ls.apListCache = [];
@@ -50,6 +51,7 @@ async function completeFile(ctx, next) {
  * @returns {Router}
  */
 async function readKoaRouters() {
+    if (!config.switch.dynamicOperation && ls.routersCache) return ls.routersCache;
     let apList = await getAllPlugin('koaRouter');
 
     // 检测路由插件是否有新增或删除

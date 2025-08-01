@@ -151,7 +151,7 @@ function getPlguinUpdateTime(filepath) {
         const stat = fs.statSync(filepath);
         timestamp = stat.mtimeMs;
     } catch (err) {
-        console.warn(err)
+        console.warn('读取文件更新时间失败', err)
     }
     return timestamp
 }

@@ -455,6 +455,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     },
     /** 开关 */
     switch: {
+        /** 动态运算 */
+        dynamicOperation: true,
         /** debug模式 */
         debugMode: true,
         /** 动态路由 */
@@ -478,11 +480,18 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     },
     /** 
      * 额外的路由，用于挂载对象
-     * @type {import('koa-router')}
+     * @type {{[key: string]: import('koa-router')}}
      */
-    AdditionalRouter: null,
+    additionalRouter: {},
     /** 配置所在的文件夹路径 */
     configDirPath: import.meta.dirname,
+    /** 请求/响应 头名字 */
+    headerNames: {
+        /** 文件来源 */
+        fileFrom: 'x-file-from',
+        /** 设置body时的堆栈信息 */
+        setStack: 'x-set-stack',
+    }
 };
 {   // 添加版本号按钮
     const ver = readVersion();

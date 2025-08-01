@@ -6,10 +6,10 @@ import { completeFile, readKoaRouters } from './utils.js';
 import { plugins } from './plugins.js';
 
 /** 额外的路由 */
-const AdditionalRouter = config.AdditionalRouter || new Router();
-if (!config.AdditionalRouter) {
-    config.AdditionalRouter = AdditionalRouter;
-    AdditionalRouter.all('获取全部路由', '/system/getAllRouter', () => { });
+var additionalRouter = config.additionalRouter[import.meta.filename] || new Router();
+if (!config.additionalRouter[import.meta.filename]) {
+    config.additionalRouter[import.meta.filename] = additionalRouter;
+    additionalRouter.all('获取全部路由', '/system/getAllRouter', () => { });
 }
 
 export default initKoa;
@@ -27,8 +27,10 @@ async function initKoa(app) {
             // 增加读取当前的所有接口
             if (ctx.path == '/system/getAllRouter') {
                 // 读取所有的路由规则
-                let re = readRouterLayers(routers.stack)                // 动态路由
-                    .concat(readRouterLayers(AdditionalRouter.stack));  // 额外路由
+                let re = readRouterLayers(routers.stack, '动态路由');
+                Object.entries(config.additionalRouter).forEach(([k, v]) => {
+                    re = re.concat(readRouterLayers(v.stack, '额外路由 - ' + k))
+                });
                 return ctx.body = re;
             }
             if (config.switch.dynamicRouter && routers.match(ctx.path, ctx.method).route) {
@@ -46,8 +48,9 @@ async function initKoa(app) {
 /**
  * 读取 layer 对象列表
  * @param {[Router.Layer]} layers 
+ * @param {string} remark 备注
  */
-function readRouterLayers(layers) {
+function readRouterLayers(layers, remark) {
     if (!layers) return;
     if (!Array.isArray(layers)) layers = [layers];
     return layers.map(layer => ({
@@ -57,5 +60,6 @@ function readRouterLayers(layers) {
         opts: layer.opts,
         paramNames: layer.paramNames,
         methods: layer.methods,
+        remark: remark
     }))
 }

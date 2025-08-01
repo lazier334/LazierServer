@@ -37,6 +37,6 @@ export default async function koaPluginCounter(ctx, next) {
             data: err.message
         }
     }
-    if (ctx.sendFileFromPath) ctx.set('x-file-form', ctx.sendFileFromPath);
+    if (ctx.sendFileFromPath) ctx.set(config.headerNames.fileFrom, encodeURI(ctx.sendFileFromPath));
     if (config.logger.resp) console.log(`<-${400 <= ctx.status ? "x" : "-"}- [${ctx.status} ${ctx.method} ${Date.now() - start}ms] ${ctx.url}${ctx.sendFileFromPath ? ` (from: ${ctx.sendFileFromPath})` : ""}`);
 }

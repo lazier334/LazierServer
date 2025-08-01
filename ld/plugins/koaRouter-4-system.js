@@ -13,6 +13,7 @@ export default function koaRouterSystem(router) {
         else restartSystem(config.system.restart.restartCmdLinux);
         ctx.body = '重启中...';
     });
+
     // 关闭接口
     router.all('/system/shutdown', async (ctx, next) => {
         ctx.body = '关机中...';

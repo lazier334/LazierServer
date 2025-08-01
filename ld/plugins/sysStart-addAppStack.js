@@ -8,7 +8,7 @@ export default async function sysStartAddAppStack({ fs, path, config, app }) {
     const Getter = originalBody.get;
     const lc = {
         errorName: 'Stack Information',
-        stackKeyName: 'x-set-stack',
+        stackKeyName: config.headerNames.setStack,
         headerMaxLen: 4000,
         cookieMaxAge: 60 * 1000,
     }
@@ -22,7 +22,7 @@ export default async function sysStartAddAppStack({ fs, path, config, app }) {
                 let stack = new Error(lc.errorName).stack;
                 try {
                     // 拿到当前的文件路径
-                    stack = encodeURIComponent(stack);
+                    stack = encodeURI(stack);
                     if (stack.length <= lc.headerMaxLen) {
                         this.ctx.set(lc.stackKeyName, stack);
                     } else {
