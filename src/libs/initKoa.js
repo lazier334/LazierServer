@@ -1,16 +1,8 @@
-import Router from 'koa-router';
 import koaCompose from './koaCompose.js';
 
-import { fs, path, config } from './config.js';
+import { config } from './config.js';
 import { completeFile, readKoaRouters } from './utils.js';
 import { plugins } from './plugins.js';
-
-/** 额外的路由 */
-var additionalRouter = config.additionalRouter[import.meta.filename] || new Router();
-if (!config.additionalRouter[import.meta.filename]) {
-    config.additionalRouter[import.meta.filename] = additionalRouter;
-    additionalRouter.all('获取全部路由', '/system/getAllRouter', () => { });
-}
 
 export default initKoa;
 
@@ -24,15 +16,6 @@ async function initKoa(app) {
         .use(async (ctx, next) => {
             // 动态路由
             const routers = await readKoaRouters();
-            // 增加读取当前的所有接口
-            if (ctx.path == '/system/getAllRouter') {
-                // 读取所有的路由规则
-                let re = readRouterLayers(routers.stack, '动态路由');
-                Object.entries(config.additionalRouter).forEach(([k, v]) => {
-                    re = re.concat(readRouterLayers(v.stack, '额外路由 - ' + k))
-                });
-                return ctx.body = re;
-            }
             if (config.switch.dynamicRouter && routers.match(ctx.path, ctx.method).route) {
                 // 路由匹配成功，执行这里的内容
                 const routersMiddleware = routers.routes();
@@ -43,23 +26,4 @@ async function initKoa(app) {
             // 路由匹配失败或者存在 ctx.next 时，走传统路由
             return await next();
         }).use(completeFile);
-}
-
-/**
- * 读取 layer 对象列表
- * @param {[Router.Layer]} layers 
- * @param {string} remark 备注
- */
-function readRouterLayers(layers, remark) {
-    if (!layers) return;
-    if (!Array.isArray(layers)) layers = [layers];
-    return layers.map(layer => ({
-        name: layer.name,
-        path: typeof layer.path == 'string' ? layer.path : 'reg:' + layer.path.toString(),
-        regexp: 'reg:' + layer.regexp.toString(),
-        opts: layer.opts,
-        paramNames: layer.paramNames,
-        methods: layer.methods,
-        remark: remark
-    }))
 }
