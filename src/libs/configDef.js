@@ -386,6 +386,12 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
                 }
             }).toString()})()`
         },
+        {
+            avatarText: 'stack',
+            text: '接口分析',
+            tooltip: '分析接口的堆栈信息',
+            fun: `this.openPage('/stack/index.html')`
+        },
     ],
     /** 插件目录列表 */
     pluginDirs: [`${ldDirName}/plugins`],

@@ -6,5 +6,6 @@
     "times": {
         "pluginStagesUpdateStep": 10000
     },
-    "proxy": ""
+    "proxy": "",
+    "可以添加自定义的配置信息": "自定义配置也是从config中读取，除了没有提示信息，其他都一样，可以使用/** @type{import('当前配置路径')} */来做jsdoc提示"
 }

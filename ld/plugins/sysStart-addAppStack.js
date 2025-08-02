@@ -22,7 +22,9 @@ export default async function sysStartAddAppStack({ fs, path, config, app }) {
                 let stack = new Error(lc.errorName).stack;
                 try {
                     // 拿到当前的文件路径
-                    stack = encodeURI(stack);
+                    if (!Array.isArray(this.ctx.stackList)) this.ctx.stackList = [];
+                    this.ctx.stackList.push(stack);
+                    stack = encodeURI(JSON.stringify(this.ctx.stackList));
                     if (stack.length <= lc.headerMaxLen) {
                         this.ctx.set(lc.stackKeyName, stack);
                     } else {
