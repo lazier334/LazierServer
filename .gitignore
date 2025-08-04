@@ -1,3 +1,5 @@
+.idea
+.vscode
 *.log
 temp*
 web*
