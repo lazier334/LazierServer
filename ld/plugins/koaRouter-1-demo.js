@@ -6,10 +6,11 @@ export default function koaRouterDemo(router) {
     // 测试接口
     router.all('/demo', async (ctx, next) => {
         ctx.body = 'hello demo';
-        next()
+        return next();
     });
-    router.all(/^\/demo.*$/, async (ctx) => {
+    router.all(/^\/demo.*$/, async (ctx, next) => {
         ctx.body = (ctx.body ?? '') + ' hello demo2';
+        return next();
     });
     return router
 }
