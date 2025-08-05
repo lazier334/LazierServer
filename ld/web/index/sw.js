@@ -1,9 +1,13 @@
 // 导入脚本
 importScripts('/res/workbox/releases/7.3.0/workbox-sw.js');
-const ver = '2';
-var debugMode = false;
+const ver = '1';
+const conf = {
+    debugMode: false,
+    cacheAllStrategyName: 'all-requests-cache-v' + ver,
+    cacheNetworkFirstName: 'html-cache-v' + ver,
+};
 var showLog = console.log;
-if (!debugMode) showLog = () => { };
+if (!conf.debugMode) showLog = () => { };
 
 /**
  * 只缓存非 `/im/`、`/user/`、`/uploads/`、`/system/` 路径的 GET 请求
@@ -22,7 +26,7 @@ function registerRouteNotCache(params) {
 // 配置 Workbox 开发模式日志
 workbox.setConfig({
     modulePathPrefix: '/res/workbox/releases/7.3.0/',
-    debug: debugMode // 生产环境设为 false
+    debug: conf.debugMode // 生产环境设为 false
 });
 
 // 自定义缓存策略：仅在缓存无效时更新
@@ -85,7 +89,7 @@ class CacheFirstWithValidation extends workbox.strategies.CacheFirst {
 
 // 核心：缓存所有请求的通用策略
 const cacheAllStrategy = new CacheFirstWithValidation({
-    cacheName: 'all-requests-cache-v' + ver,
+    cacheName: conf.cacheAllStrategyName,
     plugins: [
         // 确保缓存不超过 1000 个条目，最长 30 天
         new workbox.expiration.ExpirationPlugin({
@@ -116,7 +120,7 @@ workbox.routing.registerRoute(registerRouteNotCache,
 workbox.routing.registerRoute(
     ({ request }) => request.mode === 'navigate',
     new workbox.strategies.NetworkFirst({
-        cacheName: 'html-cache-v' + ver,
+        cacheName: conf.cacheNetworkFirstName,
         networkTimeoutSeconds: 3, // 3秒超时
         fetchOptions: {
             redirect: 'follow',        // 必须允许重定向
