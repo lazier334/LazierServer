@@ -488,7 +488,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     },
     /** 
      * 额外的路由，用于挂载对象
-     * @type {{[key: string]: import('koa-router')}}
+     * @type {{[key: string]: import('@koa/router')}}
      */
     additionalRouter: {},
     /** 配置所在的文件夹路径 */

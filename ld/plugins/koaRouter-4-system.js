@@ -17,7 +17,7 @@ const lc = {
 
 /**
  * 动态路由 system接口 插件，顺序为:  插件API > 文件API > HarAPI > 系统API
- * @param {import('koa-router')} router 路由
+ * @param {import('@koa/router')} router 路由
  */
 export default function koaRouterSystem(router) {
     // 接口: 根目录重定向

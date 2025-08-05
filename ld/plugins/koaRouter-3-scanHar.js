@@ -1,4 +1,4 @@
-import Router from 'koa-router';
+import Router from '@koa/router';
 import { fs, path, config, importSysModule } from './libs/baseImport.js';
 
 /** @type {import('../../src/libs/plugins.js')} */
@@ -23,7 +23,7 @@ if (!config.additionalRouter[import.meta.filename]) {
 
 /**
  * 动态路由 扫描web文件夹的 插件，顺序为： 插件API > 文件API > HarAPI > 系统API
- * @param {import('koa-router')} router 路由
+ * @param {import('@koa/router')} router 路由
  */
 export default function koaRouterScanHar(router) {
     // 这个接口放到前面是因为优先读取文件，再读取系统的接口，

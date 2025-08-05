@@ -1,6 +1,6 @@
 import { plugins, getAllPlugin, getPlguinUpdateTime } from './plugins.js';
 import { fs, path, config, getNowFileStorage } from './config.js';
-import Router from 'koa-router';
+import Router from '@koa/router';
 import Downloader from 'nodejs-file-downloader';
 
 /** 本地存储 LocalStorage */
@@ -11,7 +11,7 @@ ls.apListCache = [];
 ls.apListMap = {};
 /**
  * 路由缓存
- * @type {import('koa-router')}
+ * @type {import('@koa/router')}
  */
 ls.routersCache = null;
 /** 上次刷新时间 */
