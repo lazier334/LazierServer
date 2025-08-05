@@ -3,10 +3,10 @@ import Stage from './StageClass.js';
 import { pathToFileURL } from 'url';
 
 /**
- * 这是插件化的核心内容，提供各个阶段的插件，对外提供以下拓展项，编写插件使用前缀+任意+.js即可，例如 `sysStart-morePlugin.js`
+ * 这是插件化的核心内容，提供各个阶段的插件，对外提供以下拓展项，编写插件使用前缀+任意+.js即可，例如 `systemStart-morePlugin.js`
  */
 const stages = {
-    sysStart: '系统启动阶段',
+    systemStart: '系统启动阶段',
     koaPlugin: 'koa插件',
     koaRouter: '接口路由',
     selectFileByDomains: '选择域名',

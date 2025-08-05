@@ -7,7 +7,7 @@ import { plugins } from './libs/plugins.js';
 
 (async () => {
     const app = new Koa();
-    await (await plugins('sysStart')).use({ fs, path, config, app });
+    await (await plugins('systemStart')).use({ fs, path, config, app });
 
     await initKoa(app);
     // 创建 HTTPS 服务器

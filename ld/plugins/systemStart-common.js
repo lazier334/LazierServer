@@ -1,7 +1,7 @@
 /**
  * @param {import('./libs/baseImport.js')}}
  */
-export default async function sysStartCommon({ fs, path, config, app }) {
+export default async function systemStartCommon({ fs, path, config, app }) {
     // 打印版本日志
     console.info(config.showVersion());
 
