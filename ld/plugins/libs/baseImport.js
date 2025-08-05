@@ -3,7 +3,8 @@ import path from 'path';
 import app from 'koa';
 
 /** @type {import('../../../src/libs/config.js')} */
-var config = {};
+const nilConfig = {};
+var config = nilConfig.config || {};
 if (process.G) config = process.G.config;
 else {
     // 单独启动脚本的时候没有基础环境，所以需要单独导入
