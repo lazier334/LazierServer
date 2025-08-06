@@ -8,6 +8,6 @@ export { result };
  * @param {number} code 
  * @returns 
  */
-function result(data, msg = '成功', code = 200) {
-    return { code, msg, data }
+function result(data, msg = '成功', status = true, code = 200) {
+    return { code, msg, status, data }
 }

@@ -12,3 +12,4 @@ ld/logs
 logs
 LazierServer*
 dist
+ld/plugins/pluginTemp/

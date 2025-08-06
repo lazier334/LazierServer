@@ -1,6 +1,9 @@
 import send from 'koa-send';
-import { fs, path, config, getPluginsModule } from './libs/baseImport.js';
+import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
 const { plugins, pathDeduplication } = await getPluginsModule();
+/** @type {import('../../src/libs/utils.js')} */
+const utilsModule = await importSysModule('utils.js');
+const { downloadFileToPath } = utilsModule;
 
 // 启动的目标文件夹，如果是开启了 allDir ，那么在实际读取的时候会重新扫描更新
 var domainList = config.domainList.map(domain => path.join(config.rootDir, domain));

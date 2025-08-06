@@ -1,8 +1,8 @@
 {
-    "portHttp": 3030,
-    "portHttps": 3031,
-    "portWS": 3033,
-    "portWSS": 3034,
+    "portHttp": 3050,
+    "portHttps": 3051,
+    "portWS": 3053,
+    "portWSS": 3054,
     "times": {
         "pluginStagesUpdateStep": 10000
     },

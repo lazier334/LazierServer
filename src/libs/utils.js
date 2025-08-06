@@ -2,6 +2,12 @@ import { plugins, getAllPlugin, getPlguinUpdateTime } from './plugins.js';
 import { fs, path, config, getNowFileStorage } from './config.js';
 import Router from '@koa/router';
 import Downloader from 'nodejs-file-downloader';
+import https from 'https';
+
+// 创建忽略证书验证的 Agent
+const insecureAgent = new https.Agent({
+    rejectUnauthorized: false
+});
 
 /** 本地存储 LocalStorage */
 const ls = getNowFileStorage(import.meta.filename);
@@ -139,6 +145,7 @@ async function readKoaRouters() {
  * 如果不需要代理可以将其配置为 "假" 值
  * @param {string} url - 下载文件的 URL
  * @param {string} filepath - 文件保存的路径
+ * @param {string} orgUrl - 原始链接，如果传递这个参数为真，那么将不会尝试另一种协议的下载
  * @returns {Promise<string|undefined>} 文件最终存放的文件路径，下载失败则为未定义
  */
 async function downloadFileToPath(url, filepath, orgUrl) {
@@ -146,6 +153,7 @@ async function downloadFileToPath(url, filepath, orgUrl) {
         fs.mkdirSync(path.dirname(filepath), { recursive: true });
         const downloader = new Downloader({
             url: url,
+            httpsAgent: insecureAgent,
             timeout: config.times.timeout || 30 * 1000,
             directory: path.dirname(filepath), // 保存文件的目录
             fileName: path.basename(filepath), // 保存文件的名称
@@ -162,6 +170,7 @@ async function downloadFileToPath(url, filepath, orgUrl) {
                 url.replace('http://', 'https://'), filepath, url);
         }
         const errMsg = error.message || (typeof error.stack == 'string' ? error.stack.split('\n').shift() : '');
+        console.debug(error)
         console.error([`[下载文件出现异常]: 双协议均下载失败，代理(proxy)配置: ${config.proxy ? config.proxy : '未开启'}`, orgUrl, url, `主要错误信息 (${errMsg})`].join('\n'));
         console.debug(error.stack);
     }
