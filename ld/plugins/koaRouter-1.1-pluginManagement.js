@@ -72,22 +72,26 @@ export default function koaRouterManagement(router) {
             let fn = path.basename(fp);
             return stages.some(e => fn.startsWith(e));
         });
-        ctx.body = result({ stages, pluginPath });
+        ctx.body = result({ stages, pluginPath, excludePlugins: config.excludePlugins });
     });
 
     // 改
     router.all('管理路由 - 禁用/启用指定插件', '/plugin-mgmt/api/switch', async (ctx, next) => {
-        let fp = ctx.request.body.filepath;
-        let msg = '成功';
-        if (fp) {
-            fp = getAbsolutePaths(fp);
-            if (!config.excludePlugins.includes(fp)) {
-                config.excludePlugins.push(fp);
-                msg = '已添加';
-            } else msg = '已存在';
-            return ctx.body = result(fp, msg);
-        } else msg = '路径无效';
-        ctx.body = result(fp, msg, false, 500);
+        let fpList = ctx.request.body.filepathList;
+        if (Array.isArray(fpList) && 0 < fpList.length) {
+            fpList.forEach(fp => {
+                fp = getAbsolutePaths(fp);
+                let index = config.excludePlugins.includes(fp);
+                if (-1 < index) {
+                    config.excludePlugins.splice(index, 1);
+                } else {
+                    config.excludePlugins.push(fp);
+                }
+            });
+            return ctx.body = result(config.excludePlugins);
+        } else {
+            ctx.body = result(fp, '路径无效', false, 500);
+        }
     });
 
     // 增
