@@ -255,10 +255,10 @@ export default function koaRouterManagement(router) {
         let code = 200;
         let msg = '成功';
         let re = {};
+        let data = await compareDirectories(fromPath, toPath);
+        data.toFiles = [];
+        re = data;
         if (!force) {
-            let data = await compareDirectories(fromPath, toPath);
-            data.toFiles = [];
-            re = data;
             if (0 < data.conflicts.length) {
                 msg = '文件存在冲突';
                 code = 500;
