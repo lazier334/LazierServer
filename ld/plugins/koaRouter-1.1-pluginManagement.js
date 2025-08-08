@@ -33,7 +33,7 @@ const lc = {
     /** 下载的链接缓存 */
     downloadStatus: false,
     /** 下载信息 */
-    downloadInfo: null,
+    downloadLog: null,
 }
 
 /**
@@ -126,22 +126,23 @@ export default function koaRouterManagement(router) {
     });
 
     // 其他
-    router.all('管理路由 - 远程下载的信息', '/plugin-mgmt/api/downloadInfo', async (ctx, next) => {
-        ctx.body = result(lc.downloadInfo)
+    router.all('管理路由 - 远程下载的信息', '/plugin-mgmt/api/downloadLog', async (ctx, next) => {
+        ctx.body = result(lc.downloadLog)
     });
 
     router.all('管理路由 - 远程下载文件', '/plugin-mgmt/api/download', async (ctx, next) => {
         // 调用下载组件进行文件下载，下载到指定的位置，和上传功能传到的地方一致，除了文件名不一样
-        let url = ctx.request.body.url;
+        let url = ctx.request.body.pluginUrl;
         if (lc.downloadStatus) {
             return ctx.body = result(lc.downloadStatus, '正在下载中', false, 500);
         } else {
             lc.downloadStatus = url;
             downloadFileToPath(url, lc.downloadFilePath, url).then(filepath => {
-                lc.downloadInfo = `下载完成，文件位置${filepath}`
-                console.info(lc.downloadInfo);
+                if (filepath == undefined) throw new Error('下载失败!路径为: ' + filepath);
+                lc.downloadLog = `下载完成，文件位置${filepath}`
+                console.info(lc.downloadLog);
             }).catch(err => {
-                lc.downloadInfo = `下载失败，错误信息${err.message}\n${err.stack}`;
+                lc.downloadLog = `下载失败，错误信息${err.message}\n${err.stack}`;
                 console.error('下载失败', err);
             }).finally(() => {
                 lc.downloadStatus = false;
@@ -154,8 +155,8 @@ export default function koaRouterManagement(router) {
         /** 编码格式 */
         const nameEncoding = ctx.request.body.nameEncoding || 'utf8';
         /** 压缩包路径，可以传递不同路径以支持解压其他压缩包 */
-        let zipFilePath = ctx.request.body.filepath || lc.uploadFilePath;
-        if (ctx.request.body.filepath == 'download') zipFilePath = lc.downloadFilePath;
+        let zipFilePath = ctx.request.body.zipFilePath || lc.uploadFilePath;
+        if (zipFilePath == 'download') zipFilePath = lc.downloadFilePath;
         /** 解压路径 */
         const extractDir = lc.unzipDir;
         console.log('压缩包路径', zipFilePath)
@@ -256,7 +257,7 @@ export default function koaRouterManagement(router) {
         let re = {};
         if (!force) {
             let data = await compareDirectories(fromPath, toPath);
-            data.toUnique = [];
+            data.toFiles = [];
             re = data;
             if (0 < data.conflicts.length) {
                 msg = '文件存在冲突';

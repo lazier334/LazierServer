@@ -28,27 +28,27 @@ function getAbsolutePaths(filePath) {
  * @param {string} toDir - 目标目录路径
  * @param {boolean} [checkContent=false] - 是否检测文件内容差异
  * @returns {Promise<{
- *   fromUnique: string[],
- *   toUnique: string[],
+ *   fromFiles: string[],
+ *   toFiles: string[],
  *   conflicts: string[]
  * }>} 包含三个文件路径数组的对象
  */
 async function compareDirectories(fromDir, toDir, checkContent = false) {
     // 获取两个目录下的所有文件相对路径（POSIX格式）
-    const [fromFiles, toFiles] = await Promise.all([
+    const [fromFilePaths, toFilePaths] = await Promise.all([
         getRelativeFilePaths(fromDir),
         getRelativeFilePaths(toDir)
     ]);
 
     // 创建文件路径集合方便查找
-    const fromSet = new Set(fromFiles);
-    const toSet = new Set(toFiles);
+    const fromSet = new Set(fromFilePaths);
+    const toSet = new Set(toFilePaths);
 
     // 计算差异部分
-    // const fromUnique = [...fromSet].filter(file => !toSet.has(file));
-    // const toUnique = [...toSet].filter(file => !fromSet.has(file));
-    const fromUnique = [...fromSet];
-    const toUnique = [...toSet];
+    // const fromFiles = [...fromSet].filter(file => !toSet.has(file));
+    // const toFiles = [...toSet].filter(file => !fromSet.has(file));
+    const fromFiles = [...fromSet];
+    const toFiles = [...toSet];
     const commonFiles = [...fromSet].filter(file => toSet.has(file));
     // 处理冲突文件检测
     let conflicts = [];
@@ -82,8 +82,8 @@ async function compareDirectories(fromDir, toDir, checkContent = false) {
     }
 
     return {
-        fromUnique,  // 仅在来源目录存在的文件
-        toUnique,    // 仅在目标目录存在的文件
+        fromFiles,  // 仅在来源目录存在的文件
+        toFiles,    // 仅在目标目录存在的文件
         conflicts    // 冲突文件（可能路径相同但内容不同）
     };
 }

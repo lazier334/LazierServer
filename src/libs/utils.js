@@ -141,6 +141,7 @@ async function readKoaRouters() {
 /**
  * 会自动使用http和https尝试下载
  * 
+ * 当 url == orgUrl 的时候，日志只会显示 url 
  * 下载文件到指定的路径，里面使用了代理，需要开启代理并且配置正确才可以正常下载
  * 如果不需要代理可以将其配置为 "假" 值
  * @param {string} url - 下载文件的 URL
@@ -171,7 +172,11 @@ async function downloadFileToPath(url, filepath, orgUrl) {
         }
         const errMsg = error.message || (typeof error.stack == 'string' ? error.stack.split('\n').shift() : '');
         console.debug(error)
-        console.error([`[下载文件出现异常]: 双协议均下载失败，代理(proxy)配置: ${config.proxy ? config.proxy : '未开启'}`, orgUrl, url, `主要错误信息 (${errMsg})`].join('\n'));
+        if (url == orgUrl) {
+            console.error([`[下载文件出现异常]: 下载失败，代理(proxy)配置: ${config.proxy ? config.proxy : '未开启'}`, url, `主要错误信息 (${errMsg})`].join('\n'));
+        } else {
+            console.error([`[下载文件出现异常]: 双协议均下载失败，代理(proxy)配置: ${config.proxy ? config.proxy : '未开启'}`, orgUrl, url, `主要错误信息 (${errMsg})`].join('\n'));
+        }
         console.debug(error.stack);
     }
 }
