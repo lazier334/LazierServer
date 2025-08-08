@@ -68,10 +68,7 @@ export default function koaRouterManagement(router) {
     // router.all('管理路由 - 获取全部插件', '/plugin-mgmt/api/pluginList', async (ctx, next) => {
     router.all('/plugin-mgmt/api/pluginList', async (ctx, next) => {
         let stages = Object.keys(config.pluginStages);
-        let pluginPath = (await plugins.getAllPlugin()).filter(fp => {
-            let fn = path.basename(fp);
-            return stages.some(e => fn.startsWith(e));
-        });
+        let pluginPath = [...config.excludePlugins, ...(await plugins.getAllPlugin())];
         ctx.body = result({ stages, pluginPath, excludePlugins: config.excludePlugins });
     });
 
@@ -81,7 +78,7 @@ export default function koaRouterManagement(router) {
         if (Array.isArray(fpList) && 0 < fpList.length) {
             fpList.forEach(fp => {
                 fp = getAbsolutePaths(fp);
-                let index = config.excludePlugins.includes(fp);
+                let index = config.excludePlugins.indexOf(fp);
                 if (-1 < index) {
                     config.excludePlugins.splice(index, 1);
                 } else {
