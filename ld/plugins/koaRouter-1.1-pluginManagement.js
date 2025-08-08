@@ -103,23 +103,20 @@ export default function koaRouterManagement(router) {
 
     // 删
     router.all('管理路由 - 删除插件', '/plugin-mgmt/api/remove', async (ctx, next) => {
-        let fp = ctx.request.body.filepath;
-        let msg = '成功';
-        let code = 200;
-        const fn = path.basename(fp);
-        if (Object.keys(config.pluginStages).some(stage => fn.startsWith(stage))) {
+        let fpList = ctx.request.body.filepathList;
+        let data = {
+            success: [],
+            failure: []
+        };
+        fpList.forEach(fp => {
             if (fp && fs.existsSync(fp)) {
                 fs.unlinkSync(fp);
-                return ctx.body = result(fp);
+                data.success.push(fp);
             } else {
-                code = 400;
-                msg = '文件不存在';
+                data.failure.push(fp);
             }
-        } else {
-            code = 500;
-            msg = '路径无效';
-        }
-        return ctx.body = result(fp, msg, false, code);
+        });
+        return ctx.body = result(data);
     });
 
     // 其他
