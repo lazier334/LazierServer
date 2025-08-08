@@ -392,6 +392,12 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             tooltip: '分析接口的堆栈信息',
             fun: `this.openPage('/stack/index.html')`
         },
+        {
+            avatarText: 'plugins',
+            text: '插件仓库',
+            tooltip: '在线管理插件列表',
+            fun: `this.openPage('/plugin-mgmt/index.html')`
+        },
     ],
     /** 插件目录列表 */
     pluginDirs: [`${ldDirName}/plugins`],
