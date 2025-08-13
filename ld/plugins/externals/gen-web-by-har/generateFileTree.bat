@@ -1,0 +1,2 @@
+node generateFileTree.js
+pause

@@ -53,9 +53,11 @@ function safeDecode(buffer, primaryEncoding = 'utf8') {
  *  });
  * ```
  * @param {'echo hello world!'} cmd 命令
+ * @param {boolean} moreLog 更多日志信息
+ * @param {'gbk'|'utf8'} primaryEncoding 首选编码
  * @returns {Promise<{ stdout: string, stderr: string }>} 执行结果
  */
-async function runCmd(cmd = 'echo hello world!', moreLog = true) {
+async function runCmd(cmd = 'echo hello world!', moreLog = true, primaryEncoding) {
     // 针对 Windows 强制临时启用控制台 UTF-8 环境
     const winCmd = process.platform === 'win32' ? `chcp 65001 >nul & ${cmd}` : cmd;
     return new Promise((resolve, reject) => {
@@ -66,8 +68,8 @@ async function runCmd(cmd = 'echo hello world!', moreLog = true) {
         }, (error, stdout, stderr) => {
             try {
                 // 转换输出编码
-                stdout = safeDecode(stdout);
-                stderr = safeDecode(stderr);
+                stdout = safeDecode(stdout, primaryEncoding);
+                stderr = safeDecode(stderr, primaryEncoding);
                 if (error?.message) error.message = stderr || safeDecode(error.message);
             } catch (err) {
                 console.error('buffer数据', buffer);
