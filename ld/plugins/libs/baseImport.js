@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import app from 'koa';
+import { pathToFileURL } from 'url';
 
 /** @type {import('../../../src/libs/config.js')} */
 const nilConfig = {};
@@ -13,11 +14,12 @@ else {
 }
 
 export {
-    fs, path, config, app, importSysModule, getPluginsModule
+    fs, path, config, app, importSysModule, getPluginsModule, getUtilsModule, getConfigModule
 }
 
 async function importSysModule(mod) {
-    return await import(path.join(config.configDirPath, mod));
+    const filepath = pathToFileURL(path.join(config.configDirPath, mod));
+    return await import(filepath);
 }
 
 /**
@@ -26,4 +28,20 @@ async function importSysModule(mod) {
  */
 async function getPluginsModule() {
     return await importSysModule('plugins.js');
+}
+
+/**
+ * 获取 plugins 模块
+ * @returns {import('../../../src/libs/utils.js')}
+ */
+async function getUtilsModule() {
+    return await importSysModule('utils.js');
+}
+
+/**
+ * 获取 config 模块
+ * @returns {import('../../../src/libs/config.js')}
+ */
+async function getConfigModule() {
+    return config;
 }
