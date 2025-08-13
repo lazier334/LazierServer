@@ -15,7 +15,14 @@ LazierServer
 ├─ ld               // 本地数据，主要
 │  ├─ banner.txt    // banner图
 │  ├─ config.json   // 本地配置
+│  ├─ logs          // .日志文件夹
 │  ├─ plugins       // 本地插件，以及插件的相关代码
+│  │  ├─ classes    // 插件用到的类
+│  │  ├─ externals  // 第三方插件的主代码
+│  │  ├─ libs       // 插件用到的库
+│  │  ├─ utils      // 插件用到的工具
+│  │  ├─ pluginTemp // .插件的临时上传、下载、解压文件夹
+│  │  └─ other file // 插件文件
 │  └─ web           // 项目资源站
 │     ├─ example    // 文件夹 站点，示例站点
 │     ├─ index      // 文件夹 站点，主站点
@@ -29,9 +36,14 @@ LazierServer
 └─ tests            // 测试项
 ```
 
+# 其他
+* git 忽略跟踪指定文件 `git update-index --assume-unchanged tests/testApi.js`
+* git 恢复跟踪指定文件 `git update-index --no-assume-unchanged tests/testApi.js`
+
 > # <a id="文档目录" href="#文档顶部">文档顶部↗</a>
 - [LazierServer](#lazierserver)
 - [基于 `LocalServer` 改进的一个可以快速搭建伪站点的服务器](#基于-localserver-改进的一个可以快速搭建伪站点的服务器)
 - [核心技术栈](#核心技术栈)
 - [文件夹说明](#文件夹说明)
+- [其他](#其他)
 > ---
