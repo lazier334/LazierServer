@@ -2,31 +2,46 @@ import { exec } from 'child_process';
 import readline from 'readline';
 import iconv from 'iconv-lite';
 
-// 自动检测系统编码
-const encoding = process.platform === 'win32' ? 'gbk' : 'utf8';
-
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 
+export default runCmd;
 export { runCmd, waitForInput };
 
 // 增强解码函数
-function safeDecode(buffer, primaryEncoding = encoding) {
+function safeDecode(buffer, primaryEncoding = 'utf8') {
+    if (!buffer || buffer.length === 0) return '';
+    const copyBuffer = Buffer.from(buffer);
+
+    // 优先尝试自定义类型
     try {
-        if (typeof buffer === 'string' && buffer == '') return buffer;
-        return buffer && buffer.length > 0 ?
-            iconv.decode(buffer, primaryEncoding).trim() : '';
-    } catch (e) {
+        return iconv.decode(buffer, primaryEncoding).trim();
+    } catch (e) { /* 忽略继续尝试 */ }
+
+    // 其次尝试iconv解析 utf8 编码
+    if (primaryEncoding != 'utf8' && primaryEncoding != 'utf-8') {
         try {
-            // 尝试用UTF-8解码
-            return buffer.toString('utf8').trim();
-        } catch (e2) {
-            // 最终保底方案
-            return buffer.toString('binary').trim();
-        }
+            return iconv.decode(buffer, 'utf8').trim();
+        } catch (e) { /* 忽略继续尝试 */ }
     }
+
+    // 尝试iconv解析 gbk 编码
+    if (primaryEncoding != 'gbk') {
+        try {
+            return iconv.decode(buffer, 'gbk').trim();
+        } catch (e) { /* 忽略继续尝试 */ }
+    }
+
+    // 再次尝试使用js解析 utf8 编码
+    if (primaryEncoding != 'utf8' && primaryEncoding != 'utf-8') {
+        try {
+            return buffer.toString('utf8').trim();
+        } catch (e) { /* 忽略继续尝试 */ }
+    }
+    // 极端情况返回原始buffer
+    return copyBuffer;
 };
 /**
  * ```js
@@ -41,8 +56,10 @@ function safeDecode(buffer, primaryEncoding = encoding) {
  * @returns {Promise<{ stdout: string, stderr: string }>} 执行结果
  */
 async function runCmd(cmd = 'echo hello world!', moreLog = true) {
+    // 针对 Windows 强制临时启用控制台 UTF-8 环境
+    const winCmd = process.platform === 'win32' ? `chcp 65001 >nul & ${cmd}` : cmd;
     return new Promise((resolve, reject) => {
-        exec(cmd, {
+        exec(winCmd, {
             encoding: 'buffer',  // 关键：返回原始二进制数据
             windowsHide: true,   // 禁止Windows弹出额外窗口
             maxBuffer: 1024 * 1024 * 10 // 解决大输出时的缓冲区限制
@@ -53,6 +70,7 @@ async function runCmd(cmd = 'echo hello world!', moreLog = true) {
                 stderr = safeDecode(stderr);
                 if (error?.message) error.message = stderr || safeDecode(error.message);
             } catch (err) {
+                console.error('buffer数据', buffer);
                 console.error("编码转换失败:", err);
             }
 
