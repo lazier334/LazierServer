@@ -129,7 +129,7 @@ async function readKoaRouters() {
         // 清空路由列表
         router.stack.splice(0, router.stack.length);
         // 使用路由插件添加路由
-        koaRouters.use(router);
+        await koaRouters.use(router);
         // 保存路由缓存
         ls.routersCache = router;
         // 保存路由文件列表缓存
