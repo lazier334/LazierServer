@@ -11,7 +11,7 @@ if (config.switch.allDir) console.log(`已开启全文件夹扫描，将会扫�
 else console.log('指定扫描文件夹列表', pushDir(domainList));
 
 /**
- * 动态路由 扫描web文件夹的 插件，顺序为： 插件API > 文件API > HarAPI > 系统API
+ * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  * @param {import('@koa/router')} router 路由
  */
 export default function koaRouterScanWeb(router) {
