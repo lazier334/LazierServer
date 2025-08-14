@@ -189,7 +189,7 @@ const config = {
     versionBanner: `当前服务器版本 v.{version} - {detail}`,
     /** 版本信息 */
     version: {
-        "1.0(25071500)": `快速构建一个服务器站点`
+        "1.0.0(25081400)": `一个可以快速搭建的服务器`
     },
     /** 输入路径 */
     rootDir: `${ldDirName}/web`,

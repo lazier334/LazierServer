@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { spawn } from 'child_process';
 import readline from 'readline';
 import iconv from 'iconv-lite';
 
@@ -8,7 +8,7 @@ const rl = readline.createInterface({
 });
 
 export default runCmd;
-export { runCmd, waitForInput };
+export { runCmd, waitForInput, runDetachedCmd };
 
 // 增强解码函数
 function safeDecode(buffer, primaryEncoding = 'utf8') {
@@ -43,6 +43,7 @@ function safeDecode(buffer, primaryEncoding = 'utf8') {
     // 极端情况返回原始buffer
     return copyBuffer;
 };
+
 /**
  * ```js
  *  const cmd = require('./lib/util-cmd.js');
@@ -53,40 +54,59 @@ function safeDecode(buffer, primaryEncoding = 'utf8') {
  *  });
  * ```
  * @param {'echo hello world!'} cmd 命令
- * @param {boolean} moreLog 更多日志信息
- * @param {'gbk'|'utf8'} primaryEncoding 首选编码
+ * @param {{ moreLog: true, primaryEncoding: 'gbk' | 'utf8', windowsHide: true}} options 更多配置
+ *  - moreLog 更多日志信息
+ *  - primaryEncoding 首选编码
+ *  - windowsHide 隐藏windows的窗口
  * @returns {Promise<{ stdout: string, stderr: string }>} 执行结果
  */
-async function runCmd(cmd = 'echo hello world!', moreLog = true, primaryEncoding) {
+async function runCmd(cmd = 'echo hello world!', options) {
     // 针对 Windows 强制临时启用控制台 UTF-8 环境
-    const winCmd = process.platform === 'win32' ? `chcp 65001 >nul & ${cmd}` : cmd;
-    return new Promise((resolve, reject) => {
-        exec(winCmd, {
-            encoding: 'buffer',  // 关键：返回原始二进制数据
-            windowsHide: true,   // 禁止Windows弹出额外窗口
-            maxBuffer: 1024 * 1024 * 10 // 解决大输出时的缓冲区限制
-        }, (error, stdout, stderr) => {
-            try {
-                // 转换输出编码
-                stdout = safeDecode(stdout, primaryEncoding);
-                stderr = safeDecode(stderr, primaryEncoding);
-                if (error?.message) error.message = stderr || safeDecode(error.message);
-            } catch (err) {
-                console.error('buffer数据', buffer);
-                console.error("编码转换失败:", err);
-            }
+    const isWin = process.platform === 'win32';
+    const {
+        moreLog = true,
+        primaryEncoding = isWin ? 'gbk' : 'utf8',
+        windowsHide = true
+    } = (typeof options == 'object' && options != null ? options : {});
+    const winCmd = isWin ? `chcp 65001 >nul & ${cmd}` : cmd;
+    const args = isWin ? ['/c', winCmd] : ['-c', cmd];
+    const shell = isWin ? 'cmd.exe' : '/bin/sh';
 
-            if (error) {
-                console.error(`命令执行失败: ${cmd}`);
-                if (moreLog) console.error(`错误信息: ${error.message}`);
-                reject(error);
-                return;
-            }
-            if (moreLog && stdout) {
-                console.info(stdout)
-            }
-            resolve({ stdout, stderr });
+    return new Promise((resolve, reject) => {
+        const child = spawn(shell, args, {
+            encoding: 'buffer',         // 关键：返回原始二进制数据
+            windowsHide: windowsHide,   // 禁止Windows弹出额外窗口
+            maxBuffer: 1024 * 1024 * 10 // 解决大输出时的缓冲区限制
         });
+
+        let stdout = '';
+        let stderr = '';
+
+        // 实时输出 stdout
+        child.stdout.on('data', (data) => {
+            const decoded = safeDecode(data, primaryEncoding);
+            if (moreLog) process.stdout.write(decoded); // 实时打印日志
+            stdout += decoded;
+        });
+
+        // 实时输出 stderr
+        child.stderr.on('data', (data) => {
+            const decoded = safeDecode(data, primaryEncoding);
+            if (moreLog) process.stderr.write(decoded); // 实时打印错误
+            stderr += decoded;
+        });
+
+        child.on('close', (code) => {
+            if (code !== 0) {
+                const error = new Error(`Command failed with code ${code}`);
+                error.stderr = stderr;
+                reject(error);
+            } else {
+                resolve({ stdout, stderr });
+            }
+        });
+
+        child.on('error', reject);
     });
 }
 
@@ -129,4 +149,27 @@ function waitForInput(conf, functions) {
 
         waitForInput(conf, functions);
     });
+}
+
+/**
+ * 创建独立进程运行，需要手动设置环境，比如运行 cjs 需要传递 options = { NODE_OPTIONS: undefined }
+ * @param {'ls'} command 命令
+ * @param {[]} args 参数
+ * @param {{...process.env}} options [{...process.env}] 默认使用当前程序的环境
+ * @returns 
+ */
+function runDetachedCmd(command, args = [], options = { ...process.env }) {
+    const isWin = process.platform === 'win32';
+    const shell = isWin ? 'cmd.exe' : '/bin/sh';
+    const shellArgs = isWin ? ['/c', command, ...args] : ['-c', command, ...args];
+
+    const child = spawn(shell, shellArgs, {
+        detached: true,
+        stdio: 'ignore',
+        windowsHide: false,
+        ...options
+    });
+
+    child.unref();  // 解除父进程引用
+    return child;   // 返回进程
 }
