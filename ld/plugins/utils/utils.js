@@ -20,12 +20,14 @@ const utils = {
     ...router,
     ...tasks
 };
+// 删除 utils 里面的 default 导出
+delete utils.default;
 
 // 冲突检查（可选，根据需求保留）
 const utilList = [cmd, auth, crypto, router, tasks];
 utilList.forEach(obj => {
     Object.entries(obj).forEach(([k, v]) => {
-        if (utils[k] && utils[k] !== v) {
+        if (k != 'default' && utils[k] && utils[k] !== v) {
             throw new Error(`工具函数 ${k} 已存在且定义不同，请手动处理冲突`);
         }
     })

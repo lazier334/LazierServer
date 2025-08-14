@@ -1,5 +1,5 @@
 const lc = {
-    baseurl: 'http://localhost:3050',
+    baseurl: 'http://localhost:3030',
     api: '/system/restart',
 }
 

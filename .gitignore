@@ -15,3 +15,4 @@ dist
 ld/plugins/pluginTemp/
 !ld/plugins/externals/global-proxy/GlobalProxy.exe
 ld/plugins/externals/global-proxy
+ld/uploads

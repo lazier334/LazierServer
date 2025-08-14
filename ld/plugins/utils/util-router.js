@@ -1,4 +1,4 @@
-import { config, fs } from '../../../src/libs/config.js';
+import { fs, config } from './utils-base.js';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 
 /**

@@ -4,10 +4,10 @@
     3. 分享
     4. 连接im服务（提供拓展服务）
  */
-import { fs, path, config } from '../libs/config.js';
+import { fs, path, config } from './utils-base.js';
 import * as globalUtils from './utils.js';
 
-const userType = globalUtils.userType;
+const userType = globalUtils.auth.userType;
 
 /** 因为upload是作为插件提供，所以不添加进全局配置 */
 const lc = {
@@ -243,7 +243,7 @@ function initDB() {
          */
         auth(ctx) {
             if (lc.auth) {
-                const user = globalUtils.authUser(ctx);
+                const user = globalUtils.auth.authUser(ctx);
                 if (!user) throw new Error('未登录!');
                 return user;
             }
@@ -254,14 +254,14 @@ function initDB() {
             let jsondata = JSON.stringify(this.mapData);
             // 如果数据没有变化则忽略
             if (jsondata == lc.caches[fp]) return;
-            fs.writeFileSync(fp, globalUtils.encodeText(jsondata, lc.cryptoKey));
+            fs.writeFileSync(fp, globalUtils.crypto.encodeText(jsondata, lc.cryptoKey));
             lc.caches[fp] = jsondata;
             console.log('文件数据已保存');
             return true
         },
         /** 读取数据文件 */
         readData() {
-            return this.mapData = JSON.parse(globalUtils.decodeText(
+            return this.mapData = JSON.parse(globalUtils.crypto.decodeText(
                 fs.readFileSync(path.join(lc.dbDir, lc.dbName), 'utf-8'), lc.cryptoKey));
         }
     }

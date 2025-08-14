@@ -2,11 +2,7 @@ import { spawn } from 'child_process';
 import readline from 'readline';
 import iconv from 'iconv-lite';
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
+let rl;
 export default runCmd;
 export { runCmd, waitForInput, runDetachedCmd };
 
@@ -110,6 +106,15 @@ async function runCmd(cmd = 'echo hello world!', options) {
     });
 }
 
+/** 获取 rl */
+function getRL() {
+    let rlCache = rl || readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    rl = rlCache;
+    return rl;
+}
 /**
  * 没注意，基本不用，这是用于接收从控制台输入命令的函数
  * @param {{
@@ -123,11 +128,11 @@ async function runCmd(cmd = 'echo hello world!', options) {
 function waitForInput(conf, functions) {
     if (!conf || !conf.msg || !conf.map || !functions) {
         console.error("配置或功能映射无效，请检查传入的参数！");
-        rl.close();
+        getRL().close();
         return;
     }
 
-    rl.question(`${conf.msg}\n请输入功能编号: `, async (answer) => {
+    getRL().question(`${conf.msg}\n请输入功能编号: `, async (answer) => {
         const name = conf.map[answer];
         if (!name) {
             console.log("无效的功能编号:", answer);

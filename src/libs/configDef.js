@@ -348,12 +348,6 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             fun: `this.openPage('/edit/index.html?filepath=indexData-list.json')`
         },
         {
-            avatarText: 'im',
-            text: '管理连接',
-            tooltip: '给指定的连接发送消息',
-            fun: `this.openPage('/im/index.html')`
-        },
-        {
             avatarText: 'tus',
             text: '文件上传',
             tooltip: '上传文件到服务器',
