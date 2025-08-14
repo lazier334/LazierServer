@@ -91,8 +91,3 @@ async function fetchWarp(url, options = {}, timeout = 5000, requestStep = 1000) 
         }
     }
 }
-
-// 使用示例
-fetchWithTimeout('https://api.example.com/data', {}, 3000)
-    .then(response => response.json())
-    .catch(err => console.error(err));
