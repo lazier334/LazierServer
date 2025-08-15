@@ -1,14 +1,15 @@
-import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
-import uploadPluginMiddleware from './libs/koa-uploadPluginMiddleware.js';
-import StreamZip from 'node-stream-zip';
 import fsExtra from 'fs-extra';
+import StreamZip from 'node-stream-zip';
 import result from './utils/util-result.js';
+import uploadPluginMiddleware from './libs/koa-uploadPluginMiddleware.js';
 import { getAbsolutePaths, compareDirectories } from './utils/utils-base.js';
+import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
+
 /** @type {import('../../src/libs/utils.js')} */
 const utilsModule = await importSysModule('utils.js');
 const { downloadFileToPath } = utilsModule;
-
 const plugins = await getPluginsModule();
+
 const rootDir = import.meta.dirname;
 const tempDir = path.join(rootDir, 'pluginTemp');
 const lc = {

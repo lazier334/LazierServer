@@ -1,3 +1,4 @@
+import WebSocket from 'ws';
 /**
  * websocket 客户端示例
  */
@@ -6,11 +7,10 @@ const msgs = [
     'world',
     '!'
 ];
-const WebSocket = require('ws');
 var msgNum = 0;
 
 // const ws = new WebSocket('ws://localhost:3010');
-const ws = new WebSocket('wss://localhost:3011', {
+const ws = new WebSocket('wss://localhost:3034', {
     rejectUnauthorized: false   // 忽略证书无效的问题
 });
 

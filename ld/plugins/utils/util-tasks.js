@@ -1,4 +1,3 @@
-
 const TaskType = {
     /** 运行的函数，参数是当前的任务 */
     fun: async (task) => task.end = true,

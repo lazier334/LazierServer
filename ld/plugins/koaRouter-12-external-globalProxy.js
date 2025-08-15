@@ -1,6 +1,7 @@
-import { fs, path } from './libs/baseImport.js'
+import result from './utils/util-result.js';
+import { fs, path } from './libs/baseImport.js';
 import { runDetachedCmd } from './utils/util-cmd.js';
-import result from './utils/util-result.js'
+
 const lc = {
     appName: 'GlobalProxy.exe',
     appPath: './ld/plugins/externals/global-proxy',

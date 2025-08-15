@@ -1,13 +1,9 @@
-
-export default compose;
-export { compose };
-
 /**
  * 手写中间件组合函数 (类似 koa-compose)
  * @param {Array<Function>} middlewares 中间件数组
  * @returns {Function} 组合后的中间件函数
  */
-function compose(middlewares) {
+export function compose(middlewares) {
     // 确保输入是数组
     if (!Array.isArray(middlewares)) {
         throw new TypeError('Middleware stack must be an array!');
@@ -65,3 +61,4 @@ function compose(middlewares) {
         return dispatch(0);
     };
 }
+export default compose;

@@ -22,6 +22,7 @@ export {
     authUser,
     userType
 }
+
 /**
  * 默认本机发起的请求信息全都是超级管理员
  * @param {*} ctx 

@@ -1,9 +1,6 @@
 import Router from '@koa/router';
-import { fs, path, config, importSysModule } from './libs/baseImport.js';
+import { fs, path, config } from './libs/baseImport.js';
 
-/** @type {import('../../src/libs/plugins.js')} */
-const pluginsModule = await importSysModule('plugins.js');
-const { plugins, pathDeduplication } = pluginsModule;
 const ENTRYTEMP = getEntry();
 const HARTEMP = getHarTemplate();
 const lc = {

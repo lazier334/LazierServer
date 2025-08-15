@@ -1,6 +1,6 @@
-import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
-import { restartSystem } from './libs/sys-restart.js'
 import send from 'koa-send';
+import { restartSystem } from './libs/sys-restart.js';
+import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
 
 const { plugins } = await getPluginsModule();
 /** @type {import('../../src/libs/utils.js')} */

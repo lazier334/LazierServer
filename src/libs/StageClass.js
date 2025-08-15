@@ -31,5 +31,4 @@ export class Stage {
         }
     }
 };
-
 export default Stage;

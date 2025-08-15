@@ -1,14 +1,15 @@
 import Koa from 'koa';
 import https from 'https';
-import { fs, path, config, getNowFileStorage } from './libs/config.js';
 import initKoa from './libs/initKoa.js';
 import websocketServer from './libs/websocketServer.js';
+import { fs, path, config } from './libs/config.js';
 import { plugins } from './libs/plugins.js';
 
 (async () => {
     const app = new Koa();
+    // 系统启动阶段
     await (await plugins('systemStart')).use({ fs, path, config, app });
-
+    // 初始化 koa
     await initKoa(app);
     // 创建 HTTPS 服务器
     https.createServer(config.SSLOptions, app.callback()).listen(config['portHttps'],

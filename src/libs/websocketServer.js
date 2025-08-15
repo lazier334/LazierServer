@@ -1,5 +1,5 @@
-import WebSocket, { WebSocketServer } from 'ws';
 import https from 'https';
+import WebSocket, { WebSocketServer } from 'ws';
 import { plugins } from './plugins.js';
 
 const inteCache = {};

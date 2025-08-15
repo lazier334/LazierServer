@@ -1,6 +1,6 @@
-import multer from '@koa/multer';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import multer from '@koa/multer';
 
 export default function uploadPluginMiddleware({
     allowedField = 'file',                     // 表单字段名

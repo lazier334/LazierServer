@@ -9,7 +9,6 @@ import { RateLimiterMemory } from 'rate-limiter-flexible';
 const lc = {
     moreLog: config.moreLog ? console.debug : () => { }
 }
-
 // 1. 创建纯内存限流器
 const loginRateLimiter = new RateLimiterMemory({
     points: 10,         // 允许10次尝试

@@ -1,7 +1,6 @@
 import { fs, path, config, getPluginsModule } from './baseImport.js';
-console.log('config.configDirPath', config.configDirPath)
+
 const { plugins } = await getPluginsModule();
-console.log(config.genProxyExportKeys)
 
 const conf = {
     devMode: false,

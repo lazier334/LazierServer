@@ -1,5 +1,5 @@
-import { fileURLToPath, pathToFileURL } from 'url';
 import path from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 // 挂载全局对象
 if (!process.G) process.G = { getNowFileStorage };
@@ -684,4 +684,3 @@ function getNowFileStorage(filepath) {
     }
     return process.G[fn];
 }
-

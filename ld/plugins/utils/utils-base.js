@@ -1,6 +1,7 @@
-import { fs, path } from '../libs/baseImport.js';
 import fsExtra from 'fs-extra';
 import xxhashWasm from 'xxhash-wasm';
+import { fs, path } from '../libs/baseImport.js';
+
 const xxhash = await xxhashWasm();
 
 export * from '../libs/baseImport.js';

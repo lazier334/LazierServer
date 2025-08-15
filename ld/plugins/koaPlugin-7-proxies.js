@@ -1,6 +1,6 @@
 
-import koaProxies from 'koa-proxies';
 import url from 'url';
+import koaProxies from 'koa-proxies';
 
 /**
  * koa中间件 koa请求代理插件 插件

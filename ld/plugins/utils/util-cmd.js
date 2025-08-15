@@ -1,6 +1,6 @@
-import { spawn } from 'child_process';
-import readline from 'readline';
 import iconv from 'iconv-lite';
+import readline from 'readline';
+import { spawn } from 'child_process';
 
 let rl;
 export default runCmd;
@@ -106,7 +106,11 @@ async function runCmd(cmd = 'echo hello world!', options) {
     });
 }
 
-/** 获取 rl */
+/** 
+ * 获取 rl  
+ * 可能会报错 Error: setRawMode EIO
+ * @throws {Error('Error: setRawMode EIO')}
+ */
 function getRL() {
     let rlCache = rl || readline.createInterface({
         input: process.stdin,
@@ -116,7 +120,8 @@ function getRL() {
     return rl;
 }
 /**
- * 没注意，基本不用，这是用于接收从控制台输入命令的函数
+ * ！注意，基本不用，这是用于接收从控制台输入命令的函数
+ * ！注意，使用可能会报错 Error: setRawMode EIO
  * @param {{
  *     map: Object.keys(functions),
  *     msg: ""

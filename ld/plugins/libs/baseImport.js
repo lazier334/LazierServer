@@ -1,6 +1,6 @@
 import fs from 'fs';
-import path from 'path';
 import app from 'koa';
+import path from 'path';
 import { pathToFileURL } from 'url';
 
 /** @type {import('../../../src/libs/config.js')} */

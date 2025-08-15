@@ -1,5 +1,7 @@
-// 聚合工具对象
-// util 为单纯工具函数，utils 为聚合后的完整工具模块
+/*
+    聚合工具对象
+    util 为单纯工具函数，utils 为聚合后的完整工具模块
+ */
 import * as cmd from './util-cmd.js';
 import * as auth from './util-auth.js';
 import * as crypto from './util-crypto.js';
