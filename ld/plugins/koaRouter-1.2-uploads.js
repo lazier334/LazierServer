@@ -38,11 +38,11 @@ async function checkFileExists(fileHash) {
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  * @param {import('@koa/router')} router 路由
  */
-export default function koaRouterDemo(router) {
+export default function koaRouterUploads(router) {
     // TUS协议端点
-    router.all(new RegExp(lc.BASEAPI + "/files(/.*)?$"), async (ctx) => {
+    router.all(new RegExp("/uploads/files(/.*)?$"), async (ctx) => {
         const server = new Server({
-            path: lc.BASEAPI + '/files',
+            path: '/uploads/files',
             datastore: new FileStore({ directory: lc.dbDir })
         });
 
@@ -71,7 +71,7 @@ export default function koaRouterDemo(router) {
     });
 
     // 初始化上传
-    router.all(lc.BASEAPI + '/init', async (ctx) => {
+    router.all('/uploads/init', async (ctx) => {
         const { filename, fileSize, fileHash } = ctx.request.body;
         const saveExistsAsName = ctx.request.saveName;
         const { exists, filename: existingFile } = await checkFileExists(fileHash);
@@ -98,7 +98,7 @@ export default function koaRouterDemo(router) {
 
         ctx.body = {
             fileId: xxhash.h32(filename + Date.now(), lc.xxhashSeed).toString(16),
-            tusEndpoint: lc.BASEAPI + '/files'
+            tusEndpoint: '/uploads/files'
         };
     });
 
@@ -106,7 +106,7 @@ export default function koaRouterDemo(router) {
      * 使用文件名下载可能会有文件名冲突导致下载的不是自己想要的文件
      * 所以推荐使用md5下载，并使用 dfn 或 downFilename 参数重命名
      */
-    router.all(lc.BASEAPI + '/down/:filename', async (ctx) => {
+    router.all('/uploads/down/:filename', async (ctx) => {
         let filename = ctx.params.filename || ctx.request.query.filename || ctx.request.body.filename;
         let dfn = ctx.request.query.dfn || ctx.request.body.dfn || ctx.request.query.downFilename || ctx.request.body.downFilename;
         if (filename) filename = decodeURIComponent(filename);
@@ -125,7 +125,7 @@ export default function koaRouterDemo(router) {
     /**
      * 删除文件
      */
-    router.all(lc.BASEAPI + '/delete/:filename', async (ctx) => {
+    router.all('/uploads/delete/:filename', async (ctx) => {
         let filename = ctx.params.filename || ctx.request.query.filename || ctx.request.body.filename;
         let delFile = ctx.request.query.delFile || ctx.request.body.delFile;
         if (filename) filename = decodeURIComponent(filename);
@@ -133,11 +133,11 @@ export default function koaRouterDemo(router) {
         ctx.body = info;
     });
 
-    router.all(lc.BASEAPI + '/list', async (ctx) => {
+    router.all('/uploads/list', async (ctx) => {
         ctx.body = db.listFile(ctx)
     });
 
-    router.all(lc.BASEAPI + '/ls', async (ctx) => {
+    router.all('/uploads/ls', async (ctx) => {
         const files = [];
         db.listFile(ctx).forEach(info => {
             info.filenameList.forEach(name => {

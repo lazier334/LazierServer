@@ -1,4 +1,6 @@
-import { fs, config } from './utils-base.js';
+import { fs, config, delay } from './utils-base.js';
+import { authAdmin, authUser } from './util-auth.js';
+import result from './util-result.js';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 
 /**
@@ -38,7 +40,15 @@ const loginLimiter =
     };
 
 // #region 导出工具
-export { loginLimiter, readHtml, clearGtag, clearShare, addProxyJs }
+export {
+    loginLimiter,
+    readHtml,
+    clearGtag,
+    clearShare,
+    addProxyJs,
+    readParamsAndSession,
+    warpApi
+}
 
 /**
  * 读取html文件
@@ -127,4 +137,52 @@ function showInfo(title, msg, si = '', ei = '', remark = '') {
     lc.moreLog(si, `-----↑${title}↑-------`, ei, remark)
 }
 
+// #endregion
+// #region router相关工具函数
+
+/**
+ * 读取session和参数
+ * @param {*} ctx 
+ * @returns {{session:'im-session'}} 
+ */
+function readParamsAndSession(ctx) {
+    let session;
+    try {
+        session = ctx.cookies.get(config.sessionKey)
+    } catch (error) {
+        console.debug('读取session失败', error)
+    }
+    return {
+        session,
+        ...ctx.request.query,
+        ...ctx.request.body
+    }
+}
+
+/**
+ * 包装api
+ * 出现异常的时候自动响应，但是会延迟1秒
+ * 会读取登录状态到 loginUser 里面，如果不需要登录就是 undefined 
+ * @param {(ctx:import('koa-router').RouterContext, next:()=>void, params: {
+ *  session:'im-session',
+ *  loginUser:userType|undefined,
+ *  [k:string]:any
+ *  })=>void } fun 可以是promise
+ * @param {boolean} login 是否不需要登录
+ * @param {boolean} admin 超级管理员
+ * @returns 
+ */
+function warpApi(fun, login, admin) {
+    return async (ctx, next) => {
+        try {
+            if (admin) authAdmin(ctx);
+            if (login) authUser(ctx);
+            return await fun(ctx, next, readParamsAndSession(ctx));
+        } catch (error) {
+            console.log(error)
+            ctx.body = result(error, '失败', 500)
+            await delay(1000);
+        }
+    }
+}
 // #endregion

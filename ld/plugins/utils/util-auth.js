@@ -20,9 +20,18 @@ const userType = allowAdmin;
 
 export {
     authUser,
-    userType
+    userType,
+    authAdmin
 }
 
+/**
+ * 默认本机发起的请求信息全都是超级管理员
+ * @param {*} ctx 
+ * @returns {allowAdmin} 用户信息
+ */
+function authAdmin(ctx) {
+    return !!authUser(ctx).isAdmin
+}
 /**
  * 默认本机发起的请求信息全都是超级管理员
  * @param {*} ctx 
@@ -31,8 +40,10 @@ export {
 function authUser(ctx) {
     try {
         if (allowLocalOnly(ctx)) return allowAdmin;
+        throw new Error('无访问权限！');
     } catch (error) {
-        console.log('权限校验失败', error)
+        console.log('权限校验失败', error);
+        throw error;
     }
 }
 

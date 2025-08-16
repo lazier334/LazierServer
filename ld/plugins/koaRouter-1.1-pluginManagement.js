@@ -88,7 +88,7 @@ export default function koaRouterManagement(router) {
             });
             return ctx.body = result(config.excludePlugins);
         } else {
-            ctx.body = result(fp, '路径无效', false, 500);
+            ctx.body = result(fp, '路径无效', 500);
         }
     });
 
@@ -129,7 +129,7 @@ export default function koaRouterManagement(router) {
         // 调用下载组件进行文件下载，下载到指定的位置，和上传功能传到的地方一致，除了文件名不一样
         let url = ctx.request.body.pluginUrl;
         if (lc.downloadStatus) {
-            return ctx.body = result(lc.downloadStatus, '正在下载中', false, 500);
+            return ctx.body = result(lc.downloadStatus, '正在下载中', 500);
         } else {
             lc.downloadStatus = url;
             downloadFileToPath(url, lc.downloadFilePath, url).then(filepath => {
@@ -238,7 +238,7 @@ export default function koaRouterManagement(router) {
             code = 500;
             msg = error.message;
         }
-        ctx.body = result(re, msg, code == 200, code);
+        ctx.body = result(re, msg, code);
     });
 
 
@@ -276,7 +276,7 @@ export default function koaRouterManagement(router) {
                 code = 500;
             }
         }
-        return ctx.body = result(re, msg, code == 200, code);
+        return ctx.body = result(re, msg, code);
     });
 
     router.all('管理路由 - 检查临时文件的冲突', '/plugin-mgmt/api/checkFilesConflict', async (ctx, next) => {

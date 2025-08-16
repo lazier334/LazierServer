@@ -11,6 +11,7 @@ export {
     calculateFileHash,
     compareDirectories,
     getRelativeFilePaths,
+    delay,
 }
 
 /**
@@ -134,4 +135,13 @@ async function getRelativeFilePaths(dir) {
 
     await scan(dir);
     return files;
+}
+
+/**
+ * 延时，单位 ms
+ * @param {*} ms 
+ * @returns 
+ */
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

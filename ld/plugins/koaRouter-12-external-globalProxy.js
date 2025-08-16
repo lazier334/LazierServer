@@ -36,7 +36,7 @@ export default function koaRouterExternalGlobalProxy(router) {
             code = 200
         }
         // 请求指定的端口查看是否正常
-        ctx.body = result(re, undefined, code == 200, code);
+        ctx.body = result(re, undefined, code);
     });
 
     return router
