@@ -21,6 +21,10 @@ export default function koaRouterOther(router) {
         if (params.decode) ctx.body = globalUtils.encryptor.decrypt(params.data, params.key);
         else ctx.body = globalUtils.encryptor.encrypt(params.data, params.key);
     }));
+    router.all('其他接口 - 获取session', '/other/getSession', globalUtils.warpApi((ctx, next, params) => {
+        ctx.session.userId = Date.now();
+        ctx.body = '已设置';
+    }));
 
     return router
 };

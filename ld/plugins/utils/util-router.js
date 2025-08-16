@@ -148,7 +148,7 @@ function showInfo(title, msg, si = '', ei = '', remark = '') {
 function readParamsAndSession(ctx) {
     let session;
     try {
-        session = ctx.cookies.get(config.sessionKey)
+        session = ctx.cookies.get(config.session.key)
     } catch (error) {
         console.debug('读取session失败', error)
     }

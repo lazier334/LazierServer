@@ -510,7 +510,21 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         setStack: 'ls-set-stack',
     },
     /** 临时下载的文件的目录 */
-    tempDownDir: `${ldDirName}/web/temporary`
+    tempDownDir: `${ldDirName}/web/temporary`,
+    /**
+     * koa的对象
+     * @type {import('koa')}
+     */
+    app: null,
+    /** session相关 */
+    session: {
+        /** 名字 */
+        key: 'ls',
+        /** 有效期 20 个小时 */
+        maxAge: 20 * 60 * 60 * 1000,
+        /** 加密秘钥 */
+        keys: ['lazier-server_secret_key']
+    },
 };
 {   // 添加版本号按钮
     const ver = readVersion();

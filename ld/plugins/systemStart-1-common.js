@@ -10,4 +10,7 @@ export default async function systemStartCommon({ fs, path, config, app }) {
         console.warn('开发环境插件 proxy.js 不存在，生成该插件');
         await (await import(config.configDirPath + '/genProxy.js')).default('proxy.js');
     }
+
+    config.app = app;
+    app.keys = config.session.keys;
 }
