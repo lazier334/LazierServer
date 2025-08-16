@@ -487,8 +487,17 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         openAddAppStack: true,
     },
     /** 
-     * 额外的路由，用于挂载对象
+     * 额外的路由，用于挂载对象，主要用于做路由提示，并非实际业务代码
      * @type {{[key: string]: import('@koa/router')}}
+     * @example
+     * ```js
+     *  // 获取附加路由
+     *  var additionalRouter = config.additionalRouter[import.meta.filename] || new Router();
+     *  if (!config.additionalRouter[import.meta.filename]) {
+     *      config.additionalRouter[import.meta.filename] = additionalRouter;
+     *      additionalRouter.all('接口说明','/apiName', ()=>{});
+     *  }
+     * ```
      */
     additionalRouter: {},
     /** 配置所在的文件夹路径 */

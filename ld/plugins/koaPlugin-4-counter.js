@@ -1,5 +1,16 @@
+import Router from '@koa/router';
+
 /** @type {import('../../src/libs/config.js')} */
 const { config } = process.G;
+var cacheErrorApis = {};
+
+/** 额外的路由 */
+var additionalRouter = config.additionalRouter[import.meta.filename] || new Router();
+if (!config.additionalRouter[import.meta.filename]) {
+    config.additionalRouter[import.meta.filename] = additionalRouter;
+    additionalRouter.all('获取响应代码为400及以上的接口访问数据','/cacheErrorApis', ()=>{});
+    additionalRouter.all('清空响应代码为400及以上的接口访问数据','/cacheErrorApisClear', ()=>{});
+}
 
 /**
  * koa中间件 计数器 插件
@@ -20,6 +31,14 @@ export default async function koaPluginCounter(ctx, next) {
     }
     if (config.logger.req) console.log(`--> ${ctx.method} ${ctx.url} ${JSON.stringify(reqInfo)}`);
     try {
+        if (ctx.url == '/cacheErrorApis') {
+            return ctx.body = cacheErrorApis;
+        }
+        if (ctx.url == '/cacheErrorApisClear') {
+            ctx.body = cacheErrorApis;
+            cacheErrorApis = {};
+            return ctx.body;
+        }
         await next();
         if (400 <= ctx.status && ctx.status < 500 && ctx.body == undefined) {
             const code = ctx.status;
@@ -39,4 +58,11 @@ export default async function koaPluginCounter(ctx, next) {
     }
     if (ctx.sendFileFromPath) ctx.set(config.headerNames.fileFrom, encodeURI(ctx.sendFileFromPath));
     if (config.logger.resp) console.log(`<-${400 <= ctx.status ? "x" : "-"}- [${ctx.status} ${ctx.method} ${Date.now() - start}ms] ${ctx.url}${ctx.sendFileFromPath ? ` (from: ${ctx.sendFileFromPath})` : ""}`);
+    if (400 <= ctx.status) {
+        if (!cacheErrorApis[ctx.status]) {
+            cacheErrorApis[ctx.status] = {};
+        }
+        const pathname = ctx.url.split('?').shift();
+        cacheErrorApis[ctx.status][pathname] = Date.now();
+    }
 }
