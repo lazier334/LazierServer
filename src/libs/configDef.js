@@ -485,6 +485,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         indexUseProdMode: false,
         /** 开启添加栈追踪 */
         openAddAppStack: true,
+        /** 处理html接口数据内容 */
+        handlerHtmlBodyData: true,
     },
     /** 
      * 额外的路由，用于挂载对象，主要用于做路由提示，并非实际业务代码

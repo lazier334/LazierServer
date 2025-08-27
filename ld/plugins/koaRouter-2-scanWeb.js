@@ -1,5 +1,6 @@
 import send from 'koa-send';
 import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
+import { handlerHtmlBodyData, isHandlerHtmlBodyData } from './utils/util-router.js';
 
 const { plugins, pathDeduplication } = await getPluginsModule();
 /** @type {import('../../src/libs/utils.js')} */
@@ -86,6 +87,20 @@ async function sendFile(ctx, filepath, opts) {
             ctx.body = JSON.parse(data);
             return;
         } catch (err) { }
+    }
+    if (isHandlerHtmlBodyData(ctx)) {
+        const bodyFP = path.join(sendOptions.opts.root, sendOptions.filename);
+        // 修改读取的文件名
+        sendOptions.filename = sendOptions.filename + '.edit' + path.extname(sendOptions.filename);
+        const newBodyFP = path.join(sendOptions.opts.root, sendOptions.filename);
+        if (!fs.existsSync(newBodyFP)) {
+            // 不存在修改后的文件则进行创建
+            const body = fs.readFileSync(bodyFP, 'utf8');
+            const newBody = handlerHtmlBodyData(ctx, body);
+            // 创建文件
+            fs.writeFileSync(newBodyFP, newBody);
+            console.info('已成功编辑html接口文件', newBodyFP);
+        }
     }
     return await send(sendOptions.ctx, sendOptions.filename, sendOptions.opts);
 }

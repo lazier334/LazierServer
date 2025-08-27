@@ -1,5 +1,6 @@
 import Router from '@koa/router';
 import { fs, path, config } from './libs/baseImport.js';
+import { handlerHtmlBodyData } from './utils/util-router.js';
 
 const ENTRYTEMP = getEntry();
 const HARTEMP = getHarTemplate();
@@ -64,7 +65,7 @@ function sendEntries(ctx, entries) {
         if (content.encoding) {
             body = Buffer.from(body, content.encoding)
         }
-        ctx.body = body
+        ctx.body = handlerHtmlBodyData(ctx, body)
     } catch (err) {
         console.warn('Har设置响应内容失败', err)
     }

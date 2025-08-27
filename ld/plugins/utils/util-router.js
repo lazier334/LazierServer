@@ -47,7 +47,9 @@ export {
     clearShare,
     addProxyJs,
     readParamsAndSession,
-    warpApi
+    warpApi,
+    handlerHtmlBodyData,
+    isHandlerHtmlBodyData,
 }
 
 /**
@@ -64,7 +66,7 @@ function readHtml(filepath, ctx) {
  * 给字符串删除分享信息标签
  * @param {string} body 
  */
-function clearGtag(body) {
+function clearShare(body) {
     try {
         const shareIndex = body.indexOf('meta property="og:url"');
         if (-1 < shareIndex) {
@@ -83,7 +85,7 @@ function clearGtag(body) {
  * 给字符串删除gtag标签
  * @param {string} body 
  */
-function clearShare(body) {
+function clearGtag(body) {
     try {
         const gtagIndex = body.indexOf('.com/gtag');
         if (-1 < gtagIndex) {
@@ -105,14 +107,14 @@ function clearShare(body) {
 function addProxyJs(body) {
     try {
         // ## 添加标签
-        body = body.split(config["index-insertCode"]).join('')
+        body = body.split(config.indexInsertCode).join('')
             .split(`<script src="/proxy.js"></script>`).join('')
-            .split(`<script src='/proxy.js'></script>`).join('');;
+            .split(`<script src='/proxy.js'></script>`).join('');
         if (body.includes('proxy.js')) console.warn('可能已有本地插件的代码');
         else {
             const si = body.indexOf('<script');
-            body = body.substring(0, si) + config["index-insertCode"] + body.substring(si);
-            showInfo('已自动填充插件代码', config["index-insertCode"], si, si);
+            body = body.substring(0, si) + config.indexInsertCode + body.substring(si);
+            showInfo('已自动填充插件代码', config.indexInsertCode, si, si);
         }
     } catch (error) {
         console.error('自动添加插件代码失败', error);
@@ -132,9 +134,9 @@ function addProxyJs(body) {
  * @param {string} remark 备注
  */
 function showInfo(title, msg, si = '', ei = '', remark = '') {
-    lc.moreLog(si, `-----↓${title}↓-------`, ei, remark)
-    lc.moreLog(msg)
-    lc.moreLog(si, `-----↑${title}↑-------`, ei, remark)
+    lc.moreLog(si, `-----↓${title}↓-------`, ei, remark);
+    lc.moreLog(msg);
+    lc.moreLog(si, `-----↑${title}↑-------`, ei, remark);
 }
 
 // #endregion
@@ -185,4 +187,34 @@ function warpApi(fun, login, admin) {
         }
     }
 }
+
+/**
+ * 可以自定义实现这个函数  
+ * 处理 html 接口的 body 的数据，但是不会设置到 ctx.body
+ * @param {import('koa-router').RouterContext} ctx 
+ * @param {string} body 
+ * @returns {string}
+ */
+function handlerHtmlBodyData(ctx, body) {
+    if (isHandlerHtmlBodyData(ctx)) {
+        if (body instanceof Buffer) {
+            body = body.toString();
+        }
+        body = addProxyJs(body);
+        body = clearGtag(body);
+    }
+    return body
+}
+/**
+ * 可以自定义实现这个函数  
+ * 是否可以操作 html 接口数据
+ * @param {import('koa-router').RouterContext} ctx 
+ * @returns {boolean}
+ */
+function isHandlerHtmlBodyData(ctx) {
+    return config.switch.handlerHtmlBodyData
+        && (ctx.path.endsWith('.html')
+            || ctx.path.endsWith('.htm'))
+}
+
 // #endregion
