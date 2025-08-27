@@ -7,7 +7,8 @@ const { safeEnsureDirSync } = require("./common.js");
 module.exports = pluginType(async function (entry, config, next) {
     const lc = config.getStorage(__filename);
     const url = new URL(entry.request.url);
-    const filePath = path.join(config.outputDir, decodeURIComponent(url.hostname), decodeURIComponent(url.pathname));
+    let filePath = path.join(config.outputDir, decodeURIComponent(url.hostname), decodeURIComponent(url.pathname));
+    filePath = filePath.split('/').map(e => e.split('\\').map(p => encodeURIComponent(p)).join('/')).join('/');
 
     // 处理图片
     lc.fileData = {

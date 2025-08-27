@@ -20,14 +20,22 @@ export default function koaRouterScanWeb(router) {
     // 接口：全局，所有没有被拦截的都将跳到这里发送文件
     router.all(new RegExp('/(.*)'), async (ctx, next) => {
         let api = ctx.path;
-
         let domainDirs = {};
+
         // 如果开启了全部文件夹，那么重新扫描
         (config.switch.allDir ? (domainList = getAllDir(config.rootDir)) : domainList).forEach(dir => {
             let fp = path.join(dir, api);
-            if (fs.existsSync(fp) || (fs.existsSync((fp = decodeURIComponent(fp))))) {
-                if (fs.statSync(fp).isFile()) domainDirs[dir] = fp;
-            }
+            let dfp = decodeURIComponent(fp);
+            let efp = dfp.split('/').map(e => e.split('\\').map((p, i) => {
+                if (i == 0 && p.endsWith(':')) return p;
+                return encodeURIComponent(p);
+            }).join('/')).join('/');
+
+            [fp, dfp, efp].forEach(f => {
+                if (fs.existsSync(f)) {
+                    if (fs.statSync(f).isFile()) domainDirs[path.dirname(f)] = f;
+                }
+            });
         })
 
         let filepath = await selectFileByDomains(ctx, domainDirs, api);
@@ -66,20 +74,6 @@ export default function koaRouterScanWeb(router) {
 async function sendFile(ctx, filepath, opts) {
     let fp = path.join(opts.root, filepath);
     ctx.sendFileFromPath = fp;
-
-    let fpd = decodeURIComponent(fp);
-    if (fp != fpd) {
-        // 尝试生成一个解码后的文件
-        if (!fs.existsSync(fpd)) {
-            console.info('[正在生成解码路径的文件]', fpd);
-            fs.mkdirSync(path.dirname(fpd), { recursive: true });
-            fs.copyFileSync(fp, fpd);
-        }
-        console.warn('[正在读取解码路径的文件]', fpd)
-        ctx.sendFileFromPath = fpd;
-        opts.root = path.dirname(fpd);
-        filepath = path.basename(fpd);
-    }
 
     const sendOptions = { ctx, filename: filepath, opts };
     const sends = (await plugins('send')).data;

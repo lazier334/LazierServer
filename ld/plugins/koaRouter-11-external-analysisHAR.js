@@ -9,20 +9,25 @@ import { handleParams, baseDir } from './externals/gen-web-by-har/ls-startBefore
  */
 export default function koaRouterExternalAnalysisHAR(router) {
     router.all('外部插件-解析har文件', '/external/analysisHAR', async (ctx, next) => {
-        const { inputFile, outputDir } = ctx.request.body;
-        const lif = path.join(baseDir, inputFile);
-        const lod = path.join(baseDir, outputDir);
+        const {
+            inputFile,
+            /** 使用 '../../../web/' 参数即可将路径定位到 web 文件夹 */
+            outputDir = 'output'
+        } = ctx.request.body;
+        console.log('baseDir, inputFile', baseDir, inputFile)
+        const infile = path.join(baseDir, inputFile);
+        const outdir = path.join(baseDir, outputDir);
         let re = '';
-        if (!(inputFile && fs.existsSync(lif) && fs.statSync(lif).isFile())) re = '参数inputFile合并后不是一个文件的路径: ' + lif;
-        else if ((outputDir && fs.existsSync(lod) && fs.statSync(lod).isFile())) re = '参数outputDir合并后不是一个文件夹的路径，他是一个文件 ' + lod;
+        if (!(inputFile && fs.existsSync(infile) && fs.statSync(infile).isFile())) re = '参数inputFile合并后不是一个文件的路径: ' + infile;
+        else if ((outputDir && fs.existsSync(outdir) && fs.statSync(outdir).isFile())) re = '参数outputDir合并后不是一个文件夹的路径，他是一个文件 ' + outdir;
         else {
-            if (!fs.existsSync(lod)) {
+            if (!fs.existsSync(outdir)) {
                 // 创建输出文件夹
-                fs.mkdirSync(lod, { recursive: true })
+                fs.mkdirSync(outdir, { recursive: true })
             }
             // 设置参数
             await handleParams(inputFile, outputDir, true, true);
-            // 通过cmd运行第三方插件项目 参数是 inputFile, outputDir
+            // 通过cmd运行第三方插件项目
             re = await runCmd(`cd ./ld/plugins/externals/gen-web-by-har && npm run gen`);
         }
         ctx.body = result(re);
