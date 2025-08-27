@@ -54,7 +54,7 @@ export default function koaRouterScanWeb(router) {
             });
             Object.entries(files).forEach(([k, v]) => {
                 if (1 < v.length) {
-                    console.info(`<=${v.length}= [存在${v.length}个文件在目录"${k}"中]`, v)
+                    console.info(`<=${v.length}= [存在${v.length}个文件在目录中"${k}"]`, v)
                 }
             })
         })
