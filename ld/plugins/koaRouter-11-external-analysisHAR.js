@@ -14,7 +14,6 @@ export default function koaRouterExternalAnalysisHAR(router) {
             /** 使用 '../../../web/' 参数即可将路径定位到 web 文件夹 */
             outputDir = 'output'
         } = ctx.request.body;
-        console.log('baseDir, inputFile', baseDir, inputFile)
         const infile = path.join(baseDir, inputFile);
         const outdir = path.join(baseDir, outputDir);
         let re = '';

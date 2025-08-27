@@ -25,18 +25,38 @@ export default function koaRouterScanWeb(router) {
 
         // 如果开启了全部文件夹，那么重新扫描
         (config.switch.allDir ? (domainList = getAllDir(config.rootDir)) : domainList).forEach(dir => {
-            let fp = path.join(dir, api);
-            let dfp = decodeURIComponent(fp);
-            let efp = dfp.split('/').map(e => e.split('\\').map((p, i) => {
+            let fp = toAbsolutePath(path.join(dir, api));
+            let dfp = toAbsolutePath(decodeURIComponent(fp));
+            let efp = toAbsolutePath(dfp.split('/').map(e => e.split('\\').map((p, i) => {
                 if (i == 0 && p.endsWith(':')) return p;
                 return encodeURIComponent(p);
-            }).join('/')).join('/');
+            }).join('/')).join('/'));
 
+            let files = {};
             [fp, dfp, efp].forEach(f => {
                 if (fs.existsSync(f)) {
-                    if (fs.statSync(f).isFile()) domainDirs[path.dirname(f)] = f;
+                    if (fs.statSync(f).isFile()) {
+                        const fDir = path.dirname(f);
+                        const fname = path.basename(f);
+                        // 同一个文件夹中存在多个文件时按照 fp、dfp、efp 的顺序选择优先匹配项
+                        if (!domainDirs[fDir]) {
+                            domainDirs[fDir] = f
+                        }
+                        if (files[fDir]) {
+                            if (!files[fDir].includes(fname)) {
+                                files[fDir].push(fname)
+                            }
+                        } else {
+                            files[fDir] = [fname]
+                        }
+                    }
                 }
             });
+            Object.entries(files).forEach(([k, v]) => {
+                if (1 < v.length) {
+                    console.info(`<=${v.length}= [存在${v.length}个文件在目录"${k}"中]`, v)
+                }
+            })
         })
 
         let filepath = await selectFileByDomains(ctx, domainDirs, api);
@@ -151,4 +171,9 @@ function pushDir(dirs) {
     dirs.push('public');    // 主文件夹
     dirs = pathDeduplication(dirs);
     return dirs;
+}
+
+/** 获取绝对路径 */
+function toAbsolutePath(p) {
+    return path.resolve(path.normalize(p));
 }
