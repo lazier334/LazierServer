@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const { safeEnsureDirSync } = require("./common.js");
 
 const lc = {
-    open: false,
+    open: true,
     filename: ".apimap.json",
     filenamePrefix: ".apis"
 }
