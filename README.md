@@ -13,9 +13,7 @@
 ### 1. 下载项目
 * 使用git命令克隆main分支 `git clone https://github.com/lazier334/LazierServer.git`
 * 或[下载main分支压缩包](https://github.com/lazier334/LazierServer/archive/refs/heads/main.zip)
-* 或[下载手动滚动发布版本main分支](https://github.com/lazier334/LazierServer/releases/download/%E6%89%8B%E5%8A%A8%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83/LazierServer-main.zip)
-* 或[下载手动滚动发布版本main分支源码.zip `Source code (zip)`](https://github.com/lazier334/LazierServer/archive/refs/tags/%E6%89%8B%E5%8A%A8%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83.zip)
-* 或[下载手动滚动发布版本main分支源码.tar.gz `Source code (tar.zip)`](https://github.com/lazier334/LazierServer/archive/refs/tags/%E6%89%8B%E5%8A%A8%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83.tar.gz)
+* 或[下载手动滚动发布版本main分支](https://github.com/lazier334/LazierServer/releases/download/%E6%89%8B%E5%8A%A8%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83/LazierServer-main.zip)，**滚动发布版本tag中的源码不是最新版**
 
 ### 2. 在项目目录中使用命令 `npm i` 安装依赖
 * 运行命令 `npm i`
