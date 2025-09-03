@@ -4,6 +4,6 @@
  * @param {{"api.demo.com": "api.demo.com/assets/index.js", "m.demo.com": "m.demo.com/assets/index.js"}} domainsMap 域名映射列表
  * @param {import('koa').Context} ctx koa的上下文
  */
-export default function koaRouterSystem(domains, domainsMap, ctx) {
+export default function selectFileByDomainsDemo(domains, domainsMap, ctx) {
     return domains[0]
 }

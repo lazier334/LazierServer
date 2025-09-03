@@ -1,7 +1,7 @@
 /**
  * 列表插件的demo
  */
-export default async function (arr) {
+export default async function indexDataDemo(arr) {
     arr.push(...[
         {
             icon: "",

@@ -127,7 +127,7 @@ export default function koaRouterSystem(router) {
     // 接口: 读取搜索快捷关键词按钮数据
     router.all('系统路由 - 读取搜索快捷关键词按钮数据', '/system/searchButsData', async (ctx) => {
         const fp = path.join(config.dataPath, 'searchButsData.json');
-        if (!fs.existsSync(fp)) fs.writeFileSync(fp, '{"searchKeywordButs":["清空数据","a","b","c"],"searchButtomButs":["清空数据","美元","英语","中文"]}');
+        if (!fs.existsSync(fp)) fs.writeFileSync(fp, '{"searchKeywordButs":["清空数据","a","b","c"],"searchButtomButs":["清空数据","英语","中文"]}');
         ctx.body = result(readUpdateFile(fp, (data) => JSON.parse(data)));
     });
 

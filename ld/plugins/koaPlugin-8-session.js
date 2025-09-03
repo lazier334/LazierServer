@@ -9,6 +9,6 @@ const sessionMiddleware = session(config.session, config.app);
  * @param {import('koa').Context} ctx
  * @param {import('koa').Next} next
  */
-export default async function koaPluginProxies(ctx, next) {
+export default async function koaPluginSession(ctx, next) {
     return await sessionMiddleware(ctx, next)
 }

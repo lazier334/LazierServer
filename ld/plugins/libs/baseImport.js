@@ -14,7 +14,14 @@ else {
 }
 
 export {
-    fs, path, config, app, importSysModule, getPluginsModule, getUtilsModule, getConfigModule
+    fs,
+    app,
+    path,
+    config,
+    getUtilsModule,
+    getConfigModule,
+    importSysModule,
+    getPluginsModule,
 }
 
 async function importSysModule(mod) {

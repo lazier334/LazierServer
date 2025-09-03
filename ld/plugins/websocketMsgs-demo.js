@@ -1,7 +1,7 @@
 /**
  * ws自动响应的数据示例
  */
-export default async function (arr) {
+export default async function websocketMsgsDemo(arr) {
   arr.push(...[
     {
       "type": "receive",

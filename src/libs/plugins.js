@@ -1,22 +1,21 @@
 import Stage from './StageClass.js';
-import { fs, path, config } from "./config.js";
 import { pathToFileURL } from 'url';
+import { fs, path, config } from "./config.js";
 
 /**
- * 这是插件化的核心内容，提供各个阶段的插件，对外提供以下拓展项，编写插件使用前缀+任意+.js即可，例如 `systemStart-morePlugin.js`
+ * 这是插件化的核心内容，提供各个阶段的插件，阶段名称自取即可，编写插件使用前缀+任意+.js即可，例如 `systemStart-morePlugin.js`  
+ * 阶段示例:
+ *  - systemStart: 系统启动阶段
+ *  - koaPlugin: koa插件
+ *  - koaRouter: 接口路由
+ *  - selectFileByDomains: 选择域名
+ *  - genProxy: 构建网页插件的函数插件
+ *  - indexData: 首页列表数据
+ *  - websocketMsgs: websocket消息
+ *  - websocketApis: websocket接口
+ *  - send: 发送文件的处理
  */
-const stages = {
-    systemStart: '系统启动阶段',
-    koaPlugin: 'koa插件',
-    koaRouter: '接口路由',
-    selectFileByDomains: '选择域名',
-    genProxy: '构建网页插件的函数插件',
-    indexData: '首页列表数据',
-    websocketMsgs: 'websocket消息',
-    websocketApis: 'websocket接口',
-    cmd: '命令工具',
-    send: '发送文件的处理',
-};
+const stages = {};
 if (typeof config.pluginStages != 'object') {
     config.pluginStages = {}
 }
