@@ -3,8 +3,6 @@
 # LazierServer
 一个可以快速搭建的服务器
 
-# 基于 [LocalServer](#lazierserver) 改进的一个可以快速搭建伪站点的服务器
-
 # 核心技术栈
 **`Brain` + `Koa` + `Vue` + `NaiveUI`**
 
