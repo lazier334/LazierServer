@@ -776,6 +776,7 @@
                 if (value == '清空数据') value = '';
                 if (this.inputToInfo) this.store.searchKeyword = value;
                 else this.store.searchButtom = value;
+                this.debouncedHandleData();
             },
             handleCmds() {
                 // 将 cmds 转成项目 cmdsData
