@@ -402,7 +402,7 @@
             copyLinkStatus: false,
             autoCompleteStatus: false,
             currentPage: 1,
-            pageSize: 10,
+            pageSize: parseInt((new URLSearchParams(location.search)).get("pageSize")) || 10,
             pageSizes: [10, 20, 30, 40, 100, 200, 300, 500, 1000, 3000, 5000, 10000],
             title: "",  // 未使用，在顶部增加一行文字
             loading: {},
