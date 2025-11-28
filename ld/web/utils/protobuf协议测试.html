@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proto与JS代码测试工具</title>
+    <script src="https://cdn.jsdelivr.net/npm/protobufjs/dist/protobuf.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7f9;
+            color: #333;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-section,
+        .output-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .output-section {
+            grid-column: span 2;
+        }
+
+        h2 {
+            color: #3498db;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        textarea {
+            width: 100%;
+            /* height: 150px; */
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        #log {
+            height: 200px;
+            background-color: #f8f9fa;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .log-error {
+            color: #e74c3c;
+            background-color: #fdeded;
+        }
+
+        .log-success {
+            color: #27ae60;
+            background-color: #e6f7ee;
+        }
+
+        .log-info {
+            color: #3498db;
+        }
+
+        .timestamp {
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+
+        .instructions {
+            background-color: #e6f7ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .but {
+            background-color: #3498db;
+            /* 主蓝色，与页面h2颜色一致 */
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-left: 10px;
+        }
+
+        .but:hover {
+            background-color: #2980b9;
+            /* 深一点的蓝色 */
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .but:active {
+            background-color: #21618c;
+            /* 更深的蓝色 */
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .but:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Proto与JS代码测试工具</h1>
+
+    <div class="instructions">
+        <p><strong>使用说明：</strong>在下面三个输入框中分别输入Proto定义和两段JS代码。当输入框失去焦点时，系统会自动执行：先加载Proto对象，然后依次运行两段JS代码。执行结果和错误信息将显示在底部日志区域。Proto排序结果需手动复制，仅解析处理部分常见格式。
+        </p>
+    </div>
+
+    <div class="container">
+        <div class="input-section">
+            <h2>Proto 定义</h2>
+            <label for="proto-input">输入Proto内容 (将加载为Proto对象):</label>
+            <textarea id="proto-input" rows="30" placeholder="示例:
+syntax = &#34;proto3&#34;;
+package mypackage;
+
+message Person {
+  string name = 1;
+  int32 id = 2;
+  string email = 3;
+}"></textarea>
+        </div>
+
+        <div class="input-section">
+            <h2>JS 代码</h2>
+            <label for="js1-input">第一段JS代码: <em>function(context){</em></label>
+            <textarea id="js1-input" rows="11" placeholder="示例:
+// 可以在这个输入框中定义数据内容并挂载到 context 对象上
+context.data = '123456';
+
+// 参数的定义
+// var context = {
+//     protoRoot: protoRoot,
+//     messageTypes: messageTypes,
+//     log: (message) => addLog(`[Console] ${message}`, 'info'),
+//     error: (message) => addLog(`[Console.Error] ${message}`, 'error')
+// }
+"></textarea>
+
+            <label for="js2-input"><em>}</em> 第二段JS代码: <em>function(context){</em></label>
+            <textarea id="js2-input" rows="11" placeholder="示例:
+// 读取上一段代码添加的数据
+context.log(context.data);
+
+// 创建Person消息实例
+const Person = protoRoot.lookup('Person');
+const person = Person.create({ name: &#34;张三&#34;, id: 101, email: &#34;zhangsan@example.com&#34; });
+console.log(&#34;Person对象创建成功:&#34;, person);
+
+// 序列化消息
+const buffer = Person.encode(person).finish();
+console.log(&#34;序列化后的字节数组:&#34;, buffer);
+
+// 反序列化消息
+try {
+    const decodedPerson = Person.decode(buffer);
+    console.log(&#34;反序列化后的Person对象:&#34;, decodedPerson);
+    console.log(&#34;姓名:&#34;, decodedPerson.name);
+} catch (e) {
+    console.error(&#34;反序列化出错:&#34;, e.message);
+}"></textarea>
+            <label for="js2-input"><em>}</em></label>
+        </div>
+
+        <div class="output-section">
+            <h2> 执行日志
+                <button id="clearLog" class="but" onclick="clearLog()">清理日志</button>
+                <button id="runCode" class="but" onclick="handleBlur()">运行代码</button>
+                <button id="sortProto" class="but" onclick="sortProto()">排序PB</button>
+            </h2>
+            <label for="log">执行输出和错误信息:</label>
+            <div id="log"></div>
+        </div>
+        <div class="output-section">
+            <h2>Proto 排序结果</h2>
+            <label for="proto-output">排序后的Proto数据 (需手动复制):</label>
+            <textarea id="proto-output" rows="30" placeholder="..."></textarea>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量存储Proto根对象和消息类型
+        let protoRoot = null;
+        let messageTypes = {};
+        const context = {};
+
+        // 获取页面元素
+        const protoOutput = document.getElementById('proto-output');
+        const protoInput = document.getElementById('proto-input');
+        const js1Input = document.getElementById('js1-input');
+        const js2Input = document.getElementById('js2-input');
+        const logOutput = document.getElementById('log');
+        protoInput.value = `syntax = "proto3";
+// package 的数据可能不正确，根据实际情况修改
+// 如果需要导包，请手动导入
+package aviatorProto;
+option js_namespace = "type.googleapis.com";
+
+message Info {
+    string serverHash = 1;
+    double maxWin = 2;
+    int32 roomState = 3;
+}
+message SyncRate {
+    double rate = 1;
+    Timestamp now = 2;
+}
+message CashOut {
+    double myRate = 1;
+    double win = 2;
+    Timestamp now = 3;
+    double coin = 4;
+    string err = 5;
+    string serverHash = 6;
+    double endRate = 7;
+    bool hasBonus = 8;
+}
+message BetReq {
+    double bet = 1;
+    double autoRate = 2;
+    string clientSeed = 3;
+    bool useBonus = 4;
+    bool useFree = 5;
+}
+message BetResp {
+    int64 roundIndex = 1;
+    Timestamp now = 2;
+    repeated BonusRate bonusRate = 4;
+    bool hasBonus = 5;
+    bool useFree = 6;
+}
+message BonusRate {
+    double rate = 1;
+    double odds = 2;
+}
+message CoinResp {
+    double coin = 1;
+}
+message CashOutReq {
+}
+message BonusResp {
+    double bonusBar = 1;
+    double bonusMaxRate = 2;
+    double bonusAdd = 3;
+    double bonusRound = 4;
+}
+message FastWinList {
+    repeated FastWinHistory list = 1;
+}
+message FastWinHistory {
+    string nickname = 1;
+    int32 gameID = 2;
+    double odds = 3;
+    double win = 4;
+}
+message FastUseItemResp {
+    double win = 1;
+    repeated double odds = 2;
+    uint32 itemID = 3;
+    double winOdds = 4;
+}
+message Timestamp {
+    int64 seconds = 1;
+    int32 nanos = 2;
+}
+`;
+
+        js1Input.value = `context.base64ToUint8Array = function base64ToUint8Array(base64) {
+    // 解码 Base64 字符串为二进制字符串
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+
+    // 将二进制字符串转换为 Uint8Array
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+}
+
+context.data = {
+    "time": "2025/9/16 15:09:01",
+    "data": {
+        "type": 13,
+        "data": context.base64ToUint8Array("CSlcj8L1KPA/EgwIjJqkxgYQ2IzssQI=")
+    },
+    "decode": {
+        "rate": 1.01,
+        "now": {
+            "seconds": "1758006540",
+            "nanos": 641402456
+        }
+    }
+}`;
+
+        js2Input.value = `return protoRoot.lookup("SyncRate").decode(context.data.data.data)`;
+        // 添加日志函数
+        function addLog(message, type = 'info') {
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+
+            const now = new Date();
+            const timestamp = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+
+            logEntry.innerHTML = `<span class="timestamp">${timestamp}</span>${message}`;
+            logOutput.appendChild(logEntry);
+
+            // 自动滚动到底部
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        // 清空日志
+        function clearLog() {
+            logOutput.innerHTML = '';
+        }
+
+        // 加载Proto定义
+        function loadProtoDefinition() {
+            const protoText = protoInput.value.trim();
+            if (!protoText) {
+                addLog('Proto定义为空，请输入Proto内容。', 'error');
+                return false;
+            }
+
+            try {
+                clearLog();
+                addLog('开始解析Proto定义...');
+
+                // 使用protobuf.js解析Proto定义
+                protoRoot = protobuf.parse(protoText).root;
+
+                // 获取所有消息类型
+                messageTypes = {};
+                protoRoot.nestedArray.forEach(item => {
+                    item.nestedArray.forEach(e => {
+                        if (e instanceof protobuf.Type) {
+                            messageTypes[e.name] = e;
+                        }
+                    })
+                });
+
+                addLog(`Proto解析成功! 找到消息类型: ${Object.keys(messageTypes).join(', ') || '无'}`);
+                return true;
+            } catch (error) {
+                addLog(`Proto解析错误: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // 执行JS代码
+        function executeJSCode(jsCode, codeName) {
+            if (!jsCode.trim()) {
+                addLog(`${codeName}为空，没有代码需要执行。`, 'info');
+                return;
+            }
+
+            try {
+                addLog(`开始执行${codeName}...`, 'info');
+                if (typeof context != 'object') context = {};
+                if (typeof context.log != 'functiton') context.log = (message) => addLog(`[Console] ${message}`, 'info');
+                if (typeof context.error != 'functiton') context.error = (message) => addLog(`[Console.Error] ${message}`, 'error');
+                if (typeof context.messageTypes != 'object') context.messageTypes = messageTypes;
+                if (typeof context.protoRoot != 'object') context.protoRoot = protoRoot;
+
+                // 使用Function构造函数执行代码
+                const func = new Function('context', jsCode);
+                const result = func(context);
+
+                addLog('运行结果:' + (typeof result == 'object' && result != null ? JSON.stringify(result) : result), 'info');
+                addLog(`${codeName}执行完成!`, 'success');
+            } catch (error) {
+                addLog(`执行${codeName}时出错: ${error.message}`, 'error');
+            }
+        }
+
+        // 处理失去焦点事件
+        function handleBlur() {
+            // 先加载Proto定义
+            if (!loadProtoDefinition()) {
+                return;
+            }
+
+            // 依次执行两段JS代码
+            executeJSCode(js1Input.value, "第一段JS代码");
+            executeJSCode(js2Input.value, "第二段JS代码");
+        }
+
+        // 添加事件监听器
+        protoInput.addEventListener('blur', handleBlur);
+        js1Input.addEventListener('blur', handleBlur);
+        js2Input.addEventListener('blur', handleBlur);
+
+        // 初始化日志
+        addLog('页面加载完成。请在输入框中输入Proto定义和JS代码，然后移开焦点(点击其他地方)或点击运行代码按钮来执行代码。');
+
+    </script>
+    <script>
+        var EnumType = {
+            "name": "RewardType",
+            "fullName": ".fish.RewardType",
+            "children": [],
+            "enum": {
+                "Level": 0,
+                "Week": 1,
+                "Kill": 2
+            }
+        };
+
+        var MessageType = {
+            "name": "FreezeAck",
+            "fullName": ".fish.FreezeAck",
+            "children": [],
+            "attr": [
+                {
+                    "id": 1,
+                    "name": "pause",
+                    "type": "double"
+                }
+            ]
+        };
+        function genProtoFile(root) {
+            const pb = toFileListByNestedArray(root);
+            let re;
+            // 如果root是只有一个元素的数组，且没有fullName，那么就判定为里面的才是root元素
+            if (pb.name == pb.fullName && pb.name == "" && Array.isArray(pb.children) && pb.children.length == 1) {
+                re = genMessage(pb.children[0]);
+            } else {
+                re = genMessage(pb);
+            }
+            return `syntax = "proto3";
+package ${re.name || 'def'};
+` + re.body
+        }
+
+        /**
+         * 
+         * @param {EnumType|MessageType} pbRoot 
+         */
+        function genMessage(pbRoot) {
+            let re = '';
+            // 生成消息体
+            if (pbRoot.enum) {
+                let data = [];
+                Object.entries(pbRoot.enum).forEach(([k, v]) => data.push(`${k} = ${v};`));
+                re = `enum ${pbRoot.name} {
+  ${data.join('\n  ')}
+}`
+            } else if (pbRoot.attr) {
+                let data = [];
+                pbRoot.attr.forEach(e => {
+                    let base = `${e.type} ${e.name} = ${e.id}`;
+
+                    let def = '';
+                    if (e?.options?.default != undefined) def = ` [default = ${e?.options?.default}]`;
+
+                    let optional = '';
+                    if (e?.options?.proto3_optional) optional = 'optional ';
+
+                    let repeated = '';
+                    if (e?.repeated) repeated = 'repeated ';
+
+                    data.push(`${optional}${repeated}${base}${def};`);
+                });
+                re = `message ${pbRoot.name} {
+  ${data.join('\n  ')}
+}`
+            }
+            // 遍历子消息，并添加到父消息中
+            if (Array.isArray(pbRoot.children) && 0 < pbRoot.children.length) {
+                let children = pbRoot.children.map(child => {
+                    return genMessage(child)
+                });
+                children.sort((a, b) => a.name.localeCompare(b.name));
+                re = re.split('}');
+                if (re.length == 1) {
+                    re[0] += '\n' + children.map(child => child.body).join('\n\n') + '\n';
+                } else {
+                    re[re.length - 2] += '\n' + children.map(child => '  ' + child.body.replaceAll('\n', '\n  ')).join('\n\n') + '\n';
+                }
+                re = re.join('}');
+            }
+            return {
+                name: pbRoot.name,
+                fullName: pbRoot.fullName,
+                body: re
+            }
+        }
+
+        function toFileListByNestedArray(root) {
+            let re = getFieldsArrayByNestedArray(root);
+            if (Array.isArray(root.nestedArray) && 0 < root.nestedArray.length) {
+                re.children = root.nestedArray.map(e => toFileListByNestedArray(e));
+            }
+            return re;
+        }
+
+        function getFieldsArrayByNestedArray(root) {
+            let re = {
+                name: root.name,
+                fullName: root.fullName,
+            };
+            if (root.fieldsArray) {
+                re.attr = [];
+                root.fieldsArray.map(e => re.attr.push({
+                    id: e.id,
+                    name: e.name,
+                    type: e.type,
+                    repeated: e.repeated,
+                    options: e.options
+                }))
+            }
+            if (root.values) {
+                re.enum = root.values
+            }
+            return re;
+        }
+
+        function sortProto() {
+            try {
+                if (!protoRoot) loadProtoDefinition();
+                let data = genProtoFile(protoRoot);
+                protoOutput.value = data;
+                addLog(`排序Proto完成，结果请查看日志下方文本域`, 'success');
+            } catch (error) {
+                addLog(`排序Proto时出错, 可能需要先运行代码: ${error.message + '\n<br>' + error.stack.replaceAll('\n', '\n<br>')}`, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>
