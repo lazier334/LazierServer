@@ -425,6 +425,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         privacy: '隐私政策',
         /** 使用条款 */
         terms: '使用条款',
+        /** ICP备案号，值为 `假` 的时候显示 **未备案** */
+        icp: '',
     },
     /** 日志配置 */
     logger: {
