@@ -132,40 +132,23 @@ export default function koaRouterSystem(router) {
             // 权限校验失败
         }
 
+        // 关闭 debug 模式时过滤部分功能
+        if (!config.switch.debugMode) {
+            butsData = butsData.filter(but => !but.debugMode);
+        }
+
         if (!user.superAdmin) {
             // 超级管理员
-            config.superAdminButsData.forEach(text => {
-                for (let i = 0; i < butsData.length; i++) {
-                    const e = butsData[i];
-                    if (e.text == text) {
-                        butsData.splice(i, 1)
-                    }
-                }
-            });
-        }
+            butsData = butsData.filter(but => !config.superAdminButsData.includes(but.text));
+            if (!user.isAdmin) {
+                // 管理员
+                butsData = butsData.filter(but => !config.adminButsData.includes(but.text));
 
-        if (!user.isAdmin) {
-            // 管理员
-            config.adminButsData.forEach(text => {
-                for (let i = 0; i < butsData.length; i++) {
-                    const e = butsData[i];
-                    if (e.text == text) {
-                        butsData.splice(i, 1)
-                    }
+                if (!user.status) {
+                    // 已登录用户
+                    butsData = butsData.filter(but => !config.loginButsData.includes(but.text));
                 }
-            });
-        }
-
-        if (!user.status) {
-            // 已登录用户
-            config.loginButsData.forEach(text => {
-                for (let i = 0; i < butsData.length; i++) {
-                    const e = butsData[i];
-                    if (e.text == text) {
-                        butsData.splice(i, 1)
-                    }
-                }
-            });
+            }
         }
 
         ctx.body = result(butsData);

@@ -204,7 +204,7 @@ const config = {
     /** 输入路径 */
     rootDir: `${ldDirName}/web`,
     /** 输出路径 */
-    outdir: "html",
+    outdir: "dist",
     /** 打包时插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
     genInsertInsertCode: "<script src=\"/b41e93b2-009a-4be6-8d16-cb3c3e176620\"></script>",
     /** 生成插件时导出的函数列表，根据需求选择导出 */
@@ -726,7 +726,9 @@ function get__dirname(url) {
 }
 
 /**
- * 获取当前文件的储存空间，可以通过 process.G.getNowFileStorage 使用  
+ * 获取当前文件的储存空间  
+ * 
+ * 可以通过 process.G.getNowFileStorage 使用  
  * 参数传递  
  *  - getNowFileStorage - 会获得当前函数  
  *  - config - 会获得配置对象  
@@ -734,7 +736,6 @@ function get__dirname(url) {
  * @returns {object}
  */
 function getNowFileStorage(filepath) {
-    // let fn = filepath.split('/').pop().split('\\').pop();
     // 直接使用文件路径作为 key
     let fn = filepath;
     if (!['getNowFileStorage', 'config'].includes(fn)) {

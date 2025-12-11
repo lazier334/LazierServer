@@ -8,7 +8,8 @@
     },
     "proxy": "",
     "switch": {
-        "debugMode": true
+        "debugMode": true,
+        "cryptoDataEnable": false
     },
     "appendButsData": [
         {
