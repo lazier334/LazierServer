@@ -41,9 +41,28 @@ const AdminUser = {
     /** 是否是超级管理员 */
     "superAdmin": true
 }
-
+/**
+ * 权限管理对象，因为使用es模块体系导致导出的 authUser 函数无法被重写  
+ * 所以使用一个可变对象来保存权限校验函数，方便重写
+ */
+const authorization = {
+    /**
+     * 默认本机发起的请求信息全都是超级管理员
+     * @param {*} ctx 
+     * @returns {AdminUser} 用户信息
+     */
+    verify(ctx) {
+        try {
+            if (allowLocalOnly(ctx)) return AdminUser;
+        } catch (error) {
+            console.log('权限校验失败', error)
+        }
+    }
+}
 export {
+    authorization,
     authUser,
+    updateAuthUser,
     allowLocalOnly,
     completeFile,
     readKoaRouters,
@@ -56,11 +75,15 @@ export {
  * @returns {AdminUser} 用户信息
  */
 function authUser(ctx) {
-    try {
-        if (allowLocalOnly(ctx)) return AdminUser;
-    } catch (error) {
-        console.log('权限校验失败', error)
-    }
+    return authorization.verify(ctx);
+}
+/**
+ * 更新权限校验函数
+ * @param {(ctx)=>AdminUser} fun 权限校验函数
+ * @returns {(ctx)=>AdminUser} 权限校验函数
+ */
+function updateAuthUser(fun) {
+    return authorization.verify = fun;
 }
 
 // 仅允许本机请求的中间件

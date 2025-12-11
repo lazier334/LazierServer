@@ -17,3 +17,4 @@ ld/plugins/pluginTemp/
 ld/plugins/externals/global-proxy
 ld/uploads
 *.edit.*
+ld/imdbs/

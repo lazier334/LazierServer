@@ -1,10 +1,9 @@
 import send from 'koa-send';
 import { restartSystem } from './libs/sys-restart.js';
-import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
+import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseImport.js';
 
 const { plugins } = await getPluginsModule();
-/** @type {import('../../src/libs/utils.js')} */
-const utilsModule = await importSysModule('utils.js');
+const utilsModule = await getUtilsModule();
 const { authUser, downloadFileToPath, readKoaRouters } = utilsModule;
 const lc = {
     cacheData: {
@@ -41,6 +40,8 @@ export default function koaRouterSystem(router) {
 
     // 接口: 重启服务器
     router.all('系统路由 - 重启服务器', '/system/restart', async (ctx, next) => {
+        if (!authUser(ctx).superAdmin) return next();
+
         if (process.platform == 'win32') restartSystem(config.system.restart.restartCmdWin);
         else if (process.platform === 'darwin') restartSystem(config.system.restart.restartCmdMac);
         else restartSystem(config.system.restart.restartCmdLinux);
@@ -49,6 +50,8 @@ export default function koaRouterSystem(router) {
 
     // 接口: 关闭服务器
     router.all('系统路由 - 关闭服务器', '/system/shutdown', async (ctx, next) => {
+        if (!authUser(ctx).superAdmin) return next();
+
         ctx.body = result('关机中...');
         setTimeout(() => process.exit(1), 1000);
     });
@@ -121,7 +124,51 @@ export default function koaRouterSystem(router) {
     // 接口: 读取按钮数据
     router.all('系统路由 - 读取按钮数据', '/system/butsData', async (ctx) => {
         config.butsData.forEach(e => typeof e.update == 'function' ? e.update(e, config) : '');
-        ctx.body = result(config.butsData);
+        let butsData = config.butsData.concat(config.appendButsData);
+        let user = {};
+        try {
+            user = authUser(ctx) || {};
+        } catch (err) {
+            // 权限校验失败
+        }
+
+        if (!user.superAdmin) {
+            // 超级管理员
+            config.superAdminButsData.forEach(text => {
+                for (let i = 0; i < butsData.length; i++) {
+                    const e = butsData[i];
+                    if (e.text == text) {
+                        butsData.splice(i, 1)
+                    }
+                }
+            });
+        }
+
+        if (!user.isAdmin) {
+            // 管理员
+            config.adminButsData.forEach(text => {
+                for (let i = 0; i < butsData.length; i++) {
+                    const e = butsData[i];
+                    if (e.text == text) {
+                        butsData.splice(i, 1)
+                    }
+                }
+            });
+        }
+
+        if (!user.status) {
+            // 已登录用户
+            config.loginButsData.forEach(text => {
+                for (let i = 0; i < butsData.length; i++) {
+                    const e = butsData[i];
+                    if (e.text == text) {
+                        butsData.splice(i, 1)
+                    }
+                }
+            });
+        }
+
+        ctx.body = result(butsData);
     });
 
     // 接口: 读取搜索快捷关键词按钮数据

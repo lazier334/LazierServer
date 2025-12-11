@@ -51,6 +51,7 @@ if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
     config.versionBanner = fs.readFileSync(bannerPath, 'utf8')
 }
 config = defConfig.useConfig(config, defConfig);
+
 // 设置数据文件夹
 config.updateLdDirName(config.ldDirName)
 const getNowFileStorage = config.getNowFileStorage;

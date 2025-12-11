@@ -24,6 +24,11 @@ export {
     getPluginsModule,
 }
 
+/**
+ * 导入系统模块（获取系统模块）
+ * @param {'plugins.js' | 'config.js' | 'utils.js'} mod 系统模块文件名称，完整列表请查看 {@link ../../../src/libs/ 系统模块目录}
+ * @returns 
+ */
 async function importSysModule(mod) {
     const filepath = pathToFileURL(path.join(config.configDirPath, mod));
     return await import(filepath);
@@ -38,7 +43,7 @@ async function getPluginsModule() {
 }
 
 /**
- * 获取 plugins 模块
+ * 获取 utils 模块
  * @returns {import('../../../src/libs/utils.js')}
  */
 async function getUtilsModule() {

@@ -292,6 +292,27 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
 `,
     },
     /**
+     * 追加按钮，该项配置用于方便在外部配置中追加按钮
+     * @type {[{
+     *      avatarText: 'word',         // 头像内部的文字
+     *      color: '',                  // 头像的背景颜色，默认是绿色
+     *      text: '编辑快捷词',           // 按钮文字 
+     *      tooltip: '编辑快捷词数据文件', // 鼠标悬停提示文字
+     *      debugMode: true,            // 是否在调试模式下才显示的按钮
+     *      fun: `this.openPage()`      // 按钮点击后执行的代码
+     *      update(self, config) {      // 如果需要动态数据，则添加这个函数，在接口处实现内容
+     *          self.fun = `this.openPage('/edit/index.html?filepath=${config.ldConfigPath}')`
+     *      },
+     *  }]} 
+     */
+    appendButsData: [],
+    /** 需要超级管理员权限才可以查看的按钮，里面存放按钮的 text 属性 */
+    superAdminButsData: ['重启系统', '关闭系统', '编辑配置'],
+    /** 需要管理员权限才可以查看的按钮，里面存放按钮的 text 属性 */
+    adminButsData: ['自动补全', '补齐文件', '编辑快捷词', '接口分析', '插件仓库', '编辑项目列表'],
+    /** 需要一登录用户权限才可以查看的按钮，里面存放按钮的 text 属性 */
+    loginButsData: ['文件上传'],
+    /**
      * @type {[{
      *      avatarText: 'word',         // 头像内部的文字
      *      color: '',                  // 头像的背景颜色，默认是绿色
@@ -305,6 +326,33 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
      *  }]}
      */
     butsData: [
+        {
+            avatarText: 'clear',
+            text: '清理缓存',
+            tooltip: '清理worker缓存',
+            fun: `(${(async function () {
+                try {
+                    // 1. 取消注册所有 Service Worker
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                        console.log('Service Worker 已取消注册:', registration.scope);
+                    }
+                    // 2. 清理所有缓存
+                    const cacheNames = await caches.keys();
+                    for (const cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        console.log(`已删除缓存: ${cacheName}`);
+                    }
+                    console.log('SW清理成功');
+                    ElMessage.success('SW清理成功');
+                } catch (err) {
+                    console.error('SW清理失败:', err);
+                    ElMessage.error('SW清理失败');
+                    throw err;
+                }
+            }).toString()})()`
+        },
         {
             avatarText: 'fix',
             text: '补齐文件',
@@ -349,7 +397,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         },
         {
             update(self, config) {
-                self.fun = `this.openPage('/edit/index.html?filepath=${encodeURIComponent(config.dataPath + '/indexData-list.js')}')`
+                self.fun = `this.openPage('/edit/index.html?filepath=${encodeURIComponent(config.dataPath + '/plugins/indexData-1-demo.js')}')`
             },
             avatarText: 'list',
             text: '编辑项目列表',
@@ -362,33 +410,6 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             text: '文件上传',
             tooltip: '上传文件到服务器',
             fun: `this.openPage('/uploads/index.html')`
-        },
-        {
-            avatarText: 'clear',
-            text: '清理缓存',
-            tooltip: '清理worker缓存',
-            fun: `(${(async function () {
-                try {
-                    // 1. 取消注册所有 Service Worker
-                    const registrations = await navigator.serviceWorker.getRegistrations();
-                    for (const registration of registrations) {
-                        await registration.unregister();
-                        console.log('Service Worker 已取消注册:', registration.scope);
-                    }
-                    // 2. 清理所有缓存
-                    const cacheNames = await caches.keys();
-                    for (const cacheName of cacheNames) {
-                        await caches.delete(cacheName);
-                        console.log(`已删除缓存: ${cacheName}`);
-                    }
-                    console.log('SW清理成功');
-                    ElMessage.success('SW清理成功');
-                } catch (err) {
-                    console.error('SW清理失败:', err);
-                    ElMessage.error('SW清理失败');
-                    throw err;
-                }
-            }).toString()})()`
         },
         {
             avatarText: 'stack',
@@ -425,8 +446,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         privacy: '隐私政策',
         /** 使用条款 */
         terms: '使用条款',
-        /** ICP备案号，值为 `假` 的时候显示 **未备案** */
-        icp: '',
+        /** ICP备案号，值为 '' 的时候隐藏备案信息 */
+        icp: '未备案',
     },
     /** 日志配置 */
     logger: {

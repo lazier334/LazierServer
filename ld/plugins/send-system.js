@@ -28,7 +28,10 @@ export default async function sendSystem(sendOptions) {
                 switch (filename) {
                     case 'copyright': body = body.replaceAll('YYYY', new Date().getFullYear())
                         .replaceAll('公司名称', config.copyright.copyright ?? config.copyright.companyName)
-                        .replaceAll('备案号', config.copyright.icp || '未备案');
+                        .replaceAll('备案号', config.copyright.icp);
+                        if (config.copyright.icp === '') {
+                            body = body.replaceAll('<a href="https://beian.miit.gov.cn/" target="_blank"></a> |', '')
+                        }
                         break;
                     case 'contact': body = body.replaceAll('lazier334@lazier334.com', config.copyright.contact);
                         break;

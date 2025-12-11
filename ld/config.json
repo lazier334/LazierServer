@@ -10,5 +10,16 @@
     "switch": {
         "debugMode": true
     },
+    "appendButsData": [
+        {
+            "avatarText": "im",
+            "text": "管理连接",
+            "tooltip": "给指定的连接发送消息",
+            "fun": "this.openPage('/im/index.html')"
+        }
+    ],
+    "copyright": {
+        "icp": ""
+    },
     "可以添加自定义的配置信息": "自定义配置也是从config中读取，除了没有提示信息，其他都一样，可以使用/** @type{import('当前配置路径')} */来做jsdoc提示"
 }
