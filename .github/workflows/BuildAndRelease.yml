@@ -3,10 +3,10 @@ name: Build and Release
 on:
   workflow_dispatch:
     inputs:
-        tag_name:
-          description: 'Release tag (format: vX.Y.Z)'
-          required: true
-          type: string
+      tag_name:
+        description: 'Release tag (format: vX.Y.Z)'
+        required: true
+        type: string
   push:
     tags:
       - 'v*.*.*'
@@ -16,23 +16,69 @@ jobs:
     name: building
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: write
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
     
+    - name: Validate tag format (Manual trigger only)
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      run: |
+        TAG_NAME="${{ github.event.inputs.tag_name }}"
+        if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "❌ Invalid tag format. Must be vX.Y.Z (e.g., v1.0.0)"
+          exit 1
+        fi
+        if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+          echo "❌ Tag $TAG_NAME already exists!"
+          exit 1
+        fi
+    
     - name: Get tag info
       id: tag
       run: |
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          TAG_NAME=${{ github.event.inputs.tag_name }}
+          TAG_NAME="${{ github.event.inputs.tag_name }}"
         else
           TAG_NAME=${GITHUB_REF#refs/tags/}
         fi
-        echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
+        echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
         echo "VERSION=${TAG_NAME#v}" >> $GITHUB_ENV
+
+    - name: Get commit messages and timestamp
+      id: info
+      run: |
+        # 获取当前构建时间
+        BUILD_DATE=$(date -u +'%Y-%m-%d %H:%M:%S UTC')
+        echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+        echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
         
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          # 手动触发：获取最新的提交信息
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+        else
+          # 自动触发：获取标签对应的提交信息
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          COMMIT_HASH=$(git rev-list -n 1 $TAG_NAME 2>/dev/null || git rev-parse HEAD)
+          COMMIT_MSG=$(git log -1 $COMMIT_HASH --pretty=%B)
+        fi
+        
+        # 对多行文本进行处理，替换换行符为\n
+        COMMIT_MSG_ESCAPED=$(echo "$COMMIT_MSG" | sed ':a;N;$!ba;s/\n/\\n/g')
+        
+        # 将提交消息存储为环境变量
+        echo "COMMIT_MSG<<EOF" >> $GITHUB_ENV
+        echo "$COMMIT_MSG" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+        
+        # 将转义版本也存储为环境变量
+        echo "COMMIT_MSG_ESCAPED=$COMMIT_MSG_ESCAPED" >> $GITHUB_ENV
+        echo "commit_msg=$COMMIT_MSG_ESCAPED" >> $GITHUB_OUTPUT
+
     - name: Create ZIP package
       run: |
         # 排除指定文件夹，创建zip包
@@ -49,10 +95,10 @@ jobs:
         name: Release ${{ env.TAG_NAME }}
         body: |
           Version: ${{ env.VERSION }}
-          Build date: $(date +'%Y-%m-%d %H:%M:%S')
+          Build date: ${{ env.BUILD_DATE }}
           
           ## Changes
-          Auto-generated release
+          ${{ env.COMMIT_MSG }}
         files: dist/${{ env.TAG_NAME }}.zip
         draft: false
         prerelease: false
