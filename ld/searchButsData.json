@@ -1,1 +1,13 @@
-{"searchKeywordButs":["清空数据","a","b","c"],"searchButtomButs":["清空数据","英语","中文"]}
+{
+    "searchKeywordButs": [
+        "清空数据",
+        "工具",
+        "本地",
+        "测试"
+    ],
+    "searchButtomButs": [
+        "清空数据",
+        "打开",
+        "官网"
+    ]
+}
