@@ -33,11 +33,12 @@ jobs:
         else
           TAG_NAME=${GITHUB_REF#refs/tags/}
         fi
+        REPO_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
         echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
         echo "VERSION=${TAG_NAME#v}" >> $GITHUB_ENV
         
         # 设置Docker镜像标签
-        echo "DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}" >> $GITHUB_ENV
+        echo "DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/$REPO_NAME" >> $GITHUB_ENV
         echo "DOCKER_TAG=$TAG_NAME" >> $GITHUB_ENV
     
     - name: Set up Docker Buildx
