@@ -61,7 +61,7 @@ jobs:
         context: .
         file: ./Dockerfile
         platforms: linux/amd64,linux/arm64
-        push: ${{ github.event_name != 'workflow_dispatch' }}
+        push: true
         tags: |
           ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
           ${{ env.DOCKER_IMAGE }}:latest
@@ -71,12 +71,4 @@ jobs:
           org.opencontainers.image.revision=${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-    
-    - name: Update image description
-      run: |
-        # 更新容器镜像描述
-        curl -X PATCH \
-          -H "Accept: application/vnd.github.v3+json" \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          https://api.github.com/user/packages/container/${{ github.event.repository.name }}/versions \
-          -d "{\"metadata\":{\"description\":\"${{ github.event.repository.name }} version ${{ env.VERSION }}\"}}"
+        
