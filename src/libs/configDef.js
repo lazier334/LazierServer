@@ -189,6 +189,13 @@ const config = {
     versionBanner: `当前服务器版本 v.{version} - {detail}`,
     /** 版本信息 */
     version: {
+        "1.0.2(25121200)": `增加im与whistle并优化代码
++ 增加 github actions 自动打包版本
++ 增加 im 插件
++ 增加 whistle 控制项（需要手动安装 whistle ）
++ 增加 web/utils 工具网页自动扫描
++ 增加备案信息配置项 copyright.icp
+= 其他优化`,
         "1.0.1(25090100)": `增加部分能力并优化代码
 
  + 增加同目录多文件检测与选择规则（不支持匹配所有项，仅支持无编码与全编码两种的计算）
