@@ -5,7 +5,9 @@
     "proxy": "",
     "switch": {
         "debugMode": true,
-        "cryptoDataEnable": false
+        "cryptoDataEnable": false,
+        "handlerHtmlBodyData": true,
+        "openAddAppStack": true
     },
     "appendButsData": [
         {

@@ -524,9 +524,9 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         /** 本地开发使用生产环境模式 */
         indexUseProdMode: false,
         /** 开启添加栈追踪 */
-        openAddAppStack: true,
+        openAddAppStack: false,
         /** 处理html接口数据内容 */
-        handlerHtmlBodyData: true,
+        handlerHtmlBodyData: false,
     },
     /** 
      * 额外的路由，用于挂载对象，主要用于做路由提示，并非实际业务代码
