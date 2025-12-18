@@ -20,6 +20,7 @@ build
 coverage
 
 # 测试文件
+tests
 test
 __tests__
 *.test.js

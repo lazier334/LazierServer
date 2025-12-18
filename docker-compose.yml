@@ -6,25 +6,10 @@ services:
     ports:
       - "3000:3000"
       - "3001:3001"
-      - "3003:3003"
-      - "3004:3004"
+      - "3010:3010"
+      - "3011:3011"
     environment:
       - NODE_ENV=production
       - TZ=Asia/Shanghai
     volumes:
       - ./ld/:/app/ld/
-    networks:
-      - app-network
-    # 资源限制
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
-
-networks:
-  app-network:
-    driver: bridge
