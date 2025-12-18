@@ -9,9 +9,9 @@ const msgs = [
 ];
 var msgNum = 0;
 
-// const ws = new WebSocket('ws://localhost:3010');
-const ws = new WebSocket('wss://localhost:3034', {
-    rejectUnauthorized: false   // 忽略证书无效的问题
+const ws = new WebSocket('ws://localhost:3010', {
+    // 忽略证书无效的问题
+    rejectUnauthorized: false
 });
 
 ws.on('open', function open() {
