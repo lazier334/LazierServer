@@ -1,6 +1,6 @@
-import runCmd from './utils/util-cmd.js';
-import result from './utils/util-result.js';
-import { exportFunction } from './externals/demo.js';
+import runCmd from '../plugins-lazier334/utils/util-cmd.js';
+import result from '../plugins-lazier334/utils/util-result.js';
+import { exportFunction } from '../plugins-lazier334/externals/demo.js';
 
 /**
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external

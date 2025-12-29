@@ -2,6 +2,7 @@ import runCmd from './utils/util-cmd.js';
 import result from './utils/util-result.js';
 import { fs, path } from './libs/baseImport.js';
 import { handleParams, baseDir } from './externals/gen-web-by-har/ls-startBefore.mjs';
+const dirname = path.dirname(import.meta.url);
 
 /**
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
@@ -27,7 +28,7 @@ export default function koaRouterExternalAnalysisHAR(router) {
             // 设置参数
             await handleParams(inputFile, outputDir, true, true);
             // 通过cmd运行第三方插件项目
-            re = await runCmd(`cd ./ld/plugins/externals/gen-web-by-har && npm run gen`);
+            re = await runCmd(`cd ${dirname}/externals/gen-web-by-har && npm run gen`);
         }
         ctx.body = result(re);
     });

@@ -1,10 +1,11 @@
 import result from './utils/util-result.js';
 import { fs, path } from './libs/baseImport.js';
 import { runDetachedCmd } from './utils/util-cmd.js';
+const dirname = path.dirname(import.meta.url);
 
 const lc = {
     appName: 'GlobalProxy.exe',
-    appPath: './ld/plugins/externals/global-proxy',
+    appPath: dirname + '/externals/global-proxy',
     appUrl: 'http://localhost:4433'
 }
 /**
