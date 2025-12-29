@@ -11,18 +11,15 @@ const { downloadFileToPath } = utilsModule;
 const plugins = await getPluginsModule();
 
 const rootDir = import.meta.dirname;
-const tempDir = path.join(rootDir, 'pluginTemp');
 const lc = {
     /** 根目录，也是当前的目录 */
     rootDir,
-    /** 插件的临时文件夹 */
-    tempDir,
     /** 解压的插件的位置 */
-    unzipDir: path.join(tempDir, path.basename(rootDir)),
+    unzipDir: path.join(config.tempDownDir, path.basename(rootDir)),
     /** 上传的文件表单字段名 */
     uploadFileFieldName: 'uploadPlugin',
     /** 上传的文件路径 */
-    uploadFilePath: path.join(tempDir, 'uploadPlugin.zip'),
+    uploadFilePath: path.join(config.tempDownDir, 'uploadPlugin.zip'),
     /** 上传的文件最大大小 */
     uploadFileSizeMax: 50 * 1024 * 1024,
     /** 上传允许的文件拓展名 */
@@ -30,7 +27,7 @@ const lc = {
     /** 解压进度 */
     unzipProgress: 0,
     /** 下载的文件路径 */
-    downloadFilePath: path.join(tempDir, 'downloadPlugin.zip'),
+    downloadFilePath: path.join(config.tempDownDir, 'downloadPlugin.zip'),
     /** 下载的链接缓存 */
     downloadStatus: false,
     /** 下载信息 */

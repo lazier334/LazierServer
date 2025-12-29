@@ -152,28 +152,31 @@ const config = {
      * @param {string} newLdDirName 本地数据文件夹路径
      * @returns {boolean}
      */
-    updateLdDirName(newLdDirName) {
+    updateLdDirName(newLdDirName, forceRefresh) {
+        console.log('updateLdDirName...', newLdDirName)
         const oldName = this.ldDirName;
-        if (typeof newLdDirName != 'string' || newLdDirName == '' || oldName == newLdDirName) return false;
-
+        if (!forceRefresh && (typeof newLdDirName != 'string' || newLdDirName == '' || oldName == newLdDirName)) return false;
+        const replaceAllStr = (str) => {
+            return str.replaceAll(oldName, newLdDirName).replaceAll('{/ldDirName/}', newLdDirName);
+        }
         /** ld 文件夹名称 */
         this.ldDirName = newLdDirName;
         /** 输入路径 */
-        this.rootDir = this.rootDir.replace(oldName, newLdDirName);
+        this.rootDir = replaceAllStr(this.rootDir);
         /** 导出插件-存放的文件夹 */
-        this.genProxyTargetDir = this.genProxyTargetDir.replace(oldName, newLdDirName);
+        this.genProxyTargetDir = replaceAllStr(this.genProxyTargetDir);
         /** 插件目录列表 */
-        this.pluginDirs.forEach((e, i) => this.pluginDirs[i] = e.replace(oldName, newLdDirName));
+        this.pluginDirs.forEach((e, i) => this.pluginDirs[i] = replaceAllStr(e));
         /** 外部配置路径，改文件所在的 ld 目录也用于存放自定义插件 */
-        this.ldConfigPath = this.ldConfigPath.replace(oldName, newLdDirName);
+        this.ldConfigPath = replaceAllStr(this.ldConfigPath);
         /** 数据路径 */
-        this.dataPath = this.dataPath.replace(oldName, newLdDirName);
+        this.dataPath = replaceAllStr(this.dataPath);
         /** 日志输出管道列表 */
-        this.logger.dailyRotateFileList.forEach(e => e.filename = e.filename.replace(oldName, newLdDirName));
+        this.logger.dailyRotateFileList.forEach(e => e.filename = replaceAllStr(e.filename));
         /** 临时下载的文件的目录 */
-        this.tempDownDir = this.tempDownDir.replace(oldName, newLdDirName);
+        this.tempDownDir = replaceAllStr(this.tempDownDir);
         /** 额外的web目录列表 */
-        this.otherWebPath.forEach((e, i) => this.otherWebPath[i] = e.replace(oldName, newLdDirName));
+        this.otherWebPath.forEach((e, i) => this.otherWebPath[i] = replaceAllStr(e));
 
         return true;
     },
@@ -211,7 +214,7 @@ const config = {
         "1.0.0(25081400)": `一个可以快速搭建的服务器`
     },
     /** 输入路径 */
-    rootDir: `${ldDirName}/web`,
+    rootDir: `{/ldDirName/}/web`,
     /** 输出路径 */
     outdir: "dist",
     /** 打包时插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
@@ -225,7 +228,7 @@ const config = {
         "clearLoopDebugger"
     ],
     /** 导出插件-存放的文件夹 */
-    genProxyTargetDir: `${ldDirName}/web/plugin`,
+    genProxyTargetDir: `{/ldDirName/}/web/plugin`,
     /** 导出插件-导出的文件名 */
     genProxyProxyFile: "proxy.js",
     /** 本地开发环境中插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
@@ -247,7 +250,7 @@ const config = {
     /** 不扫描全部文件夹时指定仅扫描web文件夹里的哪些文件夹 */
     domainList: [],
     /** 在扫描全部文件夹时额外扫描的web主文件夹列表，相当于有多个 web 文件夹，这不影响扫描全部的har文件 */
-    otherWebPath: [`${ldDirName}/web-lazier334`],
+    otherWebPath: [],
     /** https的证书 */
     SSLOptions: {
         key: `-----BEGIN PRIVATE KEY-----
@@ -436,9 +439,9 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         },
     ],
     /** 插件目录列表 */
-    pluginDirs: [`${ldDirName}/plugins`, `${ldDirName}/plugins-lazier334`],
+    pluginDirs: [],
     /** 外部配置路径，改文件所在的 ld 目录也用于存放自定义插件 */
-    ldConfigPath: `${ldDirName}/config.json`,
+    ldConfigPath: `{/ldDirName/}/config.json`,
     /** 数据路径 */
     dataPath: ldDirName,
     /** 加密时使用的key */
@@ -556,7 +559,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         setStack: 'ls-set-stack',
     },
     /** 临时下载的文件的目录 */
-    tempDownDir: `${ldDirName}/web/temporary`,
+    tempDownDir: `{/ldDirName/}/web/temporary`,
     /**
      * koa的对象
      * @type {import('koa')}
@@ -572,6 +575,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         keys: ['lazier-server_secret_key']
     },
 };
+
 {   // 添加版本号按钮
     const ver = readVersion();
     config.butsData.push({

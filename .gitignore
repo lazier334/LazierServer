@@ -12,7 +12,7 @@ ld/logs
 logs
 LazierServer*
 dist
-ld/plugins/pluginTemp/
+ld/plugins/temporary/
 !ld/plugins/externals/global-proxy/GlobalProxy.exe
 ld/plugins/externals/global-proxy
 ld/uploads

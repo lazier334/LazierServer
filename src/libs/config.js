@@ -26,7 +26,7 @@ if (fs.existsSync(defConfig.ldConfigPath) && fs.statSync(defConfig.ldConfigPath)
     try {
         config = { ...config, ...JSON.parse(fs.readFileSync(defConfig.ldConfigPath)) };
     } catch (err) {
-        console.error('加载外部配置失败')
+        console.error('加载外部配置失败');
         throw err;
     }
 }
@@ -44,7 +44,7 @@ if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
 config = defConfig.useConfig(config, defConfig);
 
 // 设置数据文件夹
-config.updateLdDirName(config.ldDirName)
+config.updateLdDirName(config.ldDirName, true);
 
 /**
  * 获取当前文件的储存空间，可以通过 process.G.getNowFileStorage 使用  

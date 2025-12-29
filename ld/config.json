@@ -17,6 +17,13 @@
             "fun": "this.openPage('/im/index.html')"
         }
     ],
+    "otherWebPath": [
+        "{/ldDirName/}/web-lazier334"
+    ],
+    "pluginDirs": [
+        "{/ldDirName/}/plugins",
+        "{/ldDirName/}/plugins-lazier334"
+    ],
     "copyright": {
         "icp": ""
     },
