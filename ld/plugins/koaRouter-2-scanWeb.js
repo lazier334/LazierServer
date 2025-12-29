@@ -168,7 +168,6 @@ function getAllDir(dir) {
 /** 添加其他文件夹访问路径 */
 function pushDir(dirs) {
     dirs.push(config.genProxyTargetDir);    // 插件文件夹
-    dirs.push('public');    // 主文件夹
     dirs = pathDeduplication(dirs);
     return dirs;
 }
