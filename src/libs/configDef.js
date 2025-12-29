@@ -172,6 +172,8 @@ const config = {
         this.logger.dailyRotateFileList.forEach(e => e.filename = e.filename.replace(oldName, newLdDirName));
         /** 临时下载的文件的目录 */
         this.tempDownDir = this.tempDownDir.replace(oldName, newLdDirName);
+        /** 额外的web目录列表 */
+        this.otherWebPath.forEach((e, i) => this.otherWebPath[i] = e.replace(oldName, newLdDirName));
 
         return true;
     },
@@ -244,6 +246,8 @@ const config = {
     fixUrls: [],
     /** 不扫描全部文件夹时指定仅扫描web文件夹里的哪些文件夹 */
     domainList: [],
+    /** 在扫描全部文件夹时额外扫描的web主文件夹列表，相当于有多个 web 文件夹，这不影响扫描全部的har文件 */
+    otherWebPath: [`${ldDirName}/web-lazier334`],
     /** https的证书 */
     SSLOptions: {
         key: `-----BEGIN PRIVATE KEY-----
@@ -515,8 +519,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         cors: true,
         /** 是否开启自动补全，自动补全并不会影响0大小文件的自动补全 */
         autoComplete: true,
-        /** 扫描全部文件夹，开启后会扫描web中的所有文件夹 */
-        allDir: true,
+        /** 扫描全部文件夹，开启后会扫描web中的所有文件夹，否则只扫描指定的 domainList 配置中的内容，这不影响扫描全部的har文件 */
+        allWebDir: true,
         /** 导出插件-强制开启https，会让插件强制把所有请求转为https */
         genProxyForceHttps: true,
         /** 一键打包时是否生成新的插件 */

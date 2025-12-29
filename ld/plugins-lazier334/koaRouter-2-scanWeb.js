@@ -7,9 +7,9 @@ const { plugins, pathDeduplication } = await getPluginsModule();
 const utilsModule = await importSysModule('utils.js');
 const { downloadFileToPath } = utilsModule;
 
-// 启动的目标文件夹，如果是开启了 allDir ，那么在实际读取的时候会重新扫描更新
+// 启动的目标文件夹，如果是开启了 allWebDir ，那么在实际读取的时候会重新扫描更新
 var domainList = config.domainList.map(domain => path.join(config.rootDir, domain));
-if (config.switch.allDir) console.log(`已开启全文件夹扫描，将会扫描路径 ${config.rootDir} 里的所有文件夹`);
+if (config.switch.allWebDir) console.log(`已开启全文件夹扫描，将会扫描路径 ${config.rootDir} 里的所有文件夹`);
 else console.log('指定扫描文件夹列表', pushDir(domainList));
 
 /**
@@ -24,7 +24,11 @@ export default function koaRouterScanWeb(router) {
         let domainDirs = {};
 
         // 如果开启了全部文件夹，那么重新扫描
-        (config.switch.allDir ? (domainList = getAllDir(config.rootDir)) : domainList).forEach(dir => {
+        if (config.switch.allWebDir) {
+            domainList = getAllWebDir(config.rootDir);
+            domainList = pushDir(domainList);
+        }
+        domainList.forEach(dir => {
             let fp = toAbsolutePath(path.join(dir, api));
             let dfp = toAbsolutePath(decodeURIComponent(fp));
             let efp = toAbsolutePath(dfp.split('/').map(e => e.split('\\').map((p, i) => {
@@ -66,7 +70,7 @@ export default function koaRouterScanWeb(router) {
             // 检测文件大小如果为0，或者文件不存在，那么就去下载
             if (fileFolder && (!fs.existsSync(filepath) || fs.readFileSync(filepath).length <= 0)) {
                 if (!(pushDir([]).includes(fileFolder) || !fileFolder.startsWith(config.rootDir))) {
-                    // 尝试转成域名，规则查看 getAllDir() 和 pushDir() 
+                    // 尝试转成域名，规则查看 getAllWebDir() 和 pushDir() 
                     const domain = fileFolder.replace(/.*[\\/]/, '');
                     if (domain) {
                         const urlObj = new URL(ctx.request.href);
@@ -133,9 +137,9 @@ async function sendFile(ctx, filepath, opts) {
  * @returns {"api.demo.com/assets/index.js" | undefined} 选中的文件路径
  */
 async function selectFileByDomains(ctx, domainsMap, api) {
-    // 优先使用参数 ctx.query.dir 的
-    // 其次使用插件选择的，但是插件里可以删除参数
-    // 最后默认使用第一个
+    // 优先使用 参 数 ctx.query.dir 的  
+    // 其次使用 插件选择的，但是插件里可以删除参数 
+    // 最后默认使用 第一个 
     let domains = Object.keys(domainsMap);
     let selectFolder = await (await plugins('selectFileByDomains')).use(domains, domainsMap, ctx) || domains[0];
 
@@ -154,20 +158,25 @@ async function selectFileByDomains(ctx, domainsMap, api) {
 }
 
 /** 获取子目录 */
-function getAllDir(dir) {
+function getAllWebDir(dir) {
     let re = [];
     try {
         re = fs.readdirSync(dir).filter((item) => fs.statSync(path.join(dir, item)).isDirectory())
-            .map(domain => path.join(config.rootDir, domain));
+            .map(domain => path.join(dir, domain));
     } catch (err) {
         console.warn(`扫描目录时异常(目录: ${dir})`, err);
     }
-    return pushDir(re);
+    return re;
 }
 
 /** 添加其他文件夹访问路径 */
 function pushDir(dirs) {
-    dirs.push(config.genProxyTargetDir);    // 插件文件夹
+    // 插件文件夹
+    dirs.push(config.genProxyTargetDir);
+    // 其他的web文件夹
+    if (config.switch.allWebDir) {
+        config.otherWebPath.forEach(web => dirs.splice(dirs.length, 0, ...getAllWebDir(web)));
+    }
     dirs = pathDeduplication(dirs);
     return dirs;
 }

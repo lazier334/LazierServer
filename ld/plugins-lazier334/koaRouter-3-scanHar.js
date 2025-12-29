@@ -29,7 +29,9 @@ export default function koaRouterScanHar(router) {
     router.all(new RegExp('/(.*)'), async (ctx, next) => {
         let api = ctx.path;
         // 更新数据
-        detectUpdate();
+        detectUpdate(config.rootDir);
+        // 更新其他文件夹
+        config.otherWebPath.forEach(web => detectUpdate(web));
         // 扫描 web 文件夹下的所有 har 文件，也使用缓存，如果文件的修改时间没有变化则读取缓存的数据
         let entries = lc.apiMap[api];
         // 文件未找到，放行到下一个路由
