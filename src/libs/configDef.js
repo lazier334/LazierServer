@@ -432,7 +432,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         },
     ],
     /** 插件目录列表 */
-    pluginDirs: [`${ldDirName}/plugins`],
+    pluginDirs: [`${ldDirName}/plugins`, `${ldDirName}/plugins-lazier334`],
     /** 外部配置路径，改文件所在的 ld 目录也用于存放自定义插件 */
     ldConfigPath: `${ldDirName}/config.json`,
     /** 数据路径 */
