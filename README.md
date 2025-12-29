@@ -47,8 +47,8 @@ LazierServer
 │     ├─ koaCompose.js      // 自定义koa中间件
 │     ├─ plugins.js         // 阶段插件核心
 │     ├─ StageClass.js      // 阶段类
-│     ├─ utils.js           // 核心工具
-│     └─ websocketServer.js // 系统库(包)
+│     ├─ utils.js           // 系统工具
+│     └─ websocketServer.js // websocket服务
 └─ tests                    // 测试项
 ```
 
