@@ -1,7 +1,9 @@
+import { createSystemStart } from './types/index.ts';
+
 /**
  * @param {import('./libs/baseImport.js')}}
  */
-export default async function systemStartAddAppStack({ fs, path, config, app }) {
+export default createSystemStart(async function systemStartAddAppStack({ fs, path, config, app }) {
     // 方案：覆写 response.body 的 setter
     const originalBody = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(app.response), 'body')
     const Setter = originalBody.set;
@@ -39,4 +41,4 @@ export default async function systemStartAddAppStack({ fs, path, config, app }) 
         configurable: true,
         enumerable: true
     });
-}
+})

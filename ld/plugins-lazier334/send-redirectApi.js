@@ -1,3 +1,4 @@
+import { createSend } from './types/index.ts';
 import { fs, path } from './libs/baseImport.js';
 
 const lc = {
@@ -17,7 +18,7 @@ const lc = {
  * @param {SendOptions}  sendOptions
  * @returns {SendOptions}
  */
-export default async function sendRedirectApi(sendOptions) {
+export default createSend(async function sendRedirectApi(sendOptions) {
     const { ctx, filename, opts } = sendOptions;
     try {
         const fp300 = path.join(opts.root, filename + lc.redirectFileName);
@@ -32,4 +33,4 @@ export default async function sendRedirectApi(sendOptions) {
         console.log('接口重定向解析失败', path.join(opts.root, filename), error)
     }
     return sendOptions;
-}
+})

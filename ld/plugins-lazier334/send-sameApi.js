@@ -1,3 +1,4 @@
+import { createSend } from './types/index.ts';
 import { fs, path } from './libs/baseImport.js';
 
 const ApiMapType = dataType();
@@ -22,7 +23,7 @@ const lc = {
  * @param {SendOptions}  sendOptions
  * @returns {SendOptions}
  */
-export default async function sendSameApi(sendOptions) {
+export default createSend(async function sendSameApi(sendOptions) {
     const { ctx, filename, opts } = sendOptions;
     try {
         const dataMap = getApimapJson(opts.root);
@@ -37,7 +38,7 @@ export default async function sendSameApi(sendOptions) {
         console.log('接口多数据解析失败', path.join(opts.root, filename), error)
     }
     return sendOptions;
-}
+})
 
 /**
  * 获取api数据，通过计算 headers请求头 和 conotent请求体 两个对象来统计相似度  

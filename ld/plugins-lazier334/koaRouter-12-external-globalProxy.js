@@ -1,3 +1,4 @@
+import { createKoaRouter } from './types/index.ts';
 import result from './utils/util-result.js';
 import { fs, path } from './libs/baseImport.js';
 import { runDetachedCmd } from './utils/util-cmd.js';
@@ -12,7 +13,7 @@ const lc = {
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  * @param {import('@koa/router')} router 路由
  */
-export default function koaRouterExternalGlobalProxy(router) {
+export default createKoaRouter(function koaRouterExternalGlobalProxy(router) {
     router.all('外部插件-全局代理-仅windows端可用', '/external/globalProxy', async (ctx, next) => {
         let re = `${lc.appName} 可能启动失败了`;
         let code = 500;
@@ -41,7 +42,7 @@ export default function koaRouterExternalGlobalProxy(router) {
     });
 
     return router
-}
+})
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

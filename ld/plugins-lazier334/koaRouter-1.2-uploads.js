@@ -1,3 +1,4 @@
+import { createKoaRouter } from './types/index.ts';
 import send from 'koa-send';
 import crypto from 'crypto';
 import { lc, db } from './utils/utils-upload.js';
@@ -7,38 +8,10 @@ import { Server, EVENTS } from '@tus/server';
 import { FileStore } from '@tus/file-store';
 
 /**
- * 使用xxHash流式计算文件哈希
- * @param {string} filePath 
- * @returns {string} 
- */
-async function calculateFileHash(filePath) {
-    const stream = fs.createReadStream(filePath);
-    let hash = xxhash.create32(lc.xxhashSeed);
-    for await (const chunk of stream) {
-        hash.update(chunk);
-    }
-    return hash.digest().toString(16); // 返回16进制哈希
-}
-
-// 检查文件是否存在
-async function checkFileExists(fileHash) {
-    try {
-        const files = fs.readdirSync(lc.dbDir);
-        for (const file of files.filter(f => !f.endsWith('.json'))) {
-            const currentHash = await calculateFileHash(path.join(lc.dbDir, file));
-            if (currentHash === fileHash) return { exists: true, filename: file };
-        }
-    } catch (err) {
-        console.error('Error checking files:', err);
-    }
-    return { exists: false };
-}
-
-/**
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  * @param {import('@koa/router')} router 路由
  */
-export default function koaRouterUploads(router) {
+export default createKoaRouter(function koaRouterUploads(router) {
     // TUS协议端点
     router.all(new RegExp("/uploads/files(/.*)?$"), async (ctx) => {
         const server = new Server({
@@ -153,7 +126,35 @@ export default function koaRouterUploads(router) {
     });
 
     return router
-};
+})
+
+/**
+ * 使用xxHash流式计算文件哈希
+ * @param {string} filePath 
+ * @returns {string} 
+ */
+async function calculateFileHash(filePath) {
+    const stream = fs.createReadStream(filePath);
+    let hash = xxhash.create32(lc.xxhashSeed);
+    for await (const chunk of stream) {
+        hash.update(chunk);
+    }
+    return hash.digest().toString(16); // 返回16进制哈希
+}
+
+// 检查文件是否存在
+async function checkFileExists(fileHash) {
+    try {
+        const files = fs.readdirSync(lc.dbDir);
+        for (const file of files.filter(f => !f.endsWith('.json'))) {
+            const currentHash = await calculateFileHash(path.join(lc.dbDir, file));
+            if (currentHash === fileHash) return { exists: true, filename: file };
+        }
+    } catch (err) {
+        console.error('Error checking files:', err);
+    }
+    return { exists: false };
+}
 
 /**
  * 流式计算文件的md5

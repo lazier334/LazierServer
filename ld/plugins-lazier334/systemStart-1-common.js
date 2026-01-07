@@ -1,7 +1,10 @@
+import { createSystemStart } from './types/index.ts';
+
 /**
  * @param {import('./libs/baseImport.js')}}
  */
-export default async function systemStartCommon({ fs, path, config, app }) {
+export default createSystemStart(async function systemStartCommon({ fs, path, config, app }) {
+    config.app
     // 打印版本日志
     console.info(config.showVersion());
 
@@ -13,4 +16,4 @@ export default async function systemStartCommon({ fs, path, config, app }) {
 
     config.app = app;
     app.keys = config.session.keys;
-}
+})

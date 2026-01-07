@@ -1,3 +1,4 @@
+import { createSystemStart } from './types/index.ts';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
@@ -5,7 +6,7 @@ import DailyRotateFile from 'winston-daily-rotate-file';
  * 因为 logger 对象有 end 参数，会导致不再继续运行后面的插件，所以将其挂载到 console.logger
  * @param {import('./libs/baseImport.js')}}
  */
-export default async function systemStartLogger({ fs, path, config, app }) {
+export default createSystemStart(async function systemStartLogger({ fs, path, config, app }) {
     if (console.logger) return;
 
     // 日志格式：加上等级和时间前缀
@@ -78,4 +79,4 @@ export default async function systemStartLogger({ fs, path, config, app }) {
     console.logger = logger;
 
     return true
-} 
+})

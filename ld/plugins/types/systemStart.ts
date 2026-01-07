@@ -1,0 +1,28 @@
+import type Koa from 'koa';
+
+/**
+ * 参数
+ */
+type SystemOptions = {
+    fs: typeof import('fs'),
+    path: typeof import('path'),
+    config: typeof import('../../../src/libs/configDef.ts').default,
+    // config: { [key: string]: any },
+    app: Koa<Koa.DefaultState, Koa.DefaultContext>
+}
+
+/**
+ * systemStart 插件函数
+ */
+type SystemStartFunction = (opt: SystemOptions) => void;
+
+/**
+ * 创建 systemStart 插件的类型提示函数
+ * @param fun 自定义的插件函数
+ * @returns 
+ */
+export function createSystemStart(fun: SystemStartFunction): SystemStartFunction {
+    return fun;
+}
+
+export default createSystemStart;

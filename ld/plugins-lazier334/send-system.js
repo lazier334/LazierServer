@@ -1,3 +1,4 @@
+import { createSend } from './types/index.ts';
 import { fs, path, config } from './libs/baseImport.js';
 
 /**
@@ -14,7 +15,7 @@ import { fs, path, config } from './libs/baseImport.js';
  * @param {SendOptions}  sendOptions
  * @returns {SendOptions}
  */
-export default async function sendSystem(sendOptions) {
+export default createSend(async function sendSystem(sendOptions) {
     const { ctx, filename, opts } = sendOptions;
     if (ctx.path.startsWith('/system/')) {
         try {
@@ -49,4 +50,4 @@ export default async function sendSystem(sendOptions) {
         }
     }
     return sendOptions;
-}
+})

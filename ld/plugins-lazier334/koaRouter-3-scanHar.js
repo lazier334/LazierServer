@@ -1,3 +1,4 @@
+import { createKoaRouter } from './types/index.ts';
 import Router from '@koa/router';
 import { fs, path, config } from './libs/baseImport.js';
 import { handlerHtmlBodyData } from './utils/util-router.js';
@@ -23,7 +24,7 @@ if (!config.additionalRouter[import.meta.filename]) {
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  * @param {import('@koa/router')} router 路由
  */
-export default function koaRouterScanHar(router) {
+export default createKoaRouter(function koaRouterScanHar(router) {
     // 这个接口放到前面是因为优先读取文件，再读取系统的接口，
     // 接口：全局，所有没有被拦截的都将跳到这里发送文件
     router.all(new RegExp('/(.*)'), async (ctx, next) => {
@@ -44,7 +45,8 @@ export default function koaRouterScanHar(router) {
     });
 
     return router
-}
+})
+
 /**
  * 从 entries 列表选择一条数据并发送
  * @param {import('koa').Context} ctx

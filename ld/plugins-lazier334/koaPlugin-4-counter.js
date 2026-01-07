@@ -1,3 +1,4 @@
+import { createKoaPlugin } from './types/index.ts';
 import Router from '@koa/router';
 
 /** @type {import('../../src/libs/config')} */
@@ -17,7 +18,7 @@ if (!config.additionalRouter[import.meta.filename]) {
  * @param {import('koa').Context} ctx
  * @param {import('koa').Next} next
  */
-export default async function koaPluginCounter(ctx, next) {
+export default createKoaPlugin(async function koaPluginCounter(ctx, next) {
     // 计数器插件
     const start = Date.now();
     const reqInfo = {
@@ -65,4 +66,4 @@ export default async function koaPluginCounter(ctx, next) {
         const pathname = ctx.url.split('?').shift();
         cacheErrorApis[ctx.status][pathname] = Date.now();
     }
-}
+})

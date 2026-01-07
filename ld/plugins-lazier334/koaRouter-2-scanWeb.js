@@ -1,3 +1,4 @@
+import { createKoaRouter } from './types/index.ts';
 import send from 'koa-send';
 import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
 import { handlerHtmlBodyData, isHandlerHtmlBodyData } from './utils/util-router.js';
@@ -16,7 +17,7 @@ else console.log('指定扫描文件夹列表', pushDir(domainList));
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  * @param {import('@koa/router')} router 路由
  */
-export default function koaRouterScanWeb(router) {
+export default createKoaRouter(function koaRouterScanWeb(router) {
     // 这个接口放到前面是因为优先读取文件，再读取系统的接口，顺序为： 插件API > 文件API > HarAPI > 系统API
     // 接口：全局，所有没有被拦截的都将跳到这里发送文件
     router.all(new RegExp('/(.*)'), async (ctx, next) => {
@@ -93,7 +94,7 @@ export default function koaRouterScanWeb(router) {
     });
 
     return router
-}
+})
 
 /** 尝试使用json类型返回没有后缀的文件数据 */
 async function sendFile(ctx, filepath, opts) {

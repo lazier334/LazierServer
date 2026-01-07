@@ -1,3 +1,4 @@
+import { createKoaRouter } from './types/index.ts';
 import send from 'koa-send';
 import { restartSystem } from './libs/sys-restart.js';
 import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseImport.js';
@@ -19,7 +20,7 @@ const lc = {
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  * @param {import('@koa/router')} router 路由
  */
-export default function koaRouterSystem(router) {
+export default createKoaRouter(function koaRouterSystem(router) {
     // 接口: 根目录重定向
     router.all(['/', '/index'], ctx => {
         const idnexPath = path.join(config.dataPath, 'web/index');
@@ -208,7 +209,7 @@ export default function koaRouterSystem(router) {
     });
 
     return router
-}
+})
 
 /**
  * 响应数据

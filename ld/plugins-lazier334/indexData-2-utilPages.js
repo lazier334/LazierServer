@@ -1,3 +1,4 @@
+import { createIndexData } from './types/index.ts';
 import { fs, path, config } from './libs/baseImport.js';
 
 const lc = {
@@ -8,7 +9,7 @@ const lc = {
 /**
  * 工具的列表插件
  */
-export default async function indexDataDemo(arr) {
+export default createIndexData(async function indexDataDemo(arr) {
     let re = [];
 
     if (lc.open) {
@@ -82,4 +83,4 @@ export default async function indexDataDemo(arr) {
 
     arr.push(...re);
     return arr;
-}
+})

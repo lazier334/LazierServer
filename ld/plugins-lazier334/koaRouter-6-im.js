@@ -1,3 +1,4 @@
+import { createKoaRouter } from './types/index.ts';
 import * as globalUtils from './utils/utils.js';
 import all from './utils/utils-im.js';
 const {
@@ -17,9 +18,9 @@ const {
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  * @param {import('@koa/router')} router 路由
  */
-export default function koaRouterHistory(router) {
+export default createKoaRouter(function koaRouterHistory(router) {
     return addRouter(router)
-}
+})
 
 const USERAPI = imConfig.BASEAPI + '/user';
 const MSGAPI = imConfig.BASEAPI + '/msg';

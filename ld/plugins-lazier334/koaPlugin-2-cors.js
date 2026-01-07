@@ -1,3 +1,4 @@
+import { createKoaPlugin } from './types/index.ts';
 import cors from '@koa/cors';
 import { config } from './libs/baseImport.js';
 
@@ -8,6 +9,6 @@ const corsMiddleware = cors();
  * @param {import('koa').Context} ctx
  * @param {import('koa').Next} next
  */
-export default async function koaPluginCors(ctx, next) {
+export default createKoaPlugin(async function koaPluginCors(ctx, next) {
     return config.switch.cors ? await corsMiddleware(ctx, next) : await next()
-}
+})

@@ -1,4 +1,4 @@
-
+import { createKoaPlugin } from './types/index.ts';
 import session from 'koa-session';
 import { config } from './libs/baseImport.js';
 
@@ -9,6 +9,6 @@ const sessionMiddleware = session(config.session, config.app);
  * @param {import('koa').Context} ctx
  * @param {import('koa').Next} next
  */
-export default async function koaPluginSession(ctx, next) {
+export default createKoaPlugin(async function koaPluginSession(ctx, next) {
     return await sessionMiddleware(ctx, next)
-}
+})

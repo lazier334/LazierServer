@@ -1,4 +1,4 @@
-
+import { createKoaPlugin } from './types/index.ts';
 import url from 'url';
 import koaProxies from 'koa-proxies';
 
@@ -7,7 +7,7 @@ import koaProxies from 'koa-proxies';
  * @param {import('koa').Context} ctx
  * @param {import('koa').Next} next
  */
-export default async function koaPluginProxies(ctx, next) {
+export default createKoaPlugin(async function koaPluginProxies(ctx, next) {
     const toDomain = ctx.query.toDomain;
     let proxy = false;
     if (toDomain) {
@@ -31,4 +31,4 @@ export default async function koaPluginProxies(ctx, next) {
     }
 
     return await next();
-}
+})
