@@ -10,17 +10,16 @@
     "type": "git",
     "url": "git+https://github.com/lazier334/LazierServer.git"
   },
-  "license": "ISC",
+  "license": "Copyright (c) [2025] [lazier334]  \n保留所有权利。  \n\n1. 本项目**仅授权用于学习研究目的**，禁止任何形式的复制、修改、分发、商业利用或其他行为。  \n2. **无论是否获得授权**，使用者应对所有行为承担法律责任及风险，本人**拒绝承担任何直接/间接责任**。",
   "author": "lazier334",
   "type": "module",
-  "main": "src/app.js",
-  "bin": "src/app.js",
-  "directories": {
-    "test": "tests"
-  },
   "scripts": {
     "start": "node src/app.ts",
     "dev": "nodemon src/app.ts"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=11.0.0"
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
