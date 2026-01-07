@@ -3,7 +3,10 @@ import { fs, path, config } from './libs/baseImport.js';
 
 const lc = {
     open: true,
-    targetPath: path.join(config.rootDir, 'utils')
+    targetPath: [
+        path.join(config.rootDir, 'utils'),
+        path.join(import.meta.dirname, '../web-lazier334/utils')
+    ]
 }
 
 /**
@@ -62,22 +65,26 @@ export default createIndexData(async function indexDataDemo(arr) {
             ]);
 
             // 扫描网页工具（html文件）
-            re = re.concat(fs.readdirSync(lc.targetPath)
-                .map(p => path.join(lc.targetPath, p))
-                .filter(p => fs.statSync(p).isFile())
-                .map(p => ({
-                    icon: "",
-                    name: path.basename(p),
-                    mark: "工具 - " + path.basename(p),
-                    urls: [
-                        {
-                            text: "打开",
-                            url: "/" + path.basename(p)
-                        }
-                    ],
-                })));
+            lc.targetPath.forEach(targetPath => {
+                if (fs.existsSync(targetPath)) {
+                    re = re.concat(fs.readdirSync(targetPath)
+                        .map(p => path.join(targetPath, p))
+                        .filter(p => fs.statSync(p).isFile())
+                        .map(p => ({
+                            icon: "",
+                            name: path.basename(p),
+                            mark: "工具 - " + path.basename(p),
+                            urls: [
+                                {
+                                    text: "打开",
+                                    url: "/" + path.basename(p)
+                                }
+                            ],
+                        })));
+                }
+            });
         } catch (err) {
-            console.error('加载工具列表错误')
+            console.error('加载工具列表错误', err)
         }
     }
 
