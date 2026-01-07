@@ -1,7 +1,9 @@
+import { createWebsocketMsgs } from './types/index.ts';
+
 /**
  * ws自动响应的数据示例
  */
-export default async function websocketMsgsDemo(arr) {
+export default createWebsocketMsgs(async function websocketMsgsDemo(arr) {
   arr.push(...[
     {
       "type": "receive",
@@ -40,4 +42,4 @@ export default async function websocketMsgsDemo(arr) {
     }
   ])
   return arr;
-}
+})

@@ -1,8 +1,10 @@
+import { createIndexData } from './types/index.ts';
+
 /**
  * 列表插件的demo
  */
-export default async function indexDataDemo(arr) {
-    arr.push(...[
+export default createIndexData(async function indexDataDemo(arr) {
+    if (false) arr.push(...[
         {
             icon: "",
             name: "项目名称",
@@ -13,7 +15,7 @@ export default async function indexDataDemo(arr) {
                     url: "/index#跳转地址"
                 }
             ],
-        }
+        },
     ]);
     return arr;
-}
+})

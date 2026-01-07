@@ -1,9 +1,9 @@
+import { createKoaPlugin } from './types/index.ts';
+
 /**
- * koa中间件示例插件
- * @param {import('koa').Context} ctx
- * @param {import('koa').Next} next
+ * koa 中间件插件的demo
  */
-export default async function koaPluginDemo(ctx, next) {
-    // ctx.body = 'hello world! -- by demo';
+export default createKoaPlugin(async function koaPluginDemo(ctx, next) {
+    if (false) ctx.body = 'hello world! -- by demo';
     return await next();
-}
+})
