@@ -1,7 +1,7 @@
 {
   "name": "lazierserver",
-  "version": "1.0.0(25081400)",
-  "description": "一个可以快速搭建的服务器",
+  "version": "1.1.0(26010700)",
+  "description": "从js迁移到ts, 优化提示信息, 更方便开发插件\n= 其他优化",
   "homepage": "https://github.com/lazier334/LazierServer#readme",
   "bugs": {
     "url": "https://github.com/lazier334/LazierServer/issues"
@@ -46,6 +46,8 @@
   },
   "devDependencies": {
     "@types/koa": "^2.15.0",
+    "@types/koa__cors": "^5.0.1",
+    "@types/koa__router": "^12.0.5",
     "@types/koa-send": "^4.1.6",
     "@types/ws": "^8.18.1",
     "nodemon": "^3.1.10"

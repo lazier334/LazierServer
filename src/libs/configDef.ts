@@ -229,6 +229,8 @@ const config = {
     versionBanner: `当前服务器版本 v.{version} - {detail}`,
     /** 版本信息 */
     version: {
+        "1.1.0(26010700)": `从js迁移到ts, 优化提示信息, 更方便开发插件
+= 其他优化`,
         "1.0.2(25121200)": `增加im与whistle并优化代码
 + 增加 github actions 自动打包版本
 + 增加 im 插件

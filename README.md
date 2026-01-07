@@ -39,16 +39,16 @@ LazierServer
 │     ├─ index              // 主站点
 │     └─ utils              // 工具站点
 ├─ src                      // 代码
-│  ├─ app.js                // 主程序
+│  ├─ app.ts                // 主程序
 │  └─ libs                  // 系统库(包)
-│     ├─ configDef.js       // 默认配置
-│     ├─ config.js          // 初始化配置
-│     ├─ initKoa.js         // 初始化koa
-│     ├─ koaCompose.js      // 自定义koa中间件
-│     ├─ plugins.js         // 阶段插件核心
-│     ├─ StageClass.js      // 阶段类
-│     ├─ utils.js           // 系统工具
-│     └─ websocketServer.js // websocket服务
+│     ├─ configDef.ts       // 默认配置
+│     ├─ config.ts          // 初始化配置
+│     ├─ initKoa.ts         // 初始化koa
+│     ├─ koaCompose.ts      // 自定义koa中间件
+│     ├─ plugins.ts         // 阶段插件核心
+│     ├─ StageClass.ts      // 阶段类
+│     ├─ utils.ts           // 系统工具
+│     └─ websocketServer.ts // websocket服务
 └─ tests                    // 测试项
 ```
 
