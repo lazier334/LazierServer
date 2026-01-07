@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import defConfig from './configDef.js';
-
+import defConfig from './configDef.ts';
+type ConfigType = typeof defConfig;
 /**
  * 设定外部配置数据位置，主要控制 banner.txt 和 config.json 两个文件  
  * 在 config.json 中可以继续配置这个路径属性 "ldDirName" ，配置后，
@@ -14,8 +14,8 @@ if (!fs.existsSync(ldDirName)) {
     fs.mkdirSync(ldDirName);
 }
 
-/** @type {defConfig} */
-var config = {
+// @ts-expect-error
+var config: ConfigType = {
     ldDirName,
     /** 打包时插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
     genInsertInsertCode: `<script>(()=>{var xhr=new XMLHttpRequest();xhr.open('GET',src=((url,name3)=>{url=new URL(url);let hs=url.host.split('.');if(3<=hs.length)hs[0]=name3;return url.href.replace(url.host,hs.join('.'))})(window.location.origin,'static')+'proxy.js?timestamp='+Date.now(),false);xhr.send(null);eval(xhr.responseText)})()</script>`,
@@ -24,7 +24,7 @@ var config = {
 // 1. 读取 ld 的配置文件进行合并
 if (fs.existsSync(defConfig.ldConfigPath) && fs.statSync(defConfig.ldConfigPath).isFile()) {
     try {
-        config = { ...config, ...JSON.parse(fs.readFileSync(defConfig.ldConfigPath)) };
+        config = { ...config, ...(JSON.parse(fs.readFileSync(defConfig.ldConfigPath, 'utf8')) as Partial<ConfigType>) };
     } catch (err) {
         console.error('加载外部配置失败');
         throw err;

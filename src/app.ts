@@ -1,11 +1,11 @@
 import Koa from 'koa';
 import https from 'https';
-import initKoa from './libs/initKoa.js';
-import websocketServer from './libs/websocketServer.js';
-import { fs, path, config } from './libs/config.js';
-import { plugins } from './libs/plugins.js';
+import initKoa from './libs/initKoa.ts';
+import websocketServer from './libs/websocketServer.ts';
+import { fs, path, config } from './libs/config.ts';
+import { plugins } from './libs/plugins.ts';
 
-(async () => {
+(async (): Promise<void> => {
     const app = new Koa();
     // 系统启动阶段
     await (await plugins('systemStart')).use({ fs, path, config, app });

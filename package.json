@@ -19,13 +19,8 @@
     "test": "tests"
   },
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
-    "restart": "node src/lib/sys-restart.js",
-    "gen": "node src/lib/gen-all.js",
-    "build": "pkg . --targets node18-win-x64,node18-linux-x64 --output dist/",
-    "buildLinux": "pkg . --targets node18-linux-x64 --output dist/LazierServer",
-    "buildAll": "pkg . --targets node18-win-x64,node18-linux-x64,node18-linux-arm64,node18-macos-x64,node18-macos-arm64 --output dist/"
+    "start": "node src/app.ts",
+    "dev": "nodemon src/app.ts"
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
@@ -51,8 +46,8 @@
   },
   "devDependencies": {
     "@types/koa": "^2.15.0",
-    "axios": "^1.11.0",
-    "nodemon": "^3.1.10",
-    "pkg": "^5.8.1"
+    "@types/koa-send": "^4.1.6",
+    "@types/ws": "^8.18.1",
+    "nodemon": "^3.1.10"
   }
 }

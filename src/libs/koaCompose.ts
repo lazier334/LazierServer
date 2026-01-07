@@ -1,9 +1,11 @@
+import type { Middleware, DefaultContext, Next } from 'koa';
+
 /**
  * 手写中间件组合函数 (类似 koa-compose)
  * @param {Array<Function>} middlewares 中间件数组
  * @returns {Function} 组合后的中间件函数
  */
-export function compose(middlewares) {
+export function compose(middlewares: Middleware[]): Middleware {
     // 确保输入是数组
     if (!Array.isArray(middlewares)) {
         throw new TypeError('Middleware stack must be an array!');
@@ -17,12 +19,12 @@ export function compose(middlewares) {
     }
 
     // 返回组合后的中间件函数
-    return function (ctx, next) {
+    return function (ctx: DefaultContext, next: Next) {
         // 当前执行中间件的索引
         let index = -1;
 
         // 递归调度函数
-        function dispatch(i) {
+        function dispatch(i: number): Promise<void | Middleware | Next> {
             // 防止多次调用 next()
             if (i <= index) {
                 return Promise.reject(new Error('next() called multiple times'));
@@ -32,7 +34,7 @@ export function compose(middlewares) {
             index = i;
 
             // 当前要执行的中间件
-            let fn = middlewares[i];
+            let fn: Middleware | Next | undefined = middlewares[i];
 
             // 如果执行到结尾了，使用外部的next（如果有）
             if (i === middlewares.length) {
@@ -47,6 +49,7 @@ export function compose(middlewares) {
             try {
                 // 调用当前中间件，传入ctx和下一个中间件的包装函数
                 return Promise.resolve(
+                    // @ts-ignore
                     fn(ctx, function next() {
                         return dispatch(i + 1);
                     })
@@ -61,4 +64,5 @@ export function compose(middlewares) {
         return dispatch(0);
     };
 }
+
 export default compose;

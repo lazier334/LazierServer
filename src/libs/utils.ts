@@ -1,8 +1,29 @@
 import https from 'https';
 import Router from '@koa/router';
 import Downloader from 'nodejs-file-downloader';
-import { fs, path, config, getNowFileStorage } from './config.js';
-import { plugins, getAllPlugin, getPlguinUpdateTime } from './plugins.js';
+import { fs, path, config, getNowFileStorage } from './config.ts';
+import { plugins, getAllPlugin, getPlguinUpdateTime } from './plugins.ts';
+import type Application from 'koa';
+import send from 'koa-send';
+
+interface User {
+    /** 用户id */
+    userId: number;
+    /** 状态 */
+    status: string;
+    /** 用户名 */
+    username: string;
+    /** 密码 */
+    password: string;
+    /** 最后登录时间 */
+    lastUpdateTime: number;
+    /** 账号失效时间 */
+    deadline: number;
+    /** 是否是管理员 */
+    isAdmin: boolean;
+    /** 是否是超级管理员 */
+    superAdmin: boolean;
+}
 
 // 创建忽略证书验证的 Agent
 const insecureAgent = new https.Agent({
@@ -23,34 +44,32 @@ ls.routersCache = null;
 /** 上次刷新时间 */
 ls.lastRefreshTime = 0;
 
-const AdminUser = {
-    /** 用户id */
+const AdminUser: User = {
     "userId": 0,
-    /** 状态 */
     "status": "在线",
-    /** 用户名 */
     "username": "admin",
-    /** 密码 */
     "password": "-",
-    /** 最后登录时间 */
     "lastUpdateTime": 1745751359079,
-    /** 账号失效时间 */
     "deadline": 4102358400000,
-    /** 是否是管理员 */
     "isAdmin": true,
-    /** 是否是超级管理员 */
     "superAdmin": true
 }
+
+type AuthorizationVerifyFunction = (ctx: Application) => User | undefined;
+interface Authorization {
+    /**
+     * 默认本机发起的请求信息全都是超级管理员
+     * @param ctx 
+     * @returns 用户信息
+     */
+    verify: AuthorizationVerifyFunction;
+}
+
 /**
  * 权限管理对象，因为使用es模块体系导致导出的 authUser 函数无法被重写  
  * 所以使用一个可变对象来保存权限校验函数，方便重写
  */
-const authorization = {
-    /**
-     * 默认本机发起的请求信息全都是超级管理员
-     * @param {*} ctx 
-     * @returns {AdminUser} 用户信息
-     */
+const authorization: Authorization = {
     verify(ctx) {
         try {
             if (allowLocalOnly(ctx)) return AdminUser;
@@ -59,6 +78,7 @@ const authorization = {
         }
     }
 }
+
 export {
     authorization,
     authUser,
@@ -71,32 +91,34 @@ export {
 
 /**
  * 默认本机发起的请求信息全都是超级管理员
- * @param {*} ctx 
- * @returns {AdminUser} 用户信息
+ * @param ctx 
+ * @returns 用户信息
  */
-function authUser(ctx) {
+function authUser(ctx: Application): User | undefined {
     return authorization.verify(ctx);
 }
+
 /**
  * 更新权限校验函数
- * @param {(ctx)=>AdminUser} fun 权限校验函数
- * @returns {(ctx)=>AdminUser} 权限校验函数
+ * @param fun 权限校验函数
+ * @returns 权限校验函数
  */
-function updateAuthUser(fun) {
+function updateAuthUser(fun: AuthorizationVerifyFunction): AuthorizationVerifyFunction {
     return authorization.verify = fun;
 }
 
 // 仅允许本机请求的中间件
-function allowLocalOnly(ctx) {
+function allowLocalOnly(ctx: Application): boolean {
+    // @ts-ignore
     const ip = ctx.ip || ctx.request.ip;
     return ip === '::1' || ip === '127.0.0.1';
 }
 
 
 /** 补全文件的koa插件，会使用 domains 里面的域名逐个尝试下载文件 */
-async function completeFile(ctx, next) {
+async function completeFile(ctx: any, next: Function): Promise<void | string> {
     if (config.switch.autoComplete) {
-        let downloadedFile = null;
+        let downloadedFile: string | undefined | null = null;
         const api = ctx.path;
         const url = new URL(ctx.request.href);
         url.port = "";
@@ -107,7 +129,7 @@ async function completeFile(ctx, next) {
             console.debug("[尝试下载]", url.href);
             downloadedFile = await downloadFileToPath(url.href, localPath);
             if (downloadedFile) {
-                return await sendFile(ctx, path.basename(downloadedFile), {
+                return await send(ctx, path.basename(downloadedFile), {
                     root: path.dirname(downloadedFile),
                     hidden: true
                 });
@@ -119,9 +141,9 @@ async function completeFile(ctx, next) {
 
 /**
  * 获取动态的路由
- * @returns {Router}
+ * @returns Router
  */
-async function readKoaRouters() {
+async function readKoaRouters(): Promise<Router> {
     if (!config.switch.dynamicOperation && ls.routersCache) return ls.routersCache;
     let apList = await getAllPlugin('koaRouter');
 
@@ -138,7 +160,7 @@ async function readKoaRouters() {
     if (ls.lastRefreshTime + config.times.koaRouterPlugin < Date.now()) {
         const alm = ls.apListMap;
         ls.apListMap = {};
-        apList.forEach(fp => {
+        apList.forEach((fp: string) => {
             let time = getPlguinUpdateTime(fp);
             if (alm[fp] != time) refresh = true;
             ls.apListMap[fp] = time;
@@ -168,12 +190,12 @@ async function readKoaRouters() {
  * 当 url == orgUrl 的时候，日志只会显示 url 
  * 下载文件到指定的路径，里面使用了代理，需要开启代理并且配置正确才可以正常下载
  * 如果不需要代理可以将其配置为 "假" 值
- * @param {string} url - 下载文件的 URL
- * @param {string} filepath - 文件保存的路径
- * @param {string} orgUrl - 原始链接，如果传递这个参数为真，那么将不会尝试另一种协议的下载
- * @returns {Promise<string|undefined>} 文件最终存放的文件路径，下载失败则为未定义
+ * @param url - 下载文件的 URL
+ * @param filepath - 文件保存的路径
+ * @param orgUrl - 原始链接，如果传递这个参数为真，那么将不会尝试另一种协议的下载
+ * @returns 文件最终存放的文件路径，下载失败则为未定义
  */
-async function downloadFileToPath(url, filepath, orgUrl) {
+async function downloadFileToPath(url: string, filepath: string, orgUrl?: string): Promise<string | undefined> {
     try {
         fs.mkdirSync(path.dirname(filepath), { recursive: true });
         const downloader = new Downloader({
@@ -188,7 +210,8 @@ async function downloadFileToPath(url, filepath, orgUrl) {
         filepath = ((await downloader.download()).filePath || filepath).replace(/\\/g, '/');
         console.info(`[文件已下载至路径]: \x1b[32m${filepath}\x1b[0m`);
         return filepath;
-    } catch (error) {
+    } catch (err) {
+        const error = err as Error;
         if (!orgUrl) {
             return await downloadFileToPath(url.startsWith('https://') ?
                 url.replace('https://', 'http://') :

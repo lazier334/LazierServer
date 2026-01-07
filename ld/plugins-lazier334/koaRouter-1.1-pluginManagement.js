@@ -5,8 +5,8 @@ import uploadPluginMiddleware from './libs/koa-uploadPluginMiddleware.js';
 import { getAbsolutePaths, compareDirectories } from './utils/utils-base.js';
 import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
 
-/** @type {import('../../src/libs/utils.js')} */
-const utilsModule = await importSysModule('utils.js');
+/** @type {import('../../src/libs/utils.ts')} */
+const utilsModule = await importSysModule('utils.ts');
 const { downloadFileToPath } = utilsModule;
 const plugins = await getPluginsModule();
 

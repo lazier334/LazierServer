@@ -1,18 +1,19 @@
-import koaCompose from './koaCompose.js';
-import { config } from './config.js';
-import { completeFile, readKoaRouters } from './utils.js';
-import { plugins } from './plugins.js';
+import type Koa from 'koa';
+import koaCompose from './koaCompose.ts';
+import { config } from './config.ts';
+import { completeFile, readKoaRouters } from './utils.ts';
+import { plugins } from './plugins.ts';
 
 export default initKoa;
 
 /**
  * 初始化Koa
- * @param {import('@types/koa')} app 
+ * @param app 
  */
-async function initKoa(app) {
+async function initKoa(app: Koa): Promise<void> {
     // 添加路由
-    app.use(async (ctx, next) => await koaCompose((await plugins('koaPlugin')).data)(ctx, next))
-        .use(async (ctx, next) => {
+    app.use(async (ctx: Koa.DefaultContext, next: Koa.Next) => await koaCompose((await plugins('koaPlugin')).data)(ctx, next))
+        .use(async (ctx: Koa.DefaultContext, next: Koa.Next) => {
             // 动态路由
             const routers = await readKoaRouters();
             if (config.switch.dynamicRouter && routers.match(ctx.path, ctx.method).route) {

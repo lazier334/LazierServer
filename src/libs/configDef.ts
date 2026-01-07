@@ -1,11 +1,45 @@
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
+type NullObject = { [key: string]: any; };
+type NullConfig = NullObject;
+declare global {
+    namespace NodeJS {
+        interface Process {
+            G: {
+                getNowFileStorage: typeof getNowFileStorage;
+                [key: string]: any; // 兼容其他动态添加的属性
+            };
+        }
+    }
+    // 新增：按钮数据的基础类型（最小化定义，兼容原有结构）
+    interface ButDataItem {
+        avatarText: string;
+        color?: string;
+        text: string;
+        tooltip: string;
+        debugMode?: boolean;
+        fun: string;
+        update?: (self: ButDataItem, config: NullConfig) => void;
+    }
+}
+type ConfigUtilsType = {
+    readObj: typeof readObj;
+    appendObj: typeof appendObj;
+    selectConfig: typeof readObj;
+    useConfig: typeof appendObj;
+    readVersion: typeof readVersion;
+    isMainModule: typeof isMainModule;
+    get__dirname: typeof get__dirname;
+    getNowFileStorage: typeof getNowFileStorage;
+};
+
+
 // 挂载全局对象
 if (!process.G) process.G = { getNowFileStorage };
 
 /** 配置工具 */
-const ConfigUtils = {
+const ConfigUtils: ConfigUtilsType = {
     readObj,
     appendObj,
     selectConfig: readObj,
@@ -149,14 +183,15 @@ const ObfuscatorOptions = {
 const config = {
     /**
      * 更新本地数据文件夹路径
-     * @param {string} newLdDirName 本地数据文件夹路径
-     * @returns {boolean}
+     * @param newLdDirName 本地数据文件夹路径
+     * @param forceRefresh 是否强制刷新
+     * @returns 是否更新成功
      */
-    updateLdDirName(newLdDirName, forceRefresh) {
-        console.log('updateLdDirName...', newLdDirName)
+    updateLdDirName(newLdDirName: string, forceRefresh?: boolean): boolean {
+        console.log('更新数据目录:', newLdDirName)
         const oldName = this.ldDirName;
         if (!forceRefresh && (typeof newLdDirName != 'string' || newLdDirName == '' || oldName == newLdDirName)) return false;
-        const replaceAllStr = (str) => {
+        const replaceAllStr = (str: string) => {
             return str.replaceAll(oldName, newLdDirName).replaceAll('{/ldDirName/}', newLdDirName);
         }
         /** ld 文件夹名称 */
@@ -250,7 +285,7 @@ const config = {
     /** 不扫描全部文件夹时指定仅扫描web文件夹里的哪些文件夹 */
     domainList: [],
     /** 在扫描全部文件夹时额外扫描的web主文件夹列表，相当于有多个 web 文件夹，这不影响扫描全部的har文件 */
-    otherWebPath: [],
+    otherWebPath: [] as string[],
     /** https的证书 */
     SSLOptions: {
         key: `-----BEGIN PRIVATE KEY-----
@@ -319,7 +354,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
      *      },
      *  }]} 
      */
-    appendButsData: [],
+    appendButsData: [] as ButDataItem[],
     /** 需要超级管理员权限才可以查看的按钮，里面存放按钮的 text 属性 */
     superAdminButsData: ['重启系统', '关闭系统', '编辑配置'],
     /** 需要管理员权限才可以查看的按钮，里面存放按钮的 text 属性 */
@@ -359,9 +394,11 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
                         console.log(`已删除缓存: ${cacheName}`);
                     }
                     console.log('SW清理成功');
+                    // @ts-ignore 这里调用的是前端ElementPlus的消息框代码
                     ElMessage.success('SW清理成功');
                 } catch (err) {
                     console.error('SW清理失败:', err);
+                    // @ts-ignore
                     ElMessage.error('SW清理失败');
                     throw err;
                 }
@@ -397,7 +434,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             text: '编辑配置',
             tooltip: '编辑配置文件',
             debugMode: true,
-            fun: `this.openPage('/edit/index.html?filepath=config.js')`
+            fun: `this.openPage('/edit/index.html?filepath=config.ts')`
         },
         {
             update(self, config) {
@@ -437,9 +474,9 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             tooltip: '在线管理插件列表',
             fun: `this.openPage('/plugin-mgmt/index.html')`
         },
-    ],
+    ] as ButDataItem[],
     /** 插件目录列表 */
-    pluginDirs: [],
+    pluginDirs: [] as string[],
     /** 外部配置路径，改文件所在的 ld 目录也用于存放自定义插件 */
     ldConfigPath: `{/ldDirName/}/config.json`,
     /** 数据路径 */
@@ -496,9 +533,9 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         ]
     },
     /** 插件的各个阶段 */
-    pluginStages: {},
+    pluginStages: {} as Record<string, any>,
     /** 排除的插件列表 */
-    excludePlugins: [],
+    excludePlugins: [] as string[],
     /** 时间（间隔）相关 */
     times: {
         /** 自动补全超时时间 */
@@ -550,7 +587,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
      */
     additionalRouter: {},
     /** 配置所在的文件夹路径 */
-    configDirPath: import.meta.dirname,
+    configDirPath: path.dirname(fileURLToPath(import.meta.url)),
     /** 请求/响应 头名字 */
     headerNames: {
         /** 文件来源 */
@@ -585,37 +622,38 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         fun: `ElMessageBox.alert(\`当前版本: ${ver.version
             }<br>${ver.detail.replaceAll('\n', '<br>')}\`, 'Version ${ver.version
             }', {dangerouslyUseHTMLString: true,confirmButtonText: '确定'})`
-    })
+    } as ButDataItem);
 }
 
 export default config;
 
 /**
  * 读取版本，默认读取最新版本
- * @param {0} num
- * @returns {{ version: '1.0', detail: '版本说明' }}
+ * @param num
+ * @returns 版本信息
  */
-function readVersion(num = 0) {
+function readVersion(num: number = 0): { version: string; detail: string } {
     let re = { version: '0', detail: '-' };
     try {
         let vers = Object.keys(config.version);
         const version = vers[num];
-        const info = config.version[version];
+        const info = config.version[version as keyof typeof config.version];
         re.version = version;
         re.detail = info;
     } catch (err) {
+        const error = err as Error;
         re.version = '-1';
-        re.detail = err.message + '\n' + err.stack;
+        re.detail = error.message + '\n' + error.stack;
     }
     return re;
 }
 /**
  * 显示版本banner信息
- * @this {config}
- * @param {{ version: '1.0', detail: '版本说明' }} ver
- * @returns {"当前服务器版本 v.1.0 - 版本说明"}
+ * @this {typeof config}
+ * @param ver 版本信息
+ * @returns "当前服务器版本 v.1.0 - 版本说明"
  */
-function showVersion(ver) {
+function showVersion(this: typeof config, ver?: { version: string; detail: string }): string {
     if (typeof ver != 'object') ver = readVersion();
     let vs = this.versionBanner;
     if (typeof vs != 'string') vs = config.versionBanner + '\n\x1b[31m    ——无versionBanner属性，使用默认的versionBanner';
@@ -627,22 +665,21 @@ function showVersion(ver) {
 }
 /**
  * 递归逐步从t读取o的属性，默认返回新对象
- * @template T
- * @param {T | config} t 局部目标对象
- * @param {Object} o 完整原始对象
- * @param {boolean} useOrg 操作于源对象
- * @param {boolean} notAddUtilFun 不添加工具函数
- * @returns {T & ConfigUtils} 从完整对象中读取到的目标对象同类型属性后的目标对象
+ * @param t 局部目标对象
+ * @param o 完整原始对象
+ * @param useOrg 操作于源对象
+ * @param notAddUtilFun 不添加工具函数
+ * @returns 从完整对象中读取到的目标对象同类型属性后的目标对象
  */
-function readObj(t, o, useOrg, notAddUtilFun) {
+function readObj<T>(t: T, o?: object, useOrg?: boolean, notAddUtilFun?: boolean): T & ConfigUtilsType {
     // 如果t和o都是数组，那么直接返回数组o的新副本，避免数组引用导致被外部修改
-    if (Array.isArray(t) && Array.isArray(o)) return o.slice();
-    if (o == undefined) o = t;
+    if (Array.isArray(t) && Array.isArray(o)) return o.slice() as T & ConfigUtilsType;
+    if (o == undefined) o = t as object;
     let re = useOrg ? t : Object.create(null);
     if (re != o) {
         // 添加o到t，优先使用o的属性，只选择t存在的属性
-        Object.entries(t).forEach(([k, v]) => {
-            let ov = o[k];  // t的属性是 null、类型不同、自定义类，都使用o的属性，否则使用t的属性
+        Object.entries(t as object).forEach(([k, v]) => {
+            let ov = (o as Record<string, any>)[k];  // t的属性是 null、类型不同、自定义类，都使用o的属性，否则使用t的属性
             if (typeof v === typeof ov) {
                 if (typeof v === 'object') {
                     if (v != null) {
@@ -653,31 +690,30 @@ function readObj(t, o, useOrg, notAddUtilFun) {
                     }           // 解析 null
                 }               // 解析其他基本类型
             }                   // 类型不同
-            if (re[k] != ov) re[k] = ov;
+            if ((re as Record<string, any>)[k] != ov) (re as Record<string, any>)[k] = ov;
         })
     }
-    if (!notAddUtilFun) Object.keys(ConfigUtils).forEach(k => re[k] = ConfigUtils[k]);
+    if (!notAddUtilFun) Object.keys(ConfigUtils).forEach(k => re[k] = ConfigUtils[k as keyof typeof ConfigUtils]);
     return re;
 }
 
 /**
  * 递归逐步读取o和t的属性，优先使用t，类型不一样则丢弃t，默认返回新对象
- * @template T
- * @param {T | config} t 局部目标对象
- * @param {Object} o 完整原始对象
- * @param {boolean} useOrg 操作于源对象
- * @param {boolean} notAddUtilFun 不添加工具函数
- * @returns {T & ConfigUtils} 从完整对象中读取到的目标对象同类型属性后的目标对象
+ * @param t 局部目标对象
+ * @param o 完整原始对象
+ * @param useOrg 操作于源对象
+ * @param notAddUtilFun 不添加工具函数
+ * @returns 从完整对象中读取到的目标对象同类型属性后的目标对象
  */
-function appendObj(t, o = this, useOrg, notAddUtilFun) {
+function appendObj<T>(t: T, o?: object, useOrg?: boolean, notAddUtilFun?: boolean): T & ConfigUtilsType {
     // 如果t和o都是数组，那么直接返回数组t的新副本，避免数组引用导致被外部修改
-    if (Array.isArray(t) && Array.isArray(o)) return t.slice();
-    if (t == undefined) t = o;
-    let re = useOrg ? o : deepClone(o);
+    if (Array.isArray(t) && Array.isArray(o)) return t.slice() as T & ConfigUtilsType;
+    if (t == undefined) t = o as T;
+    let re = useOrg ? o as T : deepClone(o) as T;
     if (re != t) {
         // 添加t到o，优先使用t的属性，附加t存在的所有属性
-        Object.entries(t).forEach(([k, v]) => {
-            let ov = o[k];  // t的属性是 null、类型不同，都使用o的属性，自定义类、源对象不存在、其他使用t的属性
+        Object.entries(t as object).forEach(([k, v]) => {
+            let ov = (o as Record<string, any>)[k]; // t的属性是 null、类型不同，都使用o的属性，自定义类、源对象不存在、其他使用t的属性
             if (typeof v === typeof ov) {
                 if (typeof v === 'object') {
                     if (v != null) {
@@ -690,11 +726,11 @@ function appendObj(t, o = this, useOrg, notAddUtilFun) {
             } else if (ov == undefined) {
                 ov = v;                 // o没有该字段
             }                           // 类型不同
-            if (re[k] != ov) re[k] = ov;
+            if ((re as Record<string, any>)[k] != ov) (re as Record<string, any>)[k] = ov;
         })
     }
-    if (!notAddUtilFun) Object.keys(ConfigUtils).forEach(k => re[k] = ConfigUtils[k]);
-    return re;
+    if (!notAddUtilFun) Object.keys(ConfigUtils).forEach(k => (re as Record<string, any>)[k] = ConfigUtils[k as keyof typeof ConfigUtils]);
+    return re as T & ConfigUtilsType;
 }
 
 /**
@@ -702,7 +738,7 @@ function appendObj(t, o = this, useOrg, notAddUtilFun) {
  * @param {Object} obj 
  * @returns 
  */
-function deepClone(obj) {
+function deepClone(obj: any): any {
     if (typeof obj != 'object' && obj == null) return obj;
     let re = obj;
     if (typeof re == 'object' && re != null) {
@@ -720,11 +756,11 @@ function deepClone(obj) {
 
 /**
  * 判断当前脚本是被直接执行还是作为模块被引用
- * @param {'file:///root/Project/LazierServer/src/libs/configDef.js'} [currentFileUrl=import.meta.url] 当前模块的完整路径，必须要传递
- * @param {NodeJS.Process} [proc=process] 全局对象
- * @returns {boolean} 
+ * @param currentFileUrl [currentFileUrl=import.meta.url]当前模块的完整路径
+ * @param proc 全局process对象
+ * @returns 是否是主模块
  */
-function isMainModule(currentFileUrl, proc = process) {
+function isMainModule(currentFileUrl?: string, proc: NodeJS.Process = process): boolean {
     if (currentFileUrl == null) throw new Error('需要传递 import.meta.url 变量')
     const entryScriptPath = fileURLToPath(pathToFileURL(proc.argv[1]).href);// 入口脚本路径
     const currentFilePath = fileURLToPath(new URL(currentFileUrl));         // 当前文件路径
@@ -733,10 +769,10 @@ function isMainModule(currentFileUrl, proc = process) {
 
 /**
  * 获取当前的文件夹路径
- * @param {'file:///root/Project/LazierServer/src/libs/configDef.js'} [url=import.meta.url] 当前模块的完整路径，必须要传递
- * @returns {'/root/Project/LazierServer/src/libs'}
+ * @param url [url=import.meta.url] 当前模块的完整路径，必须要传递
+ * @returns 文件夹路径 '/root/Project/LazierServer/src/libs'
  */
-function get__dirname(url) {
+function get__dirname(url: string): string {
     return path.dirname(fileURLToPath(url))
 }
 
@@ -747,10 +783,10 @@ function get__dirname(url) {
  * 参数传递  
  *  - getNowFileStorage - 会获得当前函数  
  *  - config - 会获得配置对象  
- * @param {'config'} filepath [import.meta.filename] 可以直接传路径
- * @returns {object}
+ * @param filepath [import.meta.filename] 可以直接传文件路径
+ * @returns 储存空间对象
  */
-function getNowFileStorage(filepath) {
+function getNowFileStorage(filepath: string = import.meta.filename): NullObject {
     // 直接使用文件路径作为 key
     let fn = filepath;
     if (!['getNowFileStorage', 'config'].includes(fn)) {

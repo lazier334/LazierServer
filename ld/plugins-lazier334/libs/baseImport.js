@@ -3,13 +3,13 @@ import app from 'koa';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
-/** @type {import('../../../src/libs/config.js')} */
+/** @type {import('../../../src/libs/config.ts')} */
 const nilConfig = {};
 var config = nilConfig.config || {};
 if (process.G) config = process.G.config;
 else {
     // 单独启动脚本的时候没有基础环境，所以需要单独导入
-    const configPath = path.join(import.meta.dirname, '../../../src/libs/config.js')
+    const configPath = path.join(import.meta.dirname, '../../../src/libs/config.ts')
     config = (await import(configPath)).config;
 }
 
@@ -26,7 +26,7 @@ export {
 
 /**
  * 导入系统模块（获取系统模块）
- * @param {'plugins.js' | 'config.js' | 'utils.js'} mod 系统模块文件名称，完整列表请查看 {@link ../../../src/libs/ 系统模块目录}
+ * @param {'plugins.ts' | 'config.ts' | 'utils.ts'} mod 系统模块文件名称，完整列表请查看 {@link ../../../src/libs/ 系统模块目录}
  * @returns 
  */
 async function importSysModule(mod) {
@@ -36,23 +36,23 @@ async function importSysModule(mod) {
 
 /**
  * 获取 plugins 模块
- * @returns {import('../../../src/libs/plugins.js')}
+ * @returns {import('../../../src/libs/plugins.ts')}
  */
 async function getPluginsModule() {
-    return await importSysModule('plugins.js');
+    return await importSysModule('plugins.ts');
 }
 
 /**
  * 获取 utils 模块
- * @returns {import('../../../src/libs/utils.js')}
+ * @returns {import('../../../src/libs/utils.ts')}
  */
 async function getUtilsModule() {
-    return await importSysModule('utils.js');
+    return await importSysModule('utils.ts');
 }
 
 /**
  * 获取 config 模块
- * @returns {import('../../../src/libs/config.js')}
+ * @returns {import('../../../src/libs/config.ts')}
  */
 async function getConfigModule() {
     return config;

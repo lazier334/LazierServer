@@ -1,6 +1,6 @@
 import Router from '@koa/router';
 
-/** @type {import('../../src/libs/config.js')} */
+/** @type {import('../../src/libs/config')} */
 const { config } = process.G;
 var cacheErrorApis = {};
 
@@ -8,8 +8,8 @@ var cacheErrorApis = {};
 var additionalRouter = config.additionalRouter[import.meta.filename] || new Router();
 if (!config.additionalRouter[import.meta.filename]) {
     config.additionalRouter[import.meta.filename] = additionalRouter;
-    additionalRouter.all('获取响应代码为400及以上的接口访问数据','/cacheErrorApis', ()=>{});
-    additionalRouter.all('清空响应代码为400及以上的接口访问数据','/cacheErrorApisClear', ()=>{});
+    additionalRouter.all('获取响应代码为400及以上的接口访问数据', '/cacheErrorApis', () => { });
+    additionalRouter.all('清空响应代码为400及以上的接口访问数据', '/cacheErrorApisClear', () => { });
 }
 
 /**

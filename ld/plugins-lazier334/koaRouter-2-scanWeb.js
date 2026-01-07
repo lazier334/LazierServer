@@ -3,8 +3,8 @@ import { fs, path, config, getPluginsModule, importSysModule } from './libs/base
 import { handlerHtmlBodyData, isHandlerHtmlBodyData } from './utils/util-router.js';
 
 const { plugins, pathDeduplication } = await getPluginsModule();
-/** @type {import('../../src/libs/utils.js')} */
-const utilsModule = await importSysModule('utils.js');
+/** @type {import('../../src/libs/utils.ts')} */
+const utilsModule = await importSysModule('utils.ts');
 const { downloadFileToPath } = utilsModule;
 
 // 启动的目标文件夹，如果是开启了 allWebDir ，那么在实际读取的时候会重新扫描更新
