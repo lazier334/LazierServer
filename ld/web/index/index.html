@@ -707,7 +707,7 @@
                     // 用户确认后，发送请求
                     const lastSystemId = await this.getSystemId();
                     that.warpAxios(axios.get('/system/restart').then((response) => {
-                        ElMessage.warning(response.data);
+                        ElMessage.warning(response.data?.data || response.data);
 
                         const endTime = Date.now() + 60 * 1000;
                         const inteId = setInterval(() => {
