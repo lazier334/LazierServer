@@ -4,11 +4,12 @@ import path from 'path';
 import { pathToFileURL } from 'url';
 
 /** @type {import('../../../src/libs/config.ts')} */
-const nilConfig = { config: {} };
+const defConfigType = {};
 /** @type {import('../../config.json')} */
-const userConfig = {};
-var config = { ...nilConfig.config, ...userConfig };
-if (process.G) config = process.G.config;
+const userConfigType = {};
+/** @type {typeof defConfigType.config & typeof userConfigType} */
+var config = {};
+if (process?.G?.config) config = process.G.config;
 else {
     // 单独启动脚本的时候没有基础环境，所以需要单独导入
     const configPath = path.join(import.meta.dirname, '../../../src/libs/config.ts')
