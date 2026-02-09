@@ -572,7 +572,9 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         /** 开启添加栈追踪 */
         openAddAppStack: false,
         /** 处理html接口数据内容 */
-        handlerHtmlBodyData: false,
+        handlerHtmlBodyData: true,
+        /** 删除 处理html接口数据内容 产生的文件 */
+        deleteHandlerHtmlBodyDataFile: true,
     },
     /** 
      * 额外的路由，用于挂载对象，主要用于做路由提示，并非实际业务代码

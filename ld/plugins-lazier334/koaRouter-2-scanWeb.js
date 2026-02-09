@@ -101,6 +101,8 @@ async function sendFile(ctx, filepath, opts) {
     let fp = path.join(opts.root, filepath);
     ctx.sendFileFromPath = fp;
 
+    let newFilepath = null;
+    let editTag = '.edit';
     const sendOptions = { ctx, filename: filepath, opts };
     const sends = (await plugins('send')).data;
     for (const s of sends) {
@@ -116,8 +118,9 @@ async function sendFile(ctx, filepath, opts) {
     if (isHandlerHtmlBodyData(ctx)) {
         const bodyFP = path.join(sendOptions.opts.root, sendOptions.filename);
         // 修改读取的文件名
-        sendOptions.filename = sendOptions.filename + '.edit' + path.extname(sendOptions.filename);
+        sendOptions.filename = sendOptions.filename + editTag + path.extname(sendOptions.filename);
         const newBodyFP = path.join(sendOptions.opts.root, sendOptions.filename);
+        newFilepath = newBodyFP;
         if (!fs.existsSync(newBodyFP)) {
             // 不存在修改后的文件则进行创建
             const body = fs.readFileSync(bodyFP, 'utf8');
@@ -127,7 +130,12 @@ async function sendFile(ctx, filepath, opts) {
             console.info('已成功编辑html接口文件', newBodyFP);
         }
     }
-    return await send(sendOptions.ctx, sendOptions.filename, sendOptions.opts);
+    const result = await send(sendOptions.ctx, sendOptions.filename, sendOptions.opts);
+    // 删除生成的 .edit 文件
+    if (config.switch.deleteHandlerHtmlBodyDataFile && newFilepath) {
+        fs.unlinkSync(newFilepath);
+    }
+    return result;
 }
 
 /**
