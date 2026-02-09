@@ -5,6 +5,7 @@ import createSelectFileByDomains from './selectFileByDomains.ts';
 import createWebsocketApis from './websocketApis.ts';
 import createWebsocketMsgs from './websocketMsgs.ts';
 import createSystemStart from './systemStart.ts';
+import createGenProxy from './genProxy.ts';
 
 export {
     createIndexData,
@@ -13,5 +14,6 @@ export {
     createSelectFileByDomains,
     createWebsocketApis,
     createWebsocketMsgs,
-    createSystemStart
+    createSystemStart,
+    createGenProxy
 }

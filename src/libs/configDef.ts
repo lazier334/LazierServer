@@ -97,7 +97,7 @@ const ObfuscatorOptions = {
     /** 源映射模式（inline/separate） */
     sourceMapMode: 'separate',
     /** 源映射基础URL */
-    sourceMapBaseUrl: './',
+    // sourceMapBaseUrl: './',
     /** 源映射文件名 */
     sourceMapFileName: '.map',
     /** 源映射内容模式（sources/sources-content） */
