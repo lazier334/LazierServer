@@ -20,7 +20,7 @@ export class Stage {
 
     /** 
      * 使用函数，当返回 `{end:true, result:any}` 时停止后续执行并返回 `result` 数据
-     * @returns 执行结果
+     * @returns {any} 默认返回第一个参数
      */
     async use(...args: any[]): Promise<any> {
         if (this.data.length < 1) {
@@ -33,6 +33,7 @@ export class Stage {
                 return re.result;
             }
         }
+        return args[0];
     }
 }
 export default Stage;
