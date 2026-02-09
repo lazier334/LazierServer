@@ -8,7 +8,7 @@ type ConfigType = typeof defConfig;
  * 在后续的调用中将会把数据写入配置的位置。
  * 但是默认的配置和banner固定为默认路径 "./ld/"
  */
-defConfig.ldConfigPath = path.join(process.cwd(), './ld/config.json');
+defConfig.ldConfigPath = path.join(defConfig.get__dirname(import.meta.url), '../../ld/config.json');
 const ldDirName = path.dirname(defConfig.ldConfigPath);
 if (!fs.existsSync(ldDirName)) {
     fs.mkdirSync(ldDirName);
