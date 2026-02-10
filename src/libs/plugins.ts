@@ -9,6 +9,14 @@ declare global {
             stagesCache?: Record<string, Stage>;
         }
     }
+    // 扩展内置 Function 类型，添加自定义属性
+    interface Function {
+        pluginInfo?: {
+            filepath: string;
+            filename: string;
+            [key: string]: any;
+        };
+    }
 }
 
 /**
@@ -125,6 +133,11 @@ async function scanPlugin(stage: string): Promise<Stage> {
         await defScan(filepath, newStage.data);
     }
 
+    // 默认排序
+    if (config.switch.pluginsDefulatSort && newStage.data.every(e => typeof e?.pluginInfo?.filename == 'string')) {
+        newStage.data.sort((a, b) => new Intl.Collator('zh-CN').compare(a.pluginInfo.filename, b.pluginInfo.filename));
+    }
+
     // 将当前的阶段数据保存到缓存中 `process.stagesCache`  
     if (typeof process.stagesCache != 'object' || process.stagesCache == null) {
         process.stagesCache = {};
@@ -173,6 +186,10 @@ function getPlguinUpdateTime(filepath: string | URL): number {
  */
 async function defScan(filepath: string, data: any[]): Promise<Object | Function> {
     const plugin = await importWarp(filepath);
+    if (typeof plugin == 'function') {
+        if (typeof plugin.pluginInfo != 'object') plugin.pluginInfo = { filepath, filename: filepath.split('/').pop()?.split('\\').pop() ?? '' };
+        else plugin.pluginInfo.filepath = filepath;
+    }
     data.push(plugin);
     return plugin;
 }

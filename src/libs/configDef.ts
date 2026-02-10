@@ -575,6 +575,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         handlerHtmlBodyData: true,
         /** 删除 处理html接口数据内容 产生的文件 */
         deleteHandlerHtmlBodyDataFile: true,
+        /** 打开插件默认排序，排序是基于文件名进行排序 */
+        pluginsDefulatSort: true,
     },
     /** 
      * 额外的路由，用于挂载对象，主要用于做路由提示，并非实际业务代码
@@ -772,8 +774,8 @@ function isMainModule(currentFileUrl?: string, proc: NodeJS.Process = process): 
 };
 
 /**
- * 获取当前的文件夹路径
- * @param url [url=import.meta.url] 当前模块的完整路径，必须要传递
+ * 用于给mjs获取当前的文件夹路径
+ * @param url 需要传递 import.meta.url 当前模块的完整路径，必须要传递
  * @returns 文件夹路径 '/root/Project/LazierServer/src/libs'
  */
 function get__dirname(url: string): string {

@@ -25,12 +25,12 @@ export class Stage {
     async use(...args: any[]): Promise<any> {
         if (this.data.length < 1) {
             console.warn(this.stage + ' 阶段的插件列表为空');
-            return;
-        }
-        for (const handle of this.data) {
-            const re = await handle(...args);
-            if (re?.end) {
-                return re.result;
+        } else {
+            for (const handle of this.data) {
+                const re = await handle(...args);
+                if (re?.end) {
+                    return re.result;
+                }
             }
         }
         return args[0];
