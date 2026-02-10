@@ -15,7 +15,9 @@
   "type": "module",
   "scripts": {
     "start": "node src/app.ts",
-    "dev": "nodemon src/app.ts"
+    "dev": "nodemon src/app.ts",
+    "buildjs": "node ld/plugins/libs/genProxy.js",
+    "build": "node ld/plugins/libs/buildAll.js"
   },
   "engines": {
     "node": ">=24.0.0",

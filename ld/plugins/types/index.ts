@@ -6,6 +6,7 @@ import createWebsocketApis from './websocketApis.ts';
 import createWebsocketMsgs from './websocketMsgs.ts';
 import createSystemStart from './systemStart.ts';
 import createGenProxy from './genProxy.ts';
+import createBuild from './build.ts';
 
 export {
     createIndexData,
@@ -15,5 +16,6 @@ export {
     createWebsocketApis,
     createWebsocketMsgs,
     createSystemStart,
-    createGenProxy
+    createGenProxy,
+    createBuild
 }
