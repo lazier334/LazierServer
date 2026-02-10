@@ -30,7 +30,8 @@ const lc = config.selectConfig({
 });
 const lastDirname = path.resolve(config.get__dirname(import.meta.url), '..');
 if (!lc.outdir.startsWith(lastDirname)) lc.outdir = path.join(lastDirname, lc.outdir);
-if (!lc.indir.startsWith(lastDirname)) lc.indir = path.join(lastDirname, lc.rootDir);
+if (lc.rootDir.startsWith(lastDirname)) lc.indir = lc.rootDir;
+else lc.indir = path.join(lastDirname, lc.rootDir);
 
 /**
  * 打包时用于复制目标文件 的插件
