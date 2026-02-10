@@ -12,7 +12,7 @@ declare global {
             };
         }
     }
-    // 新增：按钮数据的基础类型（最小化定义，兼容原有结构）
+    // 新增：按钮数据的基础类型（最小化定义, 兼容原有结构）
     interface ButDataItem {
         avatarText: string;
         color?: string;
@@ -84,7 +84,7 @@ const ObfuscatorOptions = {
     selfDefending: true,
     /** 是否启用调试保护（阻止在开发者工具中调试） */
     debugProtection: true,
-    /** 调试保护间隔（毫秒，0表示禁用）原配置 100  */
+    /** 调试保护间隔（毫秒, 0表示禁用）原配置 100  */
     debugProtectionInterval: 0,
     /** 是否忽略import/require语句 */
     ignoreImports: false,
@@ -141,7 +141,7 @@ const ObfuscatorOptions = {
     forceTransformStrings: [],
     /** 保留的字符串（不编码） */
     reservedStrings: [],
-    /** 标识符生成方式（hexadecimal: 十六进制，mangled: 短名称） */
+    /** 标识符生成方式（hexadecimal: 十六进制, mangled: 短名称） */
     identifierNamesGenerator: 'hexadecimal',
     /** 自定义标识符字典（用于生成标识符） */
     identifiersDictionary: [],
@@ -165,7 +165,7 @@ const ObfuscatorOptions = {
     numbersToExpressions: true,
     /** 是否启用控制流扁平化（增加代码复杂度） */
     controlFlowFlattening: true,
-    /** 控制流扁平化的概率阈值（0-1，值越大被扁平化的节点越多） */
+    /** 控制流扁平化的概率阈值（0-1, 值越大被扁平化的节点越多） */
     controlFlowFlatteningThreshold: 0.5,
     /** 是否注入死代码（无用的随机代码） */
     deadCodeInjection: true,
@@ -202,7 +202,7 @@ const config = {
         this.genProxyTargetDir = replaceAllStr(this.genProxyTargetDir);
         /** 插件目录列表 */
         this.pluginDirs.forEach((e, i) => this.pluginDirs[i] = replaceAllStr(e));
-        /** 外部配置路径，改文件所在的 ld 目录也用于存放自定义插件 */
+        /** 外部配置路径, 改文件所在的 ld 目录也用于存放自定义插件 */
         this.ldConfigPath = replaceAllStr(this.ldConfigPath);
         /** 数据路径 */
         this.dataPath = replaceAllStr(this.dataPath);
@@ -254,9 +254,9 @@ const config = {
     rootDir: `{/ldDirName/}/web`,
     /** 输出路径 */
     outdir: "dist",
-    /** 打包时插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
+    /** 打包时插入的代码, 代码会插入到 index.html 文件中<body>标签内的开头 */
     genInsertInsertCode: "<script src=\"/b41e93b2-009a-4be6-8d16-cb3c3e176620\"></script>",
-    /** 生成插件时导出的函数列表，根据需求选择导出 */
+    /** 生成插件时导出的函数列表, 根据需求选择导出 */
     genProxyExportKeys: [
         "proxyXHRAndFetch",
         "proxyDocmentHeadAppendChild",
@@ -268,7 +268,7 @@ const config = {
     genProxyTargetDir: `{/ldDirName/}/web/plugin`,
     /** 导出插件-导出的文件名 */
     genProxyProxyFile: "proxy.js",
-    /** 本地开发环境中插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
+    /** 本地开发环境中插入的代码, 代码会插入到 index.html 文件中<body>标签内的开头 */
     indexInsertCode: "<script src=\"/proxy.js\"></script>",
     /** http 服务器端口 */
     portHttp: 3000,
@@ -278,15 +278,15 @@ const config = {
     portWS: 3010,
     /** websockets 服务器端口 */
     portWSS: 3011,
-    /** 代理地址，用于下载文件进行文件自动补全 */
+    /** 代理地址, 用于下载文件进行文件自动补全 */
     proxy: "http://localhost:7890",
     /** 自动补全的域名列表 */
     autoCompleteDomains: [],
-    /** 自动补齐的固定地址列表，在访问新版首页的时候将会被触发补全机制 */
+    /** 自动补齐的固定地址列表, 在访问新版首页的时候将会被触发补全机制 */
     fixUrls: [],
     /** 不扫描全部文件夹时指定仅扫描web文件夹里的哪些文件夹 */
     domainList: [],
-    /** 在扫描全部文件夹时额外扫描的web主文件夹列表，相当于有多个 web 文件夹，这不影响扫描全部的har文件 */
+    /** 在扫描全部文件夹时额外扫描的web主文件夹列表, 相当于有多个 web 文件夹, 这不影响扫描全部的har文件 */
     otherWebPath: [] as string[],
     /** https的证书 */
     SSLOptions: {
@@ -343,35 +343,35 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
 `,
     },
     /**
-     * 追加按钮，该项配置用于方便在外部配置中追加按钮
+     * 追加按钮, 该项配置用于方便在外部配置中追加按钮
      * @type {[{
      *      avatarText: 'word',         // 头像内部的文字
-     *      color: '',                  // 头像的背景颜色，默认是绿色
+     *      color: '',                  // 头像的背景颜色, 默认是绿色
      *      text: '编辑快捷词',           // 按钮文字 
      *      tooltip: '编辑快捷词数据文件', // 鼠标悬停提示文字
      *      debugMode: true,            // 是否在调试模式下才显示的按钮
      *      fun: `this.openPage()`      // 按钮点击后执行的代码
-     *      update(self, config) {      // 如果需要动态数据，则添加这个函数，在接口处实现内容
+     *      update(self, config) {      // 如果需要动态数据, 则添加这个函数, 在接口处实现内容
      *          self.fun = `this.openPage('/edit/index.html?filepath=${config.ldConfigPath}')`
      *      },
      *  }]} 
      */
     appendButsData: [] as ButDataItem[],
-    /** 需要超级管理员权限才可以查看的按钮，里面存放按钮的 text 属性 */
+    /** 需要超级管理员权限才可以查看的按钮, 里面存放按钮的 text 属性 */
     superAdminButsData: ['重启系统', '关闭系统', '编辑配置'],
-    /** 需要管理员权限才可以查看的按钮，里面存放按钮的 text 属性 */
+    /** 需要管理员权限才可以查看的按钮, 里面存放按钮的 text 属性 */
     adminButsData: ['自动补全', '补齐文件', '编辑快捷词', '接口分析', '插件仓库', '编辑项目列表'],
-    /** 需要一登录用户权限才可以查看的按钮，里面存放按钮的 text 属性 */
+    /** 需要一登录用户权限才可以查看的按钮, 里面存放按钮的 text 属性 */
     loginButsData: ['文件上传'],
     /**
      * @type {[{
      *      avatarText: 'word',         // 头像内部的文字
-     *      color: '',                  // 头像的背景颜色，默认是绿色
+     *      color: '',                  // 头像的背景颜色, 默认是绿色
      *      text: '编辑快捷词',           // 按钮文字 
      *      tooltip: '编辑快捷词数据文件', // 鼠标悬停提示文字
      *      debugMode: true,            // 是否在调试模式下才显示的按钮
      *      fun: `this.openPage()`      // 按钮点击后执行的代码
-     *      update(self, config) {      // 如果需要动态数据，则添加这个函数，在接口处实现内容
+     *      update(self, config) {      // 如果需要动态数据, 则添加这个函数, 在接口处实现内容
      *          self.fun = `this.openPage('/edit/index.html?filepath=${config.ldConfigPath}')`
      *      },
      *  }]}
@@ -479,7 +479,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     ] as ButDataItem[],
     /** 插件目录列表 */
     pluginDirs: [] as string[],
-    /** 外部配置路径，改文件所在的 ld 目录也用于存放自定义插件 */
+    /** 外部配置路径, 改文件所在的 ld 目录也用于存放自定义插件 */
     ldConfigPath: `{/ldDirName/}/config.json`,
     /** 数据路径 */
     dataPath: ldDirName,
@@ -499,7 +499,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         privacy: '隐私政策',
         /** 使用条款 */
         terms: '使用条款',
-        /** ICP备案号，值为 '' 的时候隐藏备案信息 */
+        /** ICP备案号, 值为 '' 的时候隐藏备案信息 */
         icp: '未备案',
     },
     /** 日志配置 */
@@ -559,11 +559,11 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         cryptoDataEnable: true,
         /** 允许跨域 */
         cors: true,
-        /** 是否开启自动补全，自动补全并不会影响0大小文件的自动补全 */
+        /** 是否开启自动补全, 自动补全并不会影响0大小文件的自动补全 */
         autoComplete: true,
-        /** 扫描全部文件夹，开启后会扫描web中的所有文件夹，否则只扫描指定的 domainList 配置中的内容，这不影响扫描全部的har文件 */
+        /** 扫描全部文件夹, 开启后会扫描web中的所有文件夹, 否则只扫描指定的 domainList 配置中的内容, 这不影响扫描全部的har文件 */
         allWebDir: true,
-        /** 导出插件-强制开启https，会让插件强制把所有请求转为https */
+        /** 导出插件-强制开启https, 会让插件强制把所有请求转为https */
         genProxyForceHttps: true,
         /** 一键打包时是否生成新的插件 */
         genAllGenProxy: true,
@@ -575,11 +575,11 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         handlerHtmlBodyData: true,
         /** 删除 处理html接口数据内容 产生的文件 */
         deleteHandlerHtmlBodyDataFile: true,
-        /** 打开插件默认排序，排序是基于文件名进行排序 */
+        /** 打开插件默认排序, 排序是基于文件名进行排序 */
         pluginsDefulatSort: true,
     },
     /** 
-     * 额外的路由，用于挂载对象，主要用于做路由提示，并非实际业务代码
+     * 额外的路由, 用于挂载对象, 主要用于做路由提示, 并非实际业务代码
      * @type {{[key: string]: import('@koa/router')}}
      * @example
      * ```js
@@ -634,7 +634,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
 export default config;
 
 /**
- * 读取版本，默认读取最新版本
+ * 读取版本, 默认读取最新版本
  * @param num
  * @returns 版本信息
  */
@@ -669,74 +669,82 @@ function showVersion(this: typeof config, ver?: { version: string; detail: strin
             .replaceAll('{white}', '\x1b[37m')
         + '\x1b[0m';
 }
+
 /**
- * 递归逐步从t读取o的属性，默认返回新对象
+ * 递归逐步从o读取t中的属性, 默认返回新对象, 新对象中仅保留t的属性内容。
  * @param t 局部目标对象
  * @param o 完整原始对象
- * @param useOrg 操作于源对象
+ * @param result 要操作的对象, 默认创建一个空对象
  * @param notAddUtilFun 不添加工具函数
  * @returns 从完整对象中读取到的目标对象同类型属性后的目标对象
  */
-function readObj<T>(t: T, o?: object, useOrg?: boolean, notAddUtilFun?: boolean): T & ConfigUtilsType {
-    // 如果t和o都是数组，那么直接返回数组o的新副本，避免数组引用导致被外部修改
-    if (Array.isArray(t) && Array.isArray(o)) return o.slice() as T & ConfigUtilsType;
-    if (o == undefined) o = t as object;
-    let re = useOrg ? t : Object.create(null);
-    if (re != o) {
-        // 添加o到t，优先使用o的属性，只选择t存在的属性
-        Object.entries(t as object).forEach(([k, v]) => {
-            let ov = (o as Record<string, any>)[k];  // t的属性是 null、类型不同、自定义类，都使用o的属性，否则使用t的属性
-            if (typeof v === typeof ov) {
-                if (typeof v === 'object') {
-                    if (v != null) {
-                        if (Array.isArray(ov)) ov = ov.slice(); // 解析数组
-                        else if (Object.getPrototypeOf(ov) === Object.prototype) {
-                            ov = readObj(v, ov, useOrg, true);  // 解析普通 object
-                        }       // 自定义类
-                    }           // 解析 null
-                }               // 解析其他基本类型
-            }                   // 类型不同
-            if ((re as Record<string, any>)[k] != ov) (re as Record<string, any>)[k] = ov;
-        })
-    }
+function readObj<T>(this: object, t: T, o?: object, result: object = {}, notAddUtilFun?: boolean): T & ConfigUtilsType {
+    o = o ?? (this ?? {});
+    let re = readObjCore(o, t, result);
     if (!notAddUtilFun) Object.keys(ConfigUtils).forEach(k => re[k] = ConfigUtils[k as keyof typeof ConfigUtils]);
     return re;
 }
+/**
+ * 从org对象上读取def携带的属性, 如果没有或类型不同, 则使用def的属性
+ * @param org 完整原始对象
+ * @param def 局部目标对象
+ * @param re 新对象
+ */
+function readObjCore(org: any, def: any, re: Record<string, any> = {}): any {
+    if (typeof def == 'object') {
+        // 如果 def 是 null 则返回 org, 无论 org 是什么内容
+        if (def == null) return org;
+        // 如果是 org 和 def 有一个是数组则返回 def
+        if (Array.isArray(def) || ArrayBuffer.isView(def) || Array.isArray(org) || ArrayBuffer.isView(org)) return def;
+        // 如果 org 不是一个有效的对象也返回 def
+        if (typeof org != 'object' || org == null) return def
+        // 遍历普通对象属性
+        Object.entries(def).forEach(([k, v]) => {
+            re[k] = readObjCore(org[k], v);
+        });
+        return re;
+    }
+    // 如果类型不同则使用 def
+    return typeof def != typeof org ? def : org
+}
 
 /**
- * 递归逐步读取o和t的属性，优先使用t，类型不一样则丢弃t，默认返回新对象
+ * 递归逐步读取o中t没有的属性并给t, 其中o和t都有的属性优先使用t, 类型不一样则使用o, 默认返回新对象
  * @param t 局部目标对象
  * @param o 完整原始对象
  * @param useOrg 操作于源对象
  * @param notAddUtilFun 不添加工具函数
  * @returns 从完整对象中读取到的目标对象同类型属性后的目标对象
  */
-function appendObj<T>(t: T, o?: object, useOrg?: boolean, notAddUtilFun?: boolean): T & ConfigUtilsType {
-    // 如果t和o都是数组，那么直接返回数组t的新副本，避免数组引用导致被外部修改
-    if (Array.isArray(t) && Array.isArray(o)) return t.slice() as T & ConfigUtilsType;
-    if (t == undefined) t = o as T;
-    let re = useOrg ? o as T : deepClone(o) as T;
-    if (re != t) {
-        // 添加t到o，优先使用t的属性，附加t存在的所有属性
-        Object.entries(t as object).forEach(([k, v]) => {
-            let ov = (o as Record<string, any>)[k]; // t的属性是 null、类型不同，都使用o的属性，自定义类、源对象不存在、其他使用t的属性
-            if (typeof v === typeof ov) {
-                if (typeof v === 'object') {
-                    if (v != null) {
-                        if (Array.isArray(ov)) ov = v.slice(); // 解析数组
-                        else if (Object.getPrototypeOf(ov) === Object.prototype) {
-                            ov = appendObj(v, ov, useOrg, true);  // 解析普通 object
-                        } else ov = v;  // 自定义类
-                    }                   // 解析 null
-                } else ov = v;          // 解析其他基本类型
-            } else if (ov == undefined) {
-                ov = v;                 // o没有该字段
-            }                           // 类型不同
-            if ((re as Record<string, any>)[k] != ov) (re as Record<string, any>)[k] = ov;
-        })
+function appendObj<T>(this: object, t: T, o?: object, result: object = {}, notAddUtilFun?: boolean): T & ConfigUtilsType {
+    o = o ?? (this ?? {});
+    let re = appendObjCore(t, o, result);
+    if (!notAddUtilFun) Object.keys(ConfigUtils).forEach(k => re[k] = ConfigUtils[k as keyof typeof ConfigUtils]);
+    return re;
+}
+/**
+ * 把org覆盖到def对象上, 如果类型不同则不覆盖, def未定义(def===undefined)的情况下org也覆盖
+ * @param org 局部目标对象
+ * @param def 完整原始对象
+ * @param re 新对象
+ */
+function appendObjCore(org: any, def: any, k?: any): any {
+    if (typeof org == 'object') {
+        // 如果org是null, 那么返回 def
+        if (org == null) return def;
+        // 如果是 org 和 def 都是数组/buffer则覆盖
+        if (Array.isArray(org) && Array.isArray(def)) return org;
+        if (ArrayBuffer.isView(org) && ArrayBuffer.isView(def)) return org;
+        // 如果 def 是一个 null 那么覆盖
+        if (typeof def != 'object' || def == null) return org;
+        // 遍历普通对象属性
+        Object.entries(org).forEach(([k, v]) => {
+            def[k] = appendObjCore(v, def[k], k);
+        });
+        return def;
     }
-    if (!notAddUtilFun) Object.keys(ConfigUtils).forEach(k => (re as Record<string, any>)[k] = ConfigUtils[k as keyof typeof ConfigUtils]);
-    return re as T & ConfigUtilsType;
+    // 如果 def 不是 undefined 而且类型不同则使用 def
+    return def !== undefined && typeof def != typeof org ? def : org
 }
 
 /**
@@ -750,7 +758,7 @@ function deepClone(obj: any): any {
     if (typeof re == 'object' && re != null) {
         if (Array.isArray(obj)) re = obj.slice();
         if (Object.getPrototypeOf(re) === Object.prototype) {
-            // object才走循环拷贝，数组或自定义类都直接使用
+            // object才走循环拷贝, 数组或自定义类都直接使用
             re = { ...obj };
             Object.entries(re).forEach(([k, v]) => {
                 if (typeof v == 'object') re[k] = deepClone(v);
@@ -775,7 +783,7 @@ function isMainModule(currentFileUrl?: string, proc: NodeJS.Process = process): 
 
 /**
  * 用于给mjs获取当前的文件夹路径
- * @param url 需要传递 import.meta.url 当前模块的完整路径，必须要传递
+ * @param url 需要传递 import.meta.url 当前模块的完整路径, 必须要传递
  * @returns 文件夹路径 '/root/Project/LazierServer/src/libs'
  */
 function get__dirname(url: string): string {
