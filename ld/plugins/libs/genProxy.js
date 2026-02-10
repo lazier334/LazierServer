@@ -1,6 +1,6 @@
 import { fs, path, config, getPluginsModule } from './baseImport.js';
 import JavaScriptObfuscator from 'javascript-obfuscator';
-const { plugins, getAllPlugin, getPluginDirs } = await getPluginsModule();
+const { plugins } = await getPluginsModule();
 
 const hostDef = {
     /** 对象名称标签，用于对最终结果进行全局替换，开发版替换成 obj 生产版替换成随机字符 */
