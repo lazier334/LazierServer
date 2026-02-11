@@ -62,7 +62,7 @@ function sendEntries(ctx, entries) {
             ctx.set(config.headerNames.fileFrom, encodeURI(selectEntry.filepath))
         }
         headers.forEach(header => ctx.set(header.name, header.value))
-        config.scanHar.removeHeaderList.forEach(name => ctx.remove(name));
+        config.scanHar.removeResponseHeaderList.forEach(name => ctx.remove(name));
     } catch (err) {
         console.warn('Har设置响应头失败', err)
     }

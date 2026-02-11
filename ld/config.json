@@ -1,3 +1,8 @@
+/*
+    可以添加自定义的配置信息, 自定义配置也是从config中读取, 已增加提示信息  
+    注释内容报错的处理方式: 可以在vscode中可以点击右下角的 ` {} JSON ` 
+    将其文件类型更改为 ` {} JSON with Comments (jsonc) `  
+*/
 {
     "times": {
         "pluginStagesUpdateStep": 10000
@@ -6,8 +11,11 @@
     "switch": {
         "debugMode": true,
         "cryptoDataEnable": false,
-        "handlerHtmlBodyData": true,
-        "openAddAppStack": true
+        "openAddAppStack": true,
+        /** 是否关闭 im系统 */
+        "closeIM": true,
+        /** 是否关闭 upload系统 */
+        "closeUploads": true
     },
     "appendButsData": [
         {
@@ -25,11 +33,12 @@
         "{/ldDirName/}/plugins-lazier334"
     ],
     "copyright": {
-        "icp": ""
+        "icp": "" // 隐藏备案信息
     },
-    "可以添加自定义的配置信息": "自定义配置也是从config中读取，已增加提示信息",
+    /** koaRouter-3-scanHar.js 插件的配置 */
     "scanHar": {
-        "removeHeaderList": [
+        /** 删除指定的响应头 */
+        "removeResponseHeaderList": [
             "content-encoding"
         ]
     }
