@@ -16,3 +16,4 @@ services:
       - ./ld/plugins:/app/ld/plugins
       - ./ld/uploads:/app/ld/uploads
       - ./ld/web:/app/ld/web
+      - ./ld/dist:/app/ld/dist
