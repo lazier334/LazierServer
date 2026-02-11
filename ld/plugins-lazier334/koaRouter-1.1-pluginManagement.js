@@ -1,5 +1,4 @@
 import { createKoaRouter } from './types/index.ts';
-import fsExtra from 'fs-extra';
 import StreamZip from 'node-stream-zip';
 import result from './utils/util-result.js';
 import uploadPluginMiddleware from './libs/koa-uploadPluginMiddleware.js';
@@ -261,8 +260,11 @@ export default createKoaRouter(function koaRouterPluginManagement(router) {
         }
         if (copy) {
             try {
-                // 关键配置：overwrite: true 表示强制覆盖冲突文件
-                await fsExtra.copy(fromPath, toPath, { overwrite: true });
+                // 关键配置 `force: true` 表示强制覆盖冲突文件, `recursive: true` 支持递归复制
+                fs.cpSync(fromPath, toPath, {
+                    force: true,
+                    recursive: true
+                });
                 console.log('文件夹复制完成（已覆盖冲突文件）');
             } catch (err) {
                 console.error('复制失败:', err);

@@ -1,4 +1,3 @@
-import fsExtra from 'fs-extra';
 import xxhashWasm from 'xxhash-wasm';
 import { fs, path } from '../libs/baseImport.js';
 
@@ -118,7 +117,7 @@ async function getRelativeFilePaths(dir) {
     const files = [];
 
     async function scan(currentDir) {
-        const entries = await fsExtra.readdir(currentDir, { withFileTypes: true });
+        const entries = fs.readdirSync(currentDir, { withFileTypes: true });
 
         for (const entry of entries) {
             const fullPath = path.join(currentDir, entry.name);
