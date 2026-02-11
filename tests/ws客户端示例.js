@@ -1,14 +1,14 @@
 import WebSocket from 'ws';
+
 /**
  * websocket 客户端示例
  */
+var msgNum = 0;
 const msgs = [
     'hello',
     'world',
     '!'
 ];
-var msgNum = 0;
-
 const ws = new WebSocket('ws://localhost:3010', {
     // 忽略证书无效的问题
     rejectUnauthorized: false
