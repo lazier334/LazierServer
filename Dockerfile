@@ -13,4 +13,4 @@ EXPOSE 3000
 EXPOSE 3001
 EXPOSE 3010
 EXPOSE 3011
-CMD ["node", "src/app.js"]
+CMD ["npm", "run", "start"]
