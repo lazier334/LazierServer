@@ -48,8 +48,8 @@ function GenSubmitCmd(pkg) {
     let cmdPath = path.resolve(cmdTempFile.replace('.log', `-v.${version}.log`));
     let cmds = [];
     cmds.push('# 需要手动运行命令进行创建并提交tag标签, 如果有换行等特殊符号, 需要手动处理');
-    cmds.push(`# 创建tag标签\ngit tag -a '${pkg.version}' -m '${pkg.description}'`);
-    cmds.push(`# 推送tag标签\ngit push origin '${pkg.version}'`);
+    cmds.push(`# 创建tag标签\ngit tag -a 'v${pkg.version.split('(').shift()}' -m '\nv${pkg.version + '\n' + pkg.description}'`);
+    cmds.push(`# 推送tag标签\ngit push origin 'v${pkg.version.split('(').shift()}'`);
     // 通过 packageJson 生成指令列表并写到一个临时文件中
     fs.writeFileSync(cmdPath, cmds.join('\n\n'));
     console.log('\n');
