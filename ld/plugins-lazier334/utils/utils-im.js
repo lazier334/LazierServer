@@ -268,51 +268,9 @@ const utils = {
         return sm.createObservableObject(account)
     },
 }
+const db = initIMDB(utils);
 
 
-const db = initDB();
-// 初始化数据库
-db.readDB();
-// 检测如果开启了加密，那么强制保存一次
-if (Config.cryptoDataEnable) {
-    db.saveDB(true)
-}
-// 检测如果一个账号都没有那么设置默认账号
-if (db.accounts.length < 1) {
-    db.accounts.push(utils.createAccount({ userId: 0, status: '离线', username: 'admin', password: 'admin', lastUpdateTime: Date.now(), deadline: deadlineMax, isAdmin: true, superAdmin: true }));
-    db.saveDB();
-}
-{
-    const upList = [];
-    // 格式化密码，如果密码小于16位则进行盐值加密
-    db.accounts.forEach(acc => {
-        if (acc.password.length < 20) {
-            acc.password = db.passwordSalt(acc.password)
-            db.onSaveDB();
-            upList.push(acc)
-        }
-    });
-    console.warn(`已加密更新${upList.length}位用户的密码`);
-}
-
-// 每5秒扫描一次
-const inteId5s = setInterval(() => {
-    const dn = Date.now();
-    if (imConfig.intervals.clearSession < dn) {
-        const limitTime = Date.now() - imConfig.SESSION_MAX_AGE;
-        for (const session in db.sessions) {
-            const obj = db.sessions[session];
-            if (obj.lastUpdateTime < limitTime) {
-                delete db.sessions[session];
-                imConfig.intervals.saveDBOnEventStep();
-            }
-        }
-    }
-
-    if (imConfig.intervals.saveDB < dn) {
-        db.saveDB();
-    }
-}, 5 * 1000);
 
 
 export const all = {
@@ -326,6 +284,60 @@ export const all = {
     db,
 }
 export default all;
+
+/**
+ * 初始化 im系统的 db对象，如果配置 Config.switch.closeIM 为真，
+ * 即已配置要关闭im系统时，不会进行初始化操作
+ * @returns 
+ */
+function initIMDB() {
+    if (!Config.switch.closeIM) return {};
+
+    const db = initDB();
+    // 初始化数据库
+    db.readDB();
+    // 检测如果开启了加密，那么强制保存一次
+    if (Config.cryptoDataEnable) {
+        db.saveDB(true)
+    }
+    // 检测如果一个账号都没有那么设置默认账号
+    if (db.accounts.length < 1) {
+        db.accounts.push(utils.createAccount({ userId: 0, status: '离线', username: 'admin', password: 'admin', lastUpdateTime: Date.now(), deadline: deadlineMax, isAdmin: true, superAdmin: true }));
+        db.saveDB();
+    }
+    {
+        const upList = [];
+        // 格式化密码，如果密码小于16位则进行盐值加密
+        db.accounts.forEach(acc => {
+            if (acc.password.length < 20) {
+                acc.password = db.passwordSalt(acc.password)
+                db.onSaveDB();
+                upList.push(acc)
+            }
+        });
+        console.warn(`已加密更新${upList.length}位用户的密码`);
+    }
+
+    // 每5秒扫描一次
+    const inteId5s = setInterval(() => {
+        const dn = Date.now();
+        if (imConfig.intervals.clearSession < dn) {
+            const limitTime = Date.now() - imConfig.SESSION_MAX_AGE;
+            for (const session in db.sessions) {
+                const obj = db.sessions[session];
+                if (obj.lastUpdateTime < limitTime) {
+                    delete db.sessions[session];
+                    imConfig.intervals.saveDBOnEventStep();
+                }
+            }
+        }
+
+        if (imConfig.intervals.saveDB < dn) {
+            db.saveDB();
+        }
+    }, 5 * 1000);
+    return db;
+}
 
 /** 初始化数据库 */
 function initDB() {

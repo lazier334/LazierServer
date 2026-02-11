@@ -12,7 +12,7 @@ const APIS = initAPIS();
  * @returns {boolean} 返回true则代表接口已处理，false则给下一个接口处理
  */
 module.exports = (params, ws) => {
-    if (lc.close) return false;
+    if (Config.switch.closeIM) return false;
     try {
         if (typeof params != 'object') params = {};
         const re = APIS[params.api]?.(ws, params);
