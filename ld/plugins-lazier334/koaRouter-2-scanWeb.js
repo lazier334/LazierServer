@@ -131,9 +131,17 @@ async function sendFile(ctx, filepath, opts) {
         }
     }
     const result = await send(sendOptions.ctx, sendOptions.filename, sendOptions.opts);
-    // 删除生成的 .edit 文件
     if (config.switch.deleteHandlerHtmlBodyDataFile && newFilepath) {
-        fs.unlinkSync(newFilepath);
+        // 请求流完成后删除生成的 .edit 文件(如果是文件夹也不删除)，用once避免多次触发
+        ctx.res.once('finish', async () => {
+            try {
+                if (fs.existsSync(newFilepath) && fs.statSync(newFilepath).isFile()) fs.unlinkSync(newFilepath);
+            } catch (deleteErr) {
+                // 处理删除失败的情况（比如文件已被删除、权限不足）
+                console.error(`删除 .edit 文件失败：${newFilepath}`, deleteErr.message);
+                console.error(deleteErr.stack);
+            }
+        });
     }
     return result;
 }
