@@ -1,9 +1,19 @@
 import type Router from '@koa/router';
 
+/** send的配置对象 */
+type SendOptions = {
+    /** koa的上下文对象 */
+    ctx: import('koa').ParameterizedContext;
+    /** 文件名称 */
+    filename: 'gameService';
+    /** send的配置, opts.root 是目录 */
+    opts: import('koa-send').SendOptions;
+}
+
 /**
  * send 插件函数
  */
-type SendFunction = (router: Router) => void;
+type SendFunction = (sendOptions: SendOptions) => void;
 
 /**
  * 创建 send 插件的类型提示函数  
