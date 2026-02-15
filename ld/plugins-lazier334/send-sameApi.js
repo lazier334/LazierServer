@@ -20,8 +20,6 @@ const lc = {
 /**
  * 选择具体的api
  * 返回true则表示当前函数已响应数据
- * @param {SendOptions}  sendOptions
- * @returns {SendOptions}
  */
 export default createSend(async function sendSameApi(sendOptions) {
     const { ctx, filename, opts } = sendOptions;

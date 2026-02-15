@@ -15,8 +15,6 @@ if (!config.additionalRouter[import.meta.filename]) {
 
 /**
  * koa中间件 计数器 插件
- * @param {import('koa').Context} ctx
- * @param {import('koa').Next} next
  */
 export default createKoaPlugin(async function koaPluginCounter(ctx, next) {
     // 计数器插件

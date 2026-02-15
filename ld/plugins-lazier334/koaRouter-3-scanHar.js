@@ -22,7 +22,6 @@ if (!config.additionalRouter[import.meta.filename]) {
 
 /**
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
- * @param {import('@koa/router')} router 路由
  */
 export default createKoaRouter(function koaRouterScanHar(router) {
     // 这个接口放到前面是因为优先读取文件，再读取系统的接口，

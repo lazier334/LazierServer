@@ -4,19 +4,10 @@ import { fs, path } from './libs/baseImport.js';
 const lc = {
     redirectFileName: '.300',
 }
-/**
- * @typedef {{
- *  ctx: import('koa').ParameterizedContext,    //koa的上下文对象
- *  filename: 'gameService',                    // 文件名称
- *  opts: import('koa-send').SendOptions,       // send的配置, opts.root 是目录
- * }} SendOptions send的配置对象
- */
 
 /**
  * 选择具体的api
  * 返回true则表示当前函数已响应数据
- * @param {SendOptions}  sendOptions
- * @returns {SendOptions}
  */
 export default createSend(async function sendRedirectApi(sendOptions) {
     const { ctx, filename, opts } = sendOptions;

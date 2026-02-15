@@ -1,19 +1,10 @@
 import { createSend } from './types/index.ts';
 import { fs, path, config } from './libs/baseImport.js';
 
-/**
- * @typedef {{
- *  ctx: import('koa').ParameterizedContext,    //koa的上下文对象
- *  filename: 'gameService',                    // 文件名称
- *  opts: import('koa-send').SendOptions,       // send的配置, opts.root 是目录
- * }} SendOptions send的配置对象
- */
 
 /**
  * 选择具体的api
  * 返回true则表示当前函数已响应数据
- * @param {SendOptions}  sendOptions
- * @returns {SendOptions}
  */
 export default createSend(async function sendSystem(sendOptions) {
     const { ctx, filename, opts } = sendOptions;
