@@ -8,10 +8,9 @@ const corsMiddleware = cors();
  * @param {import('koa').Context} ctx
  * @param {import('koa').Next} next
  */
-export default createKoaPlugin(async function koaPluginCors(ctx, next) {
+export default createKoaPlugin(async function koaPluginAutoCors(ctx, next) {
     // 该插件仅用于测试环境，正式环境请使用 koaPlugin-2-cors.js 插件
-    if (false) return config.switch.cors ? await corsMiddleware(ctx, next) : await next();
-    await next()
+     return config.switch.autoCors ? await corsMiddleware(ctx, next) : await next();
 })
 
 /**

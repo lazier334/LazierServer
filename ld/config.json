@@ -15,7 +15,10 @@
         /** 是否关闭 im系统 */
         "closeIM": true,
         /** 是否关闭 upload系统 */
-        "closeUploads": true
+        "closeUploads": true,
+        /** 是否开启自动跨域 */
+        "autoCors": false,
+        "cors": false
     },
     "appendButsData": [
         {
