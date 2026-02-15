@@ -10,15 +10,8 @@ const lc = {
 }
 
 /**
- * @typedef {{
-*  ctx: import('koa').ParameterizedContext,    //koa的上下文对象
-*  filename: 'gameService',                    // 文件名称
-*  opts: import('koa-send').SendOptions,       // send的配置, opts.root 是目录
-* }} SendOptions send的配置对象
-*/
-
-/**
- * 选择具体的api
+ * 相同api按照顺序进行响应插件
+ * 选择具体的api  
  * 返回true则表示当前函数已响应数据
  */
 export default createSend(async function sendSameApi(sendOptions) {

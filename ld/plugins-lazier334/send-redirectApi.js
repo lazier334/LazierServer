@@ -6,7 +6,8 @@ const lc = {
 }
 
 /**
- * 选择具体的api
+ * 重定向api插件  
+ * 选择具体的api  
  * 返回true则表示当前函数已响应数据
  */
 export default createSend(async function sendRedirectApi(sendOptions) {

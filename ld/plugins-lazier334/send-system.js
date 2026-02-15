@@ -1,9 +1,9 @@
 import { createSend } from './types/index.ts';
 import { fs, path, config } from './libs/baseImport.js';
 
-
 /**
- * 选择具体的api
+ * 系统文件处理插件  
+ * 选择具体的api  
  * 返回true则表示当前函数已响应数据
  */
 export default createSend(async function sendSystem(sendOptions) {

@@ -4,7 +4,6 @@ import DailyRotateFile from 'winston-daily-rotate-file';
 
 /**
  * 因为 logger 对象有 end 参数，会导致不再继续运行后面的插件，所以将其挂载到 console.logger
- * @param {import('./libs/baseImport.js')}}
  */
 export default createSystemStart(async function systemStartLogger({ fs, path, config, app }) {
     if (console.logger) return;

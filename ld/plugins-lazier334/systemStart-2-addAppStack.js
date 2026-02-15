@@ -1,7 +1,7 @@
 import { createSystemStart } from './types/index.ts';
 
 /**
- * @param {import('./libs/baseImport.js')}}
+ * 添加栈追踪
  */
 export default createSystemStart(async function systemStartAddAppStack({ fs, path, config, app }) {
     // 方案：覆写 response.body 的 setter

@@ -1,7 +1,7 @@
 import { createSystemStart } from './types/index.ts';
 
 /**
- * @param {import('./libs/baseImport.js')}}
+ * 基础初始化操作
  */
 export default createSystemStart(async function systemStartCommon({ fs, path, config, app }) {
     config.app
