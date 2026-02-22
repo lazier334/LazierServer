@@ -13,7 +13,7 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
     if (!fs.existsSync(path.join(config['genProxyTargetDir'], 'proxy.js'))) {
         console.warn('开发环境插件 proxy.js 不存在，生成该插件');
         const genProxyPath = pathToFileURL(path.join(import.meta.dirname, '../plugins/libs/genProxy.js'));
-        await (await import(genProxyPath)).default('proxy.js');
+        await (await import(genProxyPath)).default();
     }
 
     config.app = app;

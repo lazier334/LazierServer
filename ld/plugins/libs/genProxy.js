@@ -11,7 +11,7 @@ const hostDef = {
     exportKeys: [...config.genProxyExportKeys],
     /** 默认值是排除默认对象中的所有属性 */
     excludeKeys: [],
-    /** 导出，在dev模式下，如果存在 _dev 那么就导出 _dev，如果属性不是一个函数也不会被导出  */
+    /** 导出，生产环境不会导出 _dev 后缀的函数，在dev模式下，如果存在 _dev 那么就导出 _dev，如果属性不是一个函数也不会被导出  */
     export(keys, devMode) {
         let objName = devMode ? 'obj' : (generateRandomString(2) + '_' + generateRandomString(5));
         if (!(keys instanceof Array)) keys = this.exportKeys;
@@ -30,6 +30,14 @@ const hostDef = {
                     keys[i] = k;
                 }
             }
+        } else {
+            keys = keys.filter(k => {
+                if (k.endsWith('_dev')) {
+                    console.log(`导出函数时忽略${k}，因为生产环境中不导出 _dev 后缀的函数`);
+                    return false;
+                }
+                return true;
+            })
         }
 
         let exportFuns = [];

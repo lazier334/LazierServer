@@ -125,18 +125,15 @@ export default createGenProxy(async function genProxyDemo(funs) {
                 GlobalParam.handlerUrl = (url) => {
                     if (['about:blank'].includes(url)
                         || url.startsWith('javascript:')
-                        || url.startsWith('blob:')) return url;
-                    for (const handler of obj.handlerUrlList) {
+                        || url.startsWith('blob:')) { }
+                    else for (const handler of obj.handlerUrlList) {
                         if (!url) break;
                         url = handler(url);
                     }
+                    if (!url) url = location.origin + '/null';
                     return url;
                 }
             },
-
-        /**
-         * 初始化url处理函数 dev 版
-         */
         urlHandlerInit_dev: {
             run(e) {
                 let codeMapping = {
