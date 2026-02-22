@@ -126,7 +126,6 @@ async function sendFile(ctx, filepath, opts) {
             const newBody = handlerHtmlBodyData(ctx, body);
             // 创建文件
             fs.writeFileSync(newBodyFP, newBody);
-            console.info('已成功编辑html接口文件', newBodyFP);
         }
     }
     const result = await send(sendOptions.ctx, sendOptions.filename, sendOptions.opts);
