@@ -123,14 +123,16 @@ export default createGenProxy(async function genProxyDemo(funs) {
 
                 GlobalParam.handlerUrlList = [completeUrl, excludeUrl, detectionUrl];
                 GlobalParam.handlerUrl = (url) => {
-                    if (['about:blank'].includes(url)
-                        || url.startsWith('javascript:')
-                        || url.startsWith('blob:')) { }
-                    else for (const handler of obj.handlerUrlList) {
-                        if (!url) break;
-                        url = handler(url);
+                    if (typeof url == 'string' && 0 < url.length
+                        && (url.startsWith('http:')
+                            || url.startsWith('https:')
+                            || !url.split('?').shift().includes('://'))) {
+                        for (const handler of obj.handlerUrlList) {
+                            if (!url) break;
+                            url = handler(url);
+                        }
+                        if (!url) url = location.origin + '/null';
                     }
-                    if (!url) url = location.origin + '/null';
                     return url;
                 }
             },
