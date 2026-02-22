@@ -33,7 +33,7 @@ if (fs.existsSync(defConfig.ldConfigPath) && fs.statSync(defConfig.ldConfigPath)
 }
 
 // 2. 替换插入的代码中的 "proxy.js" 为实际配置的文件名
-config.genInsertInsertCode = config.genInsertInsertCode.replaceAll('proxy.js', config.genProxyProxyFile || defConfig.genProxyProxyFile);
+config.genInsertInsertCode = config.genInsertInsertCode.replaceAll('proxy.js', config.genProxyTargetFile || defConfig.genProxyTargetFile);
 
 // 3. 读取 banner.txt 文件内容
 const bannerPath = path.join(config.ldDirName, 'banner.txt');

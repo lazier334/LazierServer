@@ -271,7 +271,7 @@ const config = {
     /** 导出插件-存放的文件夹 */
     genProxyTargetDir: `{/ldDirName/}/web/plugin`,
     /** 导出插件-导出的文件名 */
-    genProxyProxyFile: "proxy.js",
+    genProxyTargetFile: "proxy.js",
     /** 本地开发环境中插入的代码, 代码会插入到 index.html 文件中<body>标签内的开头 */
     indexInsertCode: "<script src=\"/proxy.js\"></script>",
     /** http 服务器端口 */

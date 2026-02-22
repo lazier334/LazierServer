@@ -18,7 +18,7 @@ const lc = config.selectConfig({
     dirMap: {
         ...{// 自定义文件夹映射
             // 插件
-            [path.join(config.genProxyTargetDir, config.genProxyProxyFile)]: config.genProxyProxyFile,
+            [path.join(config.genProxyTargetDir, config.genProxyTargetFile)]: config.genProxyTargetFile,
             // 'aa': '/',
             // 'aa/bb': '/'
         }, ...Object.fromEntries([

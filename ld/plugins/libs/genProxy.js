@@ -68,6 +68,7 @@ function safe(fun){ try { fun() } catch (e) { } }
     /**
      * 添加函数集合，支持冲突提示以及运行 obj.run
      * @param {{[key: string]: Function | object}} obj 要添加的函数集合
+     * @returns {this} 自身
      */
     addFunctions(obj) {
         for (const k in obj) {
@@ -81,6 +82,14 @@ function safe(fun){ try { fun() } catch (e) { } }
             this[k] = fun;
         }
         return this
+    },
+    /**
+     * 统一字符串的换行符格式
+     * @param {string} str 要格式化的字符串
+     * @returns {string} 格式化后的字符串
+     */
+    formattedLineBreaks(str) {
+        return str.replace(/\r\n|\r|\n/g, '\n')
     }
 };
 hostDef.excludeKeys = Object.keys(hostDef);
@@ -96,18 +105,16 @@ export default main;
 // -----------------------------------------------------------------------------------------------
 
 /**
- * 主程序
+ * 主程序，先写出生产环境插件，再写出开发环境插件，所以配置 genProxyTargetFile 的名称和开发插件名称相同的时候会被开发插件覆盖
  */
-async function main() {
+async function main(proxyFile) {
     const startTime = Date.now();
     const host = await initHost({});
     const body = host.export();
     const devBody = host.export(null, true);
-    const targetPath = path.join(config.genProxyTargetDir, config.genProxyProxyFile);
+    const targetPath = path.join(config.genProxyTargetDir, proxyFile || config.genProxyTargetFile);
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
 
-    // proxy.js 开发环境脚本
-    fs.writeFileSync(path.join(config.genProxyTargetDir, 'proxy.js'), devBody);
     // 生产环境脚本
     const originPath = targetPath + '.原版.js';
     let versionNum = 0;
@@ -130,6 +137,8 @@ async function main() {
     let json = JSON.parse(obfuscatedCode.getSourceMap());
     json.version = versionNum;
     fs.writeFileSync(targetPath + '.map', JSON.stringify(json));
+    // proxy.js 开发环境脚本
+    fs.writeFileSync(path.join(config.genProxyTargetDir, 'proxy.js'), devBody);
 
     console.log("导出插件完成, 版本号", versionNum, `, 耗时${Date.now() - startTime}ms`);
     console.log("文件位置:", originPath, '以及同目录下的同前缀文件与proxy.js文件');

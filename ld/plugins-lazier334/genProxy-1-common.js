@@ -123,37 +123,55 @@ export default createGenProxy(async function genProxyDemo(funs) {
 
                 GlobalParam.handlerUrlList = [completeUrl, excludeUrl, detectionUrl];
                 GlobalParam.handlerUrl = (url) => {
-                    if (url && url != 'about:blank') {
-                        for (const handler of GlobalParam.handlerUrlList) {
-                            url = handler(url);
-                            if (!url) break;
-                        }
+                    if (['about:blank'].includes(url)
+                        || url.startsWith('javascript:')
+                        || url.startsWith('blob:')) return url;
+                    for (const handler of obj.handlerUrlList) {
+                        if (!url) break;
+                        url = handler(url);
                     }
                     return url;
                 }
             },
 
-        urlHandlerInit_dev:
-            /**
-             * 初始化url处理函数
-             */
-            function () {
-                // 检测地址，并且修改地址
-                function detectionUrl(url) {
-                    // 如果当前域名是 www.google 开头那么取消掉
-                    if (url.includes('www.google')) return;
-                    // 读取当前的域名，锁定一级域名
-                    let reUrl = url;
-                    // 补全url
-                    if (!reUrl.startsWith('http')) {
-                        if (!reUrl.startsWith('/')) {
-                            let pathname = location.pathname.split('/');
-                            pathname.pop();
-                            pathname.push(reUrl);
-                            reUrl = pathname.join('/');
+        /**
+         * 初始化url处理函数 dev 版
+         */
+        urlHandlerInit_dev: {
+            run(e) {
+                let codeMapping = {
+                    [`
+                    try {
+                        let org = new URL(url);
+                        // 操作修改 url
+                        if (GlobalParam.domainStr) {
+                            if (-1 < org.host.indexOf(GlobalParam.domainStr)) {
+                                // 存在当前域名
+                                org = new URL(reUrl);
+                            } else {
+                                // 修改域名，保留首层的子域名
+                                let domain = org.host.split(".");
+                                org.host = [domain[0]].concat(GlobalParam.domain).join(".");
+                            }
+                        } else {
+                            // 目标域名为单域名(如 localhost)的情况下设置为当前域名
+                            org.host = location.host;
                         }
-                        reUrl = location.origin + reUrl;
+                        reUrl = org.toString();
+
+                        if (GlobalParam.forceHttps) {
+                            if (!reUrl.startsWith("https")) {
+                                if (reUrl.startsWith("http")) {
+                                    reUrl = reUrl.replace("http", "https");
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.error(err)
                     }
+                    // 可以 用于将 api.a.com 与 api-suf.a.com 替换成 api-suf.a.com
+                    return reUrl.split('.').map((e, i) => i == 0 ? (e + (e.endsWith('-suf') ? '' : '-suf')) : e).join('.');
+`]: `
                     try {
                         let org = new URL(url);
                         reUrl = GlobalParam.domainUrl + org.toString().split(org.host).pop();
@@ -161,41 +179,14 @@ export default createGenProxy(async function genProxyDemo(funs) {
                         console.error('解析url时异常', err)
                     }
                     return reUrl;
-                }
-                // url处理列表
-                const banPathnameList = [];
-                function excludeUrl(url) {
-                    let lu = new URL(url);
-                    // 排除指定的 api路径
-                    if (banPathnameList.includes(lu.pathname)) return;
-                    // 排除 google
-                    if (lu.href.includes('www.google')) return;
-                    return url;
-                }
-                // 补全url
-                function completeUrl(u) {
-                    if (!u.startsWith('http://') && !u.startsWith('https://')) {
-                        if (!u.startsWith('/')) {
-                            let pathname = location.pathname.split('/');
-                            pathname.pop();
-                            pathname.push(u);
-                            u = pathname.join('/');
-                        }
-                        u = location.origin + u;
-                    }
-                    return u
-                }
-
-                GlobalParam.handlerUrlList = [completeUrl, excludeUrl, detectionUrl];
-                GlobalParam.handlerUrl = (url) => {
-                    if (['about:blank'].includes(url) || url.startsWith('javascript:')) return url;
-                    for (const handler of GlobalParam.handlerUrlList) {
-                        if (!url) break;
-                        url = handler(url);
-                    }
-                    return url;
-                }
-            },
+`
+                };
+                // 拿到原始版本并格式化换行符
+                let code = funs.formattedLineBreaks(e.urlHandlerInit.toString());
+                Object.entries(codeMapping).forEach(([k, v]) => code = code.replace(funs.formattedLineBreaks(k), funs.formattedLineBreaks(v)));
+                return funs.createFunction(code)
+            }
+        },
 
         proxyDocmentHeadAppendChild:
             /**

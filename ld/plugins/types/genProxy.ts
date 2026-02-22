@@ -16,6 +16,13 @@ type genProxyFunction = (funs: {
      * @returns {this} 自身
      */
     addFunctions: (obj: { [key: string]: Function | object }) => ThisType<typeof funs> & typeof funs;
+    /**
+     * 统一字符串的换行符格式
+     * @link {file:///./../libs/genProxy.js#71 实现处，如果无法跳转则请手动寻找文件}
+     * @param {string} str 要格式化的字符串
+     * @returns {string} 格式化后的字符串
+     */
+    formattedLineBreaks: (str: string) => string;
 } & { [key: string]: () => any; }) => void;
 
 /**
