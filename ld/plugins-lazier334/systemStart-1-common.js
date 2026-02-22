@@ -1,7 +1,8 @@
 import { createSystemStart } from './types/index.ts';
+import { pathToFileURL } from 'url';
 
 /**
- * 基础初始化操作
+ * @param {import('./libs/baseImport.js')}}
  */
 export default createSystemStart(async function systemStartCommon({ fs, path, config, app }) {
     config.app
@@ -11,7 +12,8 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
     // 检测 proxy.js 是否生成，如果没有生成，那么指定代码进行生成
     if (!fs.existsSync(path.join(config['genProxyTargetDir'], 'proxy.js'))) {
         console.warn('开发环境插件 proxy.js 不存在，生成该插件');
-        await (await import(path.join(import.meta.dirname, 'libs/genProxy.js'))).default('proxy.js');
+        const genProxyPath = pathToFileURL(path.join(import.meta.dirname, '../plugins/libs/genProxy.js'));
+        await (await import(genProxyPath)).default('proxy.js');
     }
 
     config.app = app;
