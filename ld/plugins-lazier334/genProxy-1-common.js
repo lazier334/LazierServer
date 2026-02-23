@@ -94,18 +94,18 @@ export default createGenProxy(async function genProxyDemo(funs) {
                 }
 
                 // 补全url
-                function completeUrl(u) {
-                    if (!u.startsWith('http://') && !u.startsWith('https://')) {
-                        if (!u.startsWith('/')) {
+                function completeUrl(url) {
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        if (!url.startsWith('/')) {
                             let pathname = location.pathname.split('/');
                             pathname.pop();
-                            pathname.push(u);
-                            u = pathname.join('/');
+                            pathname.push(url);
+                            url = pathname.join('/');
                         } else if (!url.includes('://')) {
-                            u = location.origin + u;
+                            url = location.origin + url;
                         }
                     }
-                    return u
+                    return url
                 }
 
                 // url处理列表
