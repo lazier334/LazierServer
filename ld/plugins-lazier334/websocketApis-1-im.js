@@ -1,6 +1,8 @@
 import { createWebsocketApis } from './types/index.ts';
-import { db, msgBodyType, Config } from './utils/utils-im.js';
+import utilsIM from './utils/utils-im.js';
 
+// 不能直接在上面解构，有可能会报错
+const { db, msgBodyType, Config } = utilsIM;
 const lc = {
     close: false,
     moreLog: Config.moreLog ? console.debug : () => { },
