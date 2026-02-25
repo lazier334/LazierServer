@@ -291,7 +291,7 @@ export default all;
  * @returns 
  */
 function initIMDB() {
-    if (!Config.switch.closeIM) return {};
+    if (Config.switch.closeIM) return {};
 
     const db = initDB();
     // 初始化数据库
