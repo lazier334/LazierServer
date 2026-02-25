@@ -103,7 +103,7 @@ function safe(fun){ try { fun() } catch (e) { } }
 hostDef.excludeKeys = Object.keys(hostDef);
 
 // 判断当前脚本是不是被直接执行
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url.replaceAll('\\', '/') === `file:///${process.argv[1]}`.replaceAll('\\', '/')) {
     main(config.proxyFile);
 }
 

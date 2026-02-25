@@ -12,7 +12,7 @@ var config = {};
 if (process?.G?.config) config = process.G.config;
 else {
     // 单独启动脚本的时候没有基础环境，所以需要单独导入
-    const configPath = path.join(import.meta.dirname, '../../../src/libs/config.ts')
+    const configPath = pathToFileURL(path.join(import.meta.dirname, '../../../src/libs/config.ts'));
     config = (await import(configPath)).config;
 }
 

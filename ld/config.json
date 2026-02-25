@@ -4,6 +4,14 @@
     将其文件类型更改为 ` {} JSON with Comments (jsonc) `  
 */
 {
+    "genProxyExportKeys": [
+        "initPlugin",
+        "urlHandlerInit",
+        "proxyXHRAndFetch",
+        "proxyDocmentHeadAppendChild",
+        "removeScriptElement",
+        "proxyWebSocket"
+    ],
     "times": {
         "pluginStagesUpdateStep": 10000
     },

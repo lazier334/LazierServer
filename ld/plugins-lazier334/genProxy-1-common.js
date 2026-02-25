@@ -8,8 +8,38 @@ export default createGenProxy(async function genProxyDemo(funs) {
     // 在生产环境被更名为 "2随机数_5随机数"
     let GlobalParam = {};
 
-    // 给插件增加其他功能可以把函数写在这里，全局 h对象 和 C变量对象
+    // 给插件增加其他功能可以把函数写在这里
     funs.addFunctions({
+        initPlugin:
+            /**
+             * 初始化
+             */
+            function () {
+                GlobalParam.domainUrl = window.location.origin;
+                GlobalParam.domain = window.location.host.split(".").slice(1);
+                GlobalParam.domainStr = GlobalParam.domain.join(".");
+                GlobalParam.forceHttps = true;
+            },
+        initPlugin_dev: {
+            /**
+             * 初始化开发版本
+             */
+            run(e) {
+                let devWelcomeMsg = `
+
+         [DEV]
+        Welcome!
+      插件注入成功！
+
+`;
+                // .run() 函数属性使用示例, 整个 initPlugin_dev 属性都会被返回的函数覆盖掉
+                return funs.createFunction(e.initPlugin.toString()
+                    .replace('GlobalParam.forceHttps = true;', `console.log(\`${devWelcomeMsg}\`);
+                    safe = function (fun) { try { fun() } catch (e) { console.log("函数加载失败", e) } };`)
+                )
+            }
+        },
+
         navigatorServiceWorkerRegister:
             /**
              * 工作服务注册
@@ -127,7 +157,7 @@ export default createGenProxy(async function genProxyDemo(funs) {
                         && (url.startsWith('http:')
                             || url.startsWith('https:')
                             || !url.split('?').shift().includes('://'))) {
-                        for (const handler of obj.handlerUrlList) {
+                        for (const handler of GlobalParam.handlerUrlList) {
                             if (!url) break;
                             url = handler(url);
                         }
@@ -186,26 +216,6 @@ export default createGenProxy(async function genProxyDemo(funs) {
                 return funs.createFunction(code)
             }
         },
-
-        proxyDocmentHeadAppendChild:
-            /**
-             * 可以代理`document.head.appendChild`函数  
-             * 用于解除gtm标记
-             */
-            function () {
-                const originalAppendChild = Element.prototype.appendChild;
-                Element.prototype.appendChild = function (node) {
-                    // js iframe
-                    if (['SCRIPT', 'IFRAME'].includes(node.tagName) && node.src) {
-                        node.src = GlobalParam.handlerUrl(node.src);
-                    }
-                    // css 
-                    if (['LINK'].includes(node.tagName) && node.href) {
-                        node.href = GlobalParam.handlerUrl(node.href);
-                    }
-                    return originalAppendChild.call(this, node);
-                };
-            },
 
         proxyElementAppendChild:
             /**
@@ -347,9 +357,6 @@ export default createGenProxy(async function genProxyDemo(funs) {
                 // 重写ws的链接
                 function modifyWebSocketUrl(originalUrl) {
                     return originalUrl;
-                    // let u = new URL(originalUrl);
-                    // u.host = 'localhost:3011'
-                    // return u.href;
                 }
                 const OriginalWebSocket = window.WebSocket;
                 // 手动强制拒绝重连
@@ -379,6 +386,23 @@ export default createGenProxy(async function genProxyDemo(funs) {
                 }
                 window.WebSocket = ProxyWebSocket;
             },
+        proxyWebSocket_dev: {
+            run(e) {
+                let codeMapping = {
+                    [`
+                    return originalUrl;
+`]: `
+                    let u = new URL(originalUrl);
+                    u.host = 'localhost:3011'
+                    return u.href;`
+                };
+                // 拿到原始版本并格式化换行符
+                let code = funs.formattedLineBreaks(e.proxyWebSocket.toString());
+                Object.entries(codeMapping).forEach(([k, v]) => code = code.replace(funs.formattedLineBreaks(k), funs.formattedLineBreaks(v)));
+                return funs.createFunction(code)
+            }
+        },
+
         proxyCreateObjectURL:
             /**
              * 代理 `URL.createObjectURL` 函数  

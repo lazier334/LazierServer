@@ -261,13 +261,7 @@ const config = {
     /** 打包时插入的代码, 代码会插入到 index.html 文件中<body>标签内的开头 */
     genInsertInsertCode: "<script src=\"/b41e93b2-009a-4be6-8d16-cb3c3e176620\"></script>",
     /** 生成插件时导出的函数列表, 根据需求选择导出 */
-    genProxyExportKeys: [
-        "proxyXHRAndFetch",
-        "proxyDocmentHeadAppendChild",
-        "navigatorServiceWorkerRegister",
-        "removeScriptElement",
-        "clearLoopDebugger"
-    ],
+    genProxyExportKeys: ["initPlugin"],
     /** 导出插件-存放的文件夹 */
     genProxyTargetDir: `{/ldDirName/}/web/plugin`,
     /** 导出插件-导出的文件名 */
