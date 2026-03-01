@@ -34,8 +34,8 @@ if (fs.existsSync(LICENSE_FilePath) && fs.statSync(LICENSE_FilePath).isFile()) {
     packageLockJson.packages[""].license = LICENSE;
 }
 
-fs.writeFileSync('../package.json', JSON.stringify(packageJson, null, 2));
-fs.writeFileSync('../package-lock.json', JSON.stringify(packageLockJson, null, 2));
+fs.writeFileSync('../package.json', JSON.stringify(packageJson, null, 2) + '\n');
+fs.writeFileSync('../package-lock.json', JSON.stringify(packageLockJson, null, 2) + '\n');
 
 console.log(`package.json 和 package-lock.json 更新版本完成!`);
 GenSubmitCmd(packageJson);
