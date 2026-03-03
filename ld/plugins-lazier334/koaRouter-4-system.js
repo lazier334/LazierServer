@@ -217,6 +217,33 @@ export default createKoaRouter(function koaRouterSystem(router) {
         ctx.body = `已尝试${open ? '开启' : '关闭'}whistle, 如果未安装whistle, 请使用命令进行全局安装: npm i -g whistle`;
     });
 
+    router.all('系统路由 - 打开web文件夹', '/system/openWeb', async (ctx) => {
+        let filepath = ctx.request?.body?.filepath || ctx.request?.query?.filepath || config.rootDir;
+        openFileExplorer(filepath);
+        ctx.body = `尝试使用文件管理器打开文件夹: ${filepath}`
+
+        // 打开文件管理器（支持Windows/Mac/Linux）
+        function openFileExplorer(targetPath = '.') {
+            const absolutePath = path.resolve(targetPath);
+
+            let command;
+            switch (process.platform) {
+                case 'win32':
+                    command = `explorer "${absolutePath}"`;
+                    break;
+                case 'darwin':
+                    command = `open "${absolutePath}"`;
+                    break;
+                case 'linux':
+                    command = `xdg-open "${absolutePath}"`;
+                    break;
+                default:
+                    throw new Error(`Unsupported platform: ${process.platform}`);
+            }
+            runCmd(command).catch(err => console.error('打开文件失败', err));
+        }
+    });
+
     return router
 })
 

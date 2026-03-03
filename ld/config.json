@@ -34,6 +34,12 @@
             "text": "管理连接",
             "tooltip": "给指定的连接发送消息",
             "fun": "this.openPage('/im/index.html')"
+        },
+        {
+            "avatarText": "/web",
+            "text": "打开web目录",
+            "tooltip": "尝试使用文件管理器打开web目录（主要用于windows系统）",
+            "fun": "this.openPage('/system/openWeb')"
         }
     ],
     "otherWebPath": [
