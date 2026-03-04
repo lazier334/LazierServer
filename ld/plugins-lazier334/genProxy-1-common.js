@@ -126,7 +126,9 @@ export default createGenProxy(async function genProxyDemo(funs) {
                 // 补全url
                 function completeUrl(url) {
                     if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                        if (!url.startsWith('/')) {
+                        if (url.startsWith('//')) {
+                            url = location.protocol + url;
+                        } else if (!url.startsWith('/')) {
                             let pathname = location.pathname.split('/');
                             pathname.pop();
                             pathname.push(url);
@@ -136,6 +138,13 @@ export default createGenProxy(async function genProxyDemo(funs) {
                         }
                     }
                     return url
+                }
+
+                // 格式化地址
+                function replaceAllPathnameSlash(url) {
+                    let lu = new URL(url);
+                    lu.pathname = lu.pathname.replaceAll('//', '/');
+                    return lu.href;
                 }
 
                 // url处理列表
@@ -151,7 +160,7 @@ export default createGenProxy(async function genProxyDemo(funs) {
                     return url;
                 }
 
-                GlobalParam.handlerUrlList = [completeUrl, excludeUrl, detectionUrl];
+                GlobalParam.handlerUrlList = [completeUrl, replaceAllPathnameSlash, excludeUrl, detectionUrl];
                 GlobalParam.handlerUrl = (url) => {
                     if (typeof url == 'string' && 0 < url.length
                         && (url.startsWith('http:')
