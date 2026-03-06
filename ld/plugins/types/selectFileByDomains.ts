@@ -18,16 +18,15 @@ type DomainList = string[];
  */
 type DomainToFileMap = { [key: string]: string };
 
-/** 
- * 选中的域名  
- * "api.demo.com"
- */
-type SelectDomain = string;
-
 /**
  * selectFileByDomains 插件函数
  */
-type SelectFileByDomainsFunction = (domainList: DomainList, domainsMap: DomainToFileMap, ctx: Context) => SelectDomain;
+type SelectFileByDomainsFunction = (domainList: DomainList, domainsMap: DomainToFileMap, ctx: Context) => {
+    /** 提前结束插件 use 调用 */
+    end: true,
+    /** 返回选中的域名 */
+    result: string
+};
 
 /**
  * 创建 selectFileByDomains 插件的类型提示函数
