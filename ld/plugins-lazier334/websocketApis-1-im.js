@@ -14,7 +14,7 @@ const APIS = initAPIS();
  * 使用时需要传递客户端的消息进来，进行路由识别与操作
  */
 export default createWebsocketApis(async function websocketApisDemo(msg, ws) {
-    if (Config.switch.closeIM) return false;
+    if (Config.switch.closeIM) return;
     try {
         if (typeof params != 'object') params = {};
         const re = APIS[params.api]?.(ws, params);
@@ -23,7 +23,6 @@ export default createWebsocketApis(async function websocketApisDemo(msg, ws) {
         console.error('im处理失败', error.message);
         lc.moreLog(error);
     }
-    return false
 })
 
 

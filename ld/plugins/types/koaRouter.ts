@@ -1,9 +1,10 @@
 import type Router from '@koa/router';
+import type { PluginResult } from './plugins.ts';
 
 /**
  * koaRouter 插件函数
  */
-type KoaRouterFunction = (router: Router) => void;
+type KoaRouterFunction = (router: Router) => PluginResult;
 
 /**
  * 创建 koaRouter 插件的类型提示函数  

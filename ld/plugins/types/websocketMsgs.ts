@@ -1,3 +1,5 @@
+import type { PluginResult } from './plugins.ts';
+
 /** 选项数据 */
 type Msg = {
     /** 类型，分别是 上传send 和 下传receive */
@@ -18,7 +20,7 @@ type MsgArray = Msg[];
 /**
  * websocketMsgs 插件函数
  */
-type WebsocketMsgsFunction = (arr: MsgArray) => void;
+type WebsocketMsgsFunction = (arr: MsgArray) => PluginResult;
 
 /**
  * 创建 websocketMsgs 插件的类型提示函数

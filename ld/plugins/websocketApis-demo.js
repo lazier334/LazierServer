@@ -7,5 +7,5 @@ export default createWebsocketApis(async function websocketApisDemo(msg, ws) {
     if (false) {
         console.log('收到来自客户端的消息', msg)
     }
-    return false
+    return {}
 })

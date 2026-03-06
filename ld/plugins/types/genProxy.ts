@@ -1,3 +1,5 @@
+import type { PluginResult } from './plugins.ts';
+
 /**
  * genProxy 插件函数
  */
@@ -23,7 +25,7 @@ type genProxyFunction = (funs: {
      * @returns {string} 格式化后的字符串
      */
     formattedLineBreaks: (str: string) => string;
-} & { [key: string]: () => any; }) => void;
+} & { [key: string]: () => any; }) => PluginResult;
 
 /**
  * 创建 genProxy 插件的类型提示函数  

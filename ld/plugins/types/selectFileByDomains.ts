@@ -1,5 +1,6 @@
 
 import type { Context } from 'koa';
+import type { PluginResult } from './plugins.ts';
 
 /** 
  * 域名列表  
@@ -21,9 +22,7 @@ type DomainToFileMap = { [key: string]: string };
 /**
  * selectFileByDomains 插件函数
  */
-type SelectFileByDomainsFunction = (domainList: DomainList, domainsMap: DomainToFileMap, ctx: Context) => {
-    /** 提前结束插件 use 调用 */
-    end: true,
+type SelectFileByDomainsFunction = (domainList: DomainList, domainsMap: DomainToFileMap, ctx: Context) => Omit<PluginResult, 'result'> & {
     /** 返回选中的域名 */
     result: string
 };

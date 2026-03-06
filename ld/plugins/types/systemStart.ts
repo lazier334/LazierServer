@@ -1,4 +1,5 @@
 import type Koa from 'koa';
+import type { PluginResult } from './plugins.ts';
 
 /**
  * 参数
@@ -14,7 +15,7 @@ type SystemOptions = {
 /**
  * systemStart 插件函数
  */
-type SystemStartFunction = (opt: SystemOptions) => void;
+type SystemStartFunction = (opt: SystemOptions) => PluginResult;
 
 /**
  * 创建 systemStart 插件的类型提示函数

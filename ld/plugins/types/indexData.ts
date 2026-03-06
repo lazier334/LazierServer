@@ -1,3 +1,4 @@
+import type { PluginResult } from './plugins.ts';
 
 /** 按钮选项 */
 type IndexDataUrlItem = {
@@ -25,7 +26,7 @@ type IndexDataArray = IndexDataItem[];
 /**
  * indexData 插件函数
  */
-type IndexDataFunction = (arr: IndexDataArray) => void;
+type IndexDataFunction = (arr: IndexDataArray) => PluginResult;
 
 /**
  * 创建 indexData 插件的类型提示函数
