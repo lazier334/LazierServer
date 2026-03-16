@@ -38,7 +38,7 @@ export default createIndexData(async function indexDataDemo(arr) {
                 {
                     icon: "",
                     name: "Whistle",
-                    mark: "网络 - Whistle",
+                    mark: '网络 - Whistle 选项 "Rules-*" 需搭配开启 "复制链接" 功能使用',
                     urls: [
                         {
                             text: "打开",
@@ -59,6 +59,14 @@ export default createIndexData(async function indexDataDemo(arr) {
                         {
                             text: "Rules-抓取文件",
                             url: "# * resWrite://`D:/W2/${url.host}/` excludeFilter://localhost  excludeFilter://*.bing.com"
+                        },
+                        {
+                            text: "Rules-静态代理单个接口",
+                            url: "# */ffb401aa-2170-4a10-b086-84f011fabbf6 file://D:\W2\ffb401aa-2170-4a10-b086-84f011fabbf6.原版.js"
+                        },
+                        {
+                            text: "Rules-转发单个接口",
+                            url: "# */shared/984721902a/index.json https://`localhost:6001${url.pathname}`"
                         }
                     ],
                 }
