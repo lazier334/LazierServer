@@ -5,7 +5,6 @@ import { pathToFileURL } from 'url';
  * @param {import('./libs/baseImport.js')}}
  */
 export default createSystemStart(async function systemStartCommon({ fs, path, config, app }) {
-    config.app
     // 打印版本日志
     console.info(config.showVersion());
 
