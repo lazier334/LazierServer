@@ -213,7 +213,7 @@ export default createKoaRouter(function koaRouterSystem(router) {
         const open = ctx.request.query.open;
         const command = open ? 'w2 start' : 'w2 stop';
         console.log('尝试执行命令(运行结果似乎不可见):', command, '如果未安装whistle, 请使用命令进行全局安装:', 'npm i -g whistle');
-        runCmd(command);
+        runCmd(command).catch(err => console.log('操作whistle失败', err));
         ctx.body = `已尝试${open ? '开启' : '关闭'}whistle, 如果未安装whistle, 请使用命令进行全局安装: npm i -g whistle`;
     });
 
