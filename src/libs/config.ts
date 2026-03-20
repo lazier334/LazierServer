@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import stripJsonComments from 'strip-json-comments';
+import { pathToFileURL } from 'url';
 import defConfig from './configDef.ts';
 type ConfigType = typeof defConfig;
 /**
@@ -25,7 +25,7 @@ var config: ConfigType = {
 // 1. 读取 ld 的配置文件进行合并
 if (fs.existsSync(defConfig.ldConfigPath) && fs.statSync(defConfig.ldConfigPath).isFile()) {
     try {
-        let conf = (await import(defConfig.ldConfigPath)).default;
+        let conf = (await import(pathToFileURL(defConfig.ldConfigPath).href)).default;
         config = { ...config, ...(conf as Partial<ConfigType>) };
     } catch (err) {
         console.error('加载外部配置失败');

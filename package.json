@@ -39,7 +39,6 @@
     "node-stream-zip": "^1.15.0",
     "nodejs-file-downloader": "^4.13.0",
     "rate-limiter-flexible": "^9.1.1",
-    "strip-json-comments": "^5.0.3",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.19.0",
