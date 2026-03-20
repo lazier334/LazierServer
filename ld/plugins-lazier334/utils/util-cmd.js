@@ -1,10 +1,10 @@
 import iconv from 'iconv-lite';
 import readline from 'readline';
-import { spawn } from 'child_process';
+import { spawn, exec } from 'child_process';
 
 let rl;
 export default runCmd;
-export { runCmd, waitForInput, runDetachedCmd };
+export { runCmd, runCmdByExec, waitForInput, runDetachedCmd };
 
 // 增强解码函数
 function safeDecode(buffer, primaryEncoding = 'utf8') {
@@ -39,6 +39,32 @@ function safeDecode(buffer, primaryEncoding = 'utf8') {
     // 极端情况返回原始buffer
     return copyBuffer;
 };
+
+/**
+ * ```js
+ *  const cmd = require('./lib/utils-cmd.js');
+ *  cmd.runCmd('aa echo hello world!').then((result) => {
+ *      console.log('命令执行结果:', result.stdout, result.stderr);
+ *  }).catch((error) => {
+ *      console.error('命令执行错误:', error);
+ *  });
+ * ```
+ * @param {'echo hello world!'} cmd 命令
+ * @returns {Promise<{ stdout: string, stderr: string }>} 执行结果
+ */
+async function runCmdByExec(cmd = 'echo hello world!') {
+    return new Promise((resolve, reject) => {
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`命令执行失败: ${cmd}`);
+                console.error(`错误信息: ${error.message}`);
+                reject(error);
+                return;
+            }
+            resolve({ stdout, stderr });
+        });
+    });
+}
 
 /**
  * ```js

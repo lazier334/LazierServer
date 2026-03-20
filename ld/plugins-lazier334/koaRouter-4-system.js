@@ -2,7 +2,7 @@ import { createKoaRouter } from './types/index.ts';
 import send from 'koa-send';
 import { restartSystem } from './libs/sys-restart.js';
 import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseImport.js';
-import { runCmd } from './utils/util-cmd.js';
+import { runCmd, runCmdByExec } from './utils/util-cmd.js';
 
 const { plugins } = await getPluginsModule();
 const utilsModule = await getUtilsModule();
@@ -192,15 +192,15 @@ export default createKoaRouter(function koaRouterSystem(router) {
         try {
             if (open) {
                 const proxyServer = ctx.request.query.proxyServer;
-                await runCmd(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 1 /f`);
-                if (proxyServer) await runCmd(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /t REG_SZ /d "${proxyServer}" /f`);
+                await runCmdByExec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 1 /f`);
+                if (proxyServer) await runCmdByExec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /t REG_SZ /d "${proxyServer}" /f`);
             } else {
-                runCmd(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f`)
+                runCmdByExec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f`)
             }
 
-            await runCmd(`powershell -Command "& { Add-Type -TypeDefinition '[DllImport(\\\"user32.dll\\\")] public static extern int SendMessageTimeout(int, int, int, string, int, int, out int);'; $null = [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); }"`);
+            await runCmdByExec(`powershell -Command "& { Add-Type -TypeDefinition '[DllImport(\\\"user32.dll\\\")] public static extern int SendMessageTimeout(int, int, int, string, int, int, out int);'; $null = [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); }"`);
             // 会按下F5按键
-            // await runCmd(`powershell -Command "& { Add-Type -TypeDefinition '[DllImport(\\\"user32.dll\\\")] public static extern int SendMessageTimeout(int, int, int, string, int, int, out int);'; $null = [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.SendKeys]::SendWait('{F5}'); }"`);
+            // await runCmdByExec(`powershell -Command "& { Add-Type -TypeDefinition '[DllImport(\\\"user32.dll\\\")] public static extern int SendMessageTimeout(int, int, int, string, int, int, out int);'; $null = [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.SendKeys]::SendWait('{F5}'); }"`);
 
             ctx.body = `已${opt}系统代理`;
         } catch (err) {
