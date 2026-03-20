@@ -10,7 +10,7 @@ const configTest: Partial<Config> = {
  * 上面是便捷查询、测试使用，实际变量未使用
  */
 export default {
-    "genProxyExportKeys": [
+    genProxyExportKeys: [
         "initPlugin",
         "urlHandlerInit",
         "proxyXHRAndFetch",
@@ -18,50 +18,50 @@ export default {
         "removeScriptElement",
         "proxyWebSocket"
     ],
-    "times": {
-        "pluginStagesUpdateStep": 10000
+    times: {
+        pluginStagesUpdateStep: 10000
     },
-    "proxy": "",
-    "switch": {
-        "debugMode": true,
-        "cryptoDataEnable": false,
-        "openAddAppStack": true,
+    proxy: "",
+    switch: {
+        debugMode: true,
+        cryptoDataEnable: false,
+        openAddAppStack: true,
         /** 是否关闭 im系统 */
-        "closeIM": true,
+        closeIM: true,
         /** 是否关闭 upload系统 */
-        "closeUploads": true,
+        closeUploads: true,
         /** 是否开启自动跨域 */
-        "autoCors": false,
-        "cors": false
+        autoCors: false,
+        cors: false
     },
-    "appendButsData": [
+    appendButsData: [
         {
-            "avatarText": "im",
-            "text": "管理连接",
-            "tooltip": "给指定的连接发送消息",
-            "fun": "this.openPage('/im/index.html')"
+            avatarText: "im",
+            text: "管理连接",
+            tooltip: "给指定的连接发送消息",
+            fun: "this.openPage('/im/index.html')"
         },
         {
-            "avatarText": "/web",
-            "text": "打开web目录",
-            "tooltip": "尝试使用文件管理器打开web目录（主要用于windows系统）",
-            "fun": "this.openPage('/system/openWeb')"
+            avatarText: "/web",
+            text: "打开web目录",
+            tooltip: "尝试使用文件管理器打开web目录（主要用于windows系统）",
+            fun: "this.openPage('/system/openWeb')"
         }
     ],
-    "otherWebPath": [
+    otherWebPath: [
         "{/ldDirName/}/web-lazier334"
     ],
-    "pluginDirs": [
+    pluginDirs: [
         "{/ldDirName/}/plugins",
         "{/ldDirName/}/plugins-lazier334"
     ],
-    "copyright": {
-        "icp": "" // 隐藏备案信息
+    copyright: {
+        icp: "" // 隐藏备案信息
     },
     /** koaRouter-3-scanHar.js 插件的配置 */
-    "scanHar": {
+    scanHar: {
         /** 删除指定的响应头 */
-        "removeResponseHeaderList": [
+        removeResponseHeaderList: [
             "content-encoding"
         ]
     },
