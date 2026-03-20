@@ -212,9 +212,14 @@ export default createKoaRouter(function koaRouterSystem(router) {
     router.all('系统路由 - 开关 whistle', '/system/whistle', async (ctx) => {
         const open = ctx.request.query.open;
         const command = open ? 'w2 start' : 'w2 stop';
-        console.log('尝试执行命令(运行结果似乎不可见):', command, '如果未安装whistle, 请使用命令进行全局安装:', 'npm i -g whistle');
-        runCmd(command).catch(err => console.log('操作whistle失败', err));
-        ctx.body = `已尝试${open ? '开启' : '关闭'}whistle, 如果未安装whistle, 请使用命令进行全局安装: npm i -g whistle`;
+        try {
+            console.log('尝试执行命令:', command, '如果未安装whistle, 请使用命令进行全局安装:', 'npm i -g whistle');
+            let msg = await runCmd(command);
+            ctx.body = `${open ? '开启' : '关闭'}whistle成功\n结果: ${msg.stdout}`;
+        } catch (err) {
+            console.log(`${open ? '开启' : '关闭'}whistle失败`, err)
+            ctx.body = `${open ? '开启' : '关闭'}whistle失败, 如果未安装whistle, 请使用命令进行全局安装: npm i -g whistle\n错误信息: ${err.message}`;
+        }
     });
 
     router.all('系统路由 - 打开web文件夹', '/system/openWeb', async (ctx) => {
