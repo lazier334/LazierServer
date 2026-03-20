@@ -55,14 +55,28 @@ export default createKoaRouter(function koaRouterScanHar(router) {
  * @param {import('koa').Context} ctx
  * @param {[ENTRYTEMP]} entries 
  */
+function selectEntry(ctx, entries) {
+    let entry = entries[0];
+    // 内容为空的时候尝试往下翻
+    if (!(entry.response.content.text?.length != 0)) {
+        entry = entries.find(e => e.response.content.text?.length != 0) || entry;
+    }
+    return entry;
+}
+
+/**
+ * 从 entries 列表选择一条数据并发送
+ * @param {import('koa').Context} ctx
+ * @param {[ENTRYTEMP]} entries 
+ */
 function sendEntries(ctx, entries) {
-    let selectEntry = entries[0];
-    let content = selectEntry.response.content;
+    let entry = selectEntry(ctx, entries);
+    let content = entry.response.content;
     let body = content.text;
-    let headers = selectEntry.response.headers;
+    let headers = entry.response.headers;
     try {
-        if (selectEntry.filepath) {
-            ctx.set(config.headerNames.fileFrom, encodeURI(selectEntry.filepath))
+        if (entry.filepath) {
+            ctx.set(config.headerNames.fileFrom, encodeURI(entry.filepath))
         }
         headers.forEach(header => ctx.set(header.name, header.value))
         config.scanHar.removeResponseHeaderList.forEach(name => ctx.remove(name));
@@ -125,7 +139,7 @@ function detectUpdate(rootDir = config.rootDir) {
  * @param {string} rootDir har文件所在文件夹
  * @returns {boolean} 扫描的文件中有没有新的
  */
-function scanHarFiles(rootDir = config.rootDir) {
+function scanHarFiles(rootDir) {
     let fileUpdate = false;
     const harFilesCache = fs.readdirSync(rootDir).filter(file => file.endsWith('.har')).map(filename => {
         // 读取文件的修改时间
@@ -163,9 +177,9 @@ function scanHarFiles(rootDir = config.rootDir) {
 }
 /**
  * 更新api数据
- * @param {[HARTEMP]} [data=lc.harFilesCache] 
+ * @param {[HARTEMP]} data 一般使用 lc.harFilesCache 来更新
  */
-function updateApiMap(data = lc.harFilesCache) {
+function updateApiMap(data) {
     let apiMap = {};
     data.forEach(har => {
         har.log.entries.forEach(entry => {
