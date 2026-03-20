@@ -7,8 +7,7 @@ import type { PluginResult } from './plugins.ts';
 type SystemOptions = {
     fs: typeof import('fs'),
     path: typeof import('path'),
-    config: typeof import('../../../src/libs/configDef.ts').default,
-    // config: { [key: string]: any },
+    config: typeof import('../libs/baseImport.js').config,
     app: Koa<Koa.DefaultState, Koa.DefaultContext>
 }
 

@@ -20,7 +20,7 @@ LazierServer
 ├─ bin                      // 脚本工具
 ├─ ld                       // 本地数据，主要
 │  ├─ banner.txt            // banner图
-│  ├─ config.json           // 本地配置
+│  ├─ config.ts             // 本地配置
 │  ├─ logs                  // .日志文件夹
 │  ├─ plugins               // 主插件列表，以及插件的相关代码，方便自行开发
 │  │  ├─ temporary          // .插件的临时上传、下载、解压文件夹

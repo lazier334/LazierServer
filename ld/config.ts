@@ -1,9 +1,15 @@
-/*
-    可以添加自定义的配置信息, 自定义配置也是从config中读取, 已增加提示信息  
-    注释内容报错的处理方式: 可以在vscode中可以点击右下角的 ` {} JSON ` 
-    将其文件类型更改为 ` {} JSON with Comments (jsonc) `  
-*/
-{
+import type configDef from '../src/libs/configDef';
+type Config = typeof configDef;
+const configTest: Partial<Config> = {
+    // 这里可以用来快速查询与测试系统配置列表
+}
+
+/**
+ * 用户自定义配置  
+ * 只有这里的配置信息会被导出  
+ * 上面是便捷查询、测试使用，实际变量未使用
+ */
+export default {
     "genProxyExportKeys": [
         "initPlugin",
         "urlHandlerInit",
@@ -58,5 +64,5 @@
         "removeResponseHeaderList": [
             "content-encoding"
         ]
-    }
+    },
 }

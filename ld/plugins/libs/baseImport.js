@@ -5,10 +5,11 @@ import { pathToFileURL } from 'url';
 
 /** @type {import('../../../src/libs/config.ts')} */
 const defConfigType = {};
-/** @type {import('../../config.json')} */
+/** @type {import('../../config.ts')} */
 const userConfigType = {};
-/** @type {typeof defConfigType.config & typeof userConfigType} */
+/** @type {typeof defConfigType.config & typeof userConfigType.default} */
 var config = {};
+
 if (process?.G?.config) config = process.G.config;
 else {
     // 单独启动脚本的时候没有基础环境，所以需要单独导入

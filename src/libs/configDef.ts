@@ -229,8 +229,7 @@ const config = {
     versionBanner: `当前服务器版本 v.{version} - {detail}`,
     /** 版本信息 */
     version: {
-        "1.1.1(26021100)": `
-+ 增加打包系统
+        "1.1.1(26021100)": `+ 增加打包系统
 = 优化提示信息, 更方便开发插件
 = 系统其他优化`,
         "1.1.0(26010700)": `从js迁移到ts, 优化提示信息, 更方便开发插件
@@ -478,7 +477,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     /** 插件目录列表 */
     pluginDirs: [] as string[],
     /** 外部配置路径, 改文件所在的 ld 目录也用于存放自定义插件 */
-    ldConfigPath: `{/ldDirName/}/config.json`,
+    ldConfigPath: `{/ldDirName/}/config.ts`,
     /** 数据路径 */
     dataPath: ldDirName,
     /** 加密时使用的key */

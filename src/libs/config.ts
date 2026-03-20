@@ -4,12 +4,12 @@ import stripJsonComments from 'strip-json-comments';
 import defConfig from './configDef.ts';
 type ConfigType = typeof defConfig;
 /**
- * 设定外部配置数据位置，主要控制 banner.txt 和 config.json 两个文件  
- * 在 config.json 中可以继续配置这个路径属性 "ldDirName" ，配置后，
+ * 设定外部配置数据位置，主要控制 banner.txt 和 config.ts 两个文件  
+ * 在 config.ts 中可以继续配置这个路径属性 "ldDirName" ，配置后，
  * 在后续的调用中将会把数据写入配置的位置。
  * 但是默认的配置和banner固定为默认路径 "./ld/"
  */
-defConfig.ldConfigPath = path.join(defConfig.get__dirname(import.meta.url), '../../ld/config.json');
+defConfig.ldConfigPath = path.join(defConfig.get__dirname(import.meta.url), '../../ld/config.ts');
 const ldDirName = path.dirname(defConfig.ldConfigPath);
 if (!fs.existsSync(ldDirName)) {
     fs.mkdirSync(ldDirName);
@@ -25,7 +25,8 @@ var config: ConfigType = {
 // 1. 读取 ld 的配置文件进行合并
 if (fs.existsSync(defConfig.ldConfigPath) && fs.statSync(defConfig.ldConfigPath).isFile()) {
     try {
-        config = { ...config, ...(JSON.parse(stripJsonComments(fs.readFileSync(defConfig.ldConfigPath, 'utf8'))) as Partial<ConfigType>) };
+        let conf = (await import(defConfig.ldConfigPath)).default;
+        config = { ...config, ...(conf as Partial<ConfigType>) };
     } catch (err) {
         console.error('加载外部配置失败');
         throw err;
