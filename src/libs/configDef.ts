@@ -548,7 +548,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         cryptoDataEnable: true,
         /** 允许跨域 */
         cors: true,
-        /** 是否开启自动补全, 自动补全并不会影响0大小文件的自动补全 */
+        /** 是否开启自动补全 */
         autoComplete: true,
         /** 扫描全部文件夹, 开启后会扫描web中的所有文件夹, 否则只扫描指定的 domainList 配置中的内容, 这不影响扫描全部的har文件 */
         allWebDir: true,

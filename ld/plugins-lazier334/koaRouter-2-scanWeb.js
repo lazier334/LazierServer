@@ -61,22 +61,22 @@ export default createKoaRouter(function koaRouterScanWeb(router) {
                     console.info(`<=${v.length}= [存在${v.length}个文件在目录中"${k}"]`, v)
                 }
             })
-        })
+        });
 
         let filepath = await selectFileByDomains(ctx, domainDirs, api);
         if (filepath) {
             // 拿到文件夹
             let fileFolder = Object.keys(domainDirs).find(d => filepath.includes(path.basename(d)));
             // 检测文件大小如果为0，或者文件不存在，那么就去下载
-            if (fileFolder && (!fs.existsSync(filepath) || fs.readFileSync(filepath).length <= 0)) {
-                if (!(pushDir([]).includes(fileFolder) || !fileFolder.startsWith(config.rootDir))) {
+            if (fileFolder && (!fs.existsSync(filepath) || fs.readFileSync(filepath).length <= 0) && config.switch.autoComplete) {
+                if (!pushDir([]).includes(fileFolder) && fileFolder.startsWith(config.rootDir)) {
                     // 尝试转成域名，规则查看 getAllWebDir() 和 pushDir() 
                     const domain = fileFolder.replace(/.*[\\/]/, '');
                     if (domain) {
                         const urlObj = new URL(ctx.request.href);
                         const url = urlObj.href.replace(urlObj.host, domain);
                         console.log(`[文件大小为0，开始下载]: ${url} (${filepath})`);
-                        filepath = await downloadFileToPath(url, filepath);
+                        filepath = (await downloadFileToPath(url, filepath)) || filepath;
                     }
                 }
             }

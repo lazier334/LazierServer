@@ -10,6 +10,10 @@ const configTest: Partial<Config> = {
  * 上面是便捷查询、测试使用，实际变量未使用
  */
 export default {
+    portHttp: 3000,
+    portHttps: 3001,
+    portWS: 3010,
+    portWSS: 3011,
     genProxyExportKeys: [
         "initPlugin",
         "urlHandlerInit",
@@ -32,7 +36,8 @@ export default {
         closeUploads: true,
         /** 是否开启自动跨域 */
         autoCors: false,
-        cors: false
+        cors: false,
+        autoComplete: false
     },
     appendButsData: [
         {
