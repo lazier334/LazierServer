@@ -643,8 +643,6 @@
                 setFloatPage();
                 clsoeFloatPage();
                 this.moreButs = [];
-                // XXX 计划去除 cmds 模块，改用插件管理来代替
-                // this.getCmds();
                 this.getIndexData(() => {
                     this.handleData();
                 });
@@ -791,13 +789,6 @@
                         ]
                     });
                 });
-            },
-            // XXX 计划去除 cmds 模块，改用插件管理来代替
-            getCmds() {
-                this.warpAxios(axios.get('/system/cmds').then((response) => {
-                    this.cmds = response.data;
-                    this.handleCmds();
-                }), "获取命令列表失败", true)
             },
             runCmd(cmd) {
                 this.warpAxios(axios.get('/system/cmd?cmd=' + cmd).then((response) => {
