@@ -27,11 +27,11 @@ export default createIndexData(async function indexDataDemo(arr) {
                     urls: [
                         {
                             text: "打开",
-                            url: "/system/systemProxy?open=true&proxyServer=" + whistleProxyServer
+                            url: "/system/systemProxy?openApi=true&open=true&proxyServer=" + whistleProxyServer
                         },
                         {
                             text: "关闭",
-                            url: "/system/systemProxy"
+                            url: "/system/systemProxy?openApi=true"
                         }
                     ],
                 },
@@ -42,11 +42,11 @@ export default createIndexData(async function indexDataDemo(arr) {
                     urls: [
                         {
                             text: "打开",
-                            url: "/system/whistle?open=true"
+                            url: "/system/whistle?open=true&openApi=true"
                         },
                         {
                             text: "关闭",
-                            url: "/system/whistle"
+                            url: "/system/whistle?openApi=true"
                         },
                         {
                             text: "测试",
@@ -58,15 +58,15 @@ export default createIndexData(async function indexDataDemo(arr) {
                         },
                         {
                             text: "Rules-抓取文件",
-                            url: "# * resWrite://`D:/W2/${url.host}/` excludeFilter://localhost  excludeFilter://*.bing.com"
+                            url: "# * resWrite://`D:/W2/${reqHeaders.host}/` excludeFilter://localhost  excludeFilter://*.bing.com"
                         },
                         {
                             text: "Rules-静态代理单个接口",
-                            url: "# */ffb401aa-2170-4a10-b086-84f011fabbf6 file://D:\W2\ffb401aa-2170-4a10-b086-84f011fabbf6.原版.js"
+                            url: "# */s.js file://D:\W2\s.js"
                         },
                         {
                             text: "Rules-转发单个接口",
-                            url: "# */shared/984721902a/index.json https://`localhost:6001${url.pathname}`"
+                            url: "# */shared/984721902a/index.json https://`localhost:3001${reqHeaders.pathname}`"
                         }
                     ],
                 }

@@ -597,10 +597,12 @@
             openUrl(url) {
                 url = this.normalizeUrl(url);
                 if (this.copyLinkStatus) this.copyText(url);
-                else if (url.includes('openApi')) this.warpAxios(axios(url).then(res => {
-                    ElMessage.success('操作成功: ' + res.data.msg);
-                }), '打开链接失败', true);
-                else if (url.includes('openInIframe')) openFloatPage(url);
+                else if (url.includes('openApi')) {
+                    ElMessage.info('正在请求Api中...' + url);
+                    this.warpAxios(axios(url).then(res => {
+                        ElMessage.success('Api响应: ' + (res.data.msg || res.data || res));
+                    }), '打开链接失败', true);
+                } else if (url.includes('openInIframe')) openFloatPage(url);
                 else if (url.includes('openInNowWindow')) location.href = url;
                 else window.open(url);
             },
