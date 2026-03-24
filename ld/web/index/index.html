@@ -402,9 +402,9 @@
             copyLinkStatus: false,
             autoCompleteStatus: false,
             currentPage: 1,
-            pageSize: parseInt((new URLSearchParams(location.search)).get("pageSize")) || 10,
+            pageSize: parseInt((new URLSearchParams(location.search)).get("pageSize")) || 100,
             pageSizes: [10, 20, 30, 40, 100, 200, 300, 500, 1000, 3000, 5000, 10000],
-            title: "",  // 未使用，在顶部增加一行文字
+            title: "Tip: 使用系统打开的url可以通过uri参数 openApi访问接口, openInIframe页内打开, openInNowWindow当前页打开",
             loading: {},
             store: {
                 searchKeyword: "",
