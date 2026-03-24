@@ -4,12 +4,12 @@ import { pathToFileURL } from 'url';
 import defConfig from './configDef.ts';
 type ConfigType = typeof defConfig;
 /**
- * 设定外部配置数据位置，主要控制 banner.txt 和 config.ts 两个文件  
- * 在 config.ts 中可以继续配置这个路径属性 "ldDirName" ，配置后，
+ * 设定外部配置数据位置，主要控制 banner.txt 和 conf.ts 两个文件  
+ * 在 conf.ts 中可以继续配置这个路径属性 "ldDirName" ，配置后，
  * 在后续的调用中将会把数据写入配置的位置。
  * 但是默认的配置和banner固定为默认路径 "./ld/"
  */
-defConfig.ldConfigPath = path.join(defConfig.get__dirname(import.meta.url), '../../ld/config.ts');
+defConfig.ldConfigPath = path.join(defConfig.get__dirname(import.meta.url), '../../ld/conf.ts');
 const ldDirName = path.dirname(defConfig.ldConfigPath);
 if (!fs.existsSync(ldDirName)) {
     fs.mkdirSync(ldDirName);

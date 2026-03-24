@@ -433,7 +433,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             text: '编辑配置',
             tooltip: '编辑配置文件',
             debugMode: true,
-            fun: `this.openPage('/edit/index.html?filepath=config.ts')`
+            fun: `this.openPage('/edit/index.html?filepath=conf.ts')`
         },
         {
             update(self, config) {
@@ -477,7 +477,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     /** 插件目录列表 */
     pluginDirs: [] as string[],
     /** 外部配置路径, 改文件所在的 ld 目录也用于存放自定义插件 */
-    ldConfigPath: `{/ldDirName/}/config.ts`,
+    ldConfigPath: `{/ldDirName/}/conf.ts`,
     /** 数据路径 */
     dataPath: ldDirName,
     /** 加密时使用的key */

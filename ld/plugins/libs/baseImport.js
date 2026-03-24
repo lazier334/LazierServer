@@ -5,7 +5,7 @@ import { pathToFileURL } from 'url';
 
 /** @type {import('../../../src/libs/config.ts')} */
 const defConfigType = {};
-/** @type {import('../../config.ts')} */
+/** @type {import('../../conf.ts')} */
 const userConfigType = {};
 /** @type {typeof defConfigType.config & typeof userConfigType.default} */
 var config = {};
