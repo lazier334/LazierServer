@@ -1,7 +1,6 @@
 import Koa from 'koa';
 import https from 'https';
-import initKoa from './libs/initKoa.ts';
-import websocketServer from './libs/websocketServer.ts';
+import { initKoa, createWebSocketServer } from './libs/initKoa.ts';
 import { fs, path, config } from './libs/config.ts';
 import { plugins } from './libs/plugins.ts';
 
@@ -34,7 +33,7 @@ import { plugins } from './libs/plugins.ts';
             // 创建 HTTP 服务器
             app.listen(config['portHttp'], () => console.log(`http  服务器已运行，访问地址:    http://localhost:${config['portHttp']}`));
             // 创建 WebSocket 服务器
-            websocketServer(config);
+            createWebSocketServer(config);
         });
     }
 })()
