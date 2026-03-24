@@ -107,11 +107,6 @@ export default createKoaRouter(function koaRouterSystem(router) {
         ctx.body = result(fs.readFileSync(filepath, 'utf-8'));
     });
 
-    // 接口: 尝试补齐其他文件
-    router.all('系统路由 - 尝试补齐其他文件', '/system/fixUrls', async ctx => {
-        ctx.body = result(config.fixUrls)
-    });
-
     // 接口: 读取版本信息
     router.all('系统路由 - 读取版本信息', '/system/version', async (ctx) => {
         ctx.body = result(config.readVersion())

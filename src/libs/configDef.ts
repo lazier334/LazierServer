@@ -279,8 +279,6 @@ const config = {
     proxy: "http://localhost:7890",
     /** 自动补全的域名列表 */
     autoCompleteDomains: [],
-    /** 自动补齐的固定地址列表, 在访问新版首页的时候将会被触发补全机制 */
-    fixUrls: [],
     /** 不扫描全部文件夹时指定仅扫描web文件夹里的哪些文件夹 */
     domainList: [],
     /** 在扫描全部文件夹时额外扫描的web主文件夹列表, 相当于有多个 web 文件夹, 这不影响扫描全部的har文件 */
@@ -402,12 +400,6 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
                     throw err;
                 }
             }).toString()})()`
-        },
-        {
-            avatarText: 'fix',
-            text: '补齐文件',
-            tooltip: '补齐配置中指定的文件',
-            fun: `this.getFixUrls()`
         },
         {
             avatarText: 'serve',

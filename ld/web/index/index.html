@@ -560,14 +560,6 @@
                     console.error(error);
                 }).finally((res) => this.loading[msg] = false);
             },
-            getFixUrls() {
-                this.warpAxios(axios.get('/system/fixUrls').then(function (response) {
-                    ElMessage.success('需要补齐的接口数量为: ' + response.data.data.length)
-                    response.data.data.forEach(function (url) {
-                        axios.get(url)
-                    });
-                }), "获取资源列表失败", true)
-            },
             /**
              * 规范化 URL：
              * - 如果缺少协议，自动补全 `https://`
