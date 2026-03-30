@@ -1,7 +1,7 @@
 {
   "name": "lazierserver",
-  "version": "1.1.1(26021100)",
-  "description": "+ 增加打包系统\n= 优化提示信息, 更方便开发插件\n= 系统其他优化",
+  "version": "1.2.0(26033000)",
+  "description": "= 优化系统\n- 移除第三方插件 GlobalProxy\n= 系统其他优化",
   "homepage": "https://github.com/lazier334/LazierServer#readme",
   "bugs": {
     "url": "https://github.com/lazier334/LazierServer/issues"
