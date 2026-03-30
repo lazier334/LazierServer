@@ -19,7 +19,7 @@ else console.log('指定扫描文件夹列表', pushDir(domainList));
 export default createKoaRouter(function koaRouterScanWeb(router) {
     // 这个接口放到前面是因为优先读取文件，再读取系统的接口，顺序为： 插件API > 文件API > HarAPI > 系统API
     // 接口：全局，所有没有被拦截的都将跳到这里发送文件
-    router.all(new RegExp('/(.*)'), async (ctx, next) => {
+    router.all('全局接口: 扫描web资源', new RegExp('/(.*)'), async (ctx, next) => {
         let api = ctx.path;
         let domainDirs = {};
 

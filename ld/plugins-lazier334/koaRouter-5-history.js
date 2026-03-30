@@ -5,12 +5,12 @@ import { createKoaRouter } from './types/index.ts';
  */
 export default createKoaRouter(function koaRouterHistory(router) {
     // stack 支持vue的历史模式
-    router.all(/^\/stack\/.*$/, async (ctx, next) => {
+    router.all('接口分析 (支持vue的历史模式)', /^\/stack\/.*$/, async (ctx, next) => {
         ctx.url = '/stack/index.html';
         return await next();
     });
     // plugin-mgmt 支持vue的历史模式
-    router.all(/^\/plugin-mgmt\/.*$/, async (ctx, next) => {
+    router.all('插件管理 (支持vue的历史模式)', /^\/plugin-mgmt\/.*$/, async (ctx, next) => {
         ctx.url = '/plugin-mgmt/index.html';
         return await next();
     });

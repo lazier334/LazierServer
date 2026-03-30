@@ -21,13 +21,17 @@ const lc = {
  */
 export default createKoaRouter(function koaRouterSystem(router) {
     // 接口: 根目录重定向
-    router.all(['/', '/index'], ctx => {
+    router.all('接口: 根目录重定向', '/', ctx => {
+        const idnexPath = path.join(config.dataPath, 'web/index');
+        ctx.redirect('/index.html?dir=' + idnexPath);
+    });
+    router.all('接口: 根目录重定向', '/index', ctx => {
         const idnexPath = path.join(config.dataPath, 'web/index');
         ctx.redirect('/index.html?dir=' + idnexPath);
     });
 
     // 接口: 自动补全编辑页的文件匹配 /edit/vs/*
-    router.all(/^\/edit\/vs\/.*$/, async (ctx) => {
+    router.all('接口: 自动补全编辑页的文件匹配', /^\/edit\/vs\/.*$/, async (ctx) => {
         const filepath = path.join(config.tempDownDir, ctx.url);
         const url = 'https://unpkg.com/monaco-editor@0.33.0/min/vs' + ctx.url.substring(ctx.url.indexOf('/vs') + '/vs'.length);
         const fp = await downloadFileToPath(url, filepath);

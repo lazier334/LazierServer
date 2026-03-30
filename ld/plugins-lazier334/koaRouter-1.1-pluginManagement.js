@@ -62,8 +62,7 @@ export default createKoaRouter(function koaRouterPluginManagement(router) {
         ctx.body = result(re, msg);
     });
 
-    // router.all('管理路由 - 获取全部插件', '/plugin-mgmt/api/pluginList', async (ctx, next) => {
-    router.all('/plugin-mgmt/api/pluginList', async (ctx, next) => {
+    router.all('管理路由 - 获取全部插件', '/plugin-mgmt/api/pluginList', async (ctx, next) => {
         let stages = Object.keys(config.pluginStages);
         let pluginPath = [...config.excludePlugins, ...(await plugins.getAllPlugin())];
         ctx.body = result({ stages, pluginPath, excludePlugins: config.excludePlugins });

@@ -82,7 +82,7 @@ class Task {
         if (this.finish) {
             throw new Error('提交失败：任务已完成');
         }
-        if (this.runTime + this.timeout  < Date.now()) {
+        if (this.runTime + this.timeout < Date.now()) {
             this.runTime = 0;
             throw new Error('提交失败：任务已超时');
         }
@@ -90,7 +90,7 @@ class Task {
         this.finish = true;
         return this;
     }
-    
+
     /**
      * 检查任务是否空闲
      * @returns {boolean}
@@ -150,8 +150,7 @@ class Server {
  */
 export default createKoaRouter(function koaRouterRpc(router) {
 
-    // 服务器: 注册 rpc 
-    router.all(lc.apiBaseName + '/register', async (ctx, next) => {
+    router.all('服务器: 注册 rpc', lc.apiBaseName + '/register', async (ctx, next) => {
         // 拿到数据内容
         const params = mergeParams(ctx);
         const host = params.host;
@@ -165,8 +164,7 @@ export default createKoaRouter(function koaRouterRpc(router) {
         }
     });
 
-    // 服务器: 提交任务 
-    router.all(lc.apiBaseName + '/submit', async (ctx, next) => {
+    router.all('服务器: 提交任务', lc.apiBaseName + '/submit', async (ctx, next) => {
         // 拿到数据内容
         const params = mergeParams(ctx);
         try {
@@ -180,8 +178,7 @@ export default createKoaRouter(function koaRouterRpc(router) {
         }
     });
 
-    // 客户端: 添加任务 
-    router.all(lc.apiBaseName + '/addTask', async (ctx, next) => {
+    router.all('客户端: 添加任务', lc.apiBaseName + '/addTask', async (ctx, next) => {
         const host = mergeParams(ctx).host;
         if (!Array.isArray(storage.Rpcs.tasks[host])) storage.Rpcs.tasks[host] = [];
         const taskList = storage.Rpcs.tasks[host];
@@ -192,8 +189,7 @@ export default createKoaRouter(function koaRouterRpc(router) {
         scanTask(host);
     });
 
-    // 客户端: 等待任务完成 
-    router.all(lc.apiBaseName + '/waitTask', async (ctx, next) => {
+    router.all('客户端: 等待任务完成', lc.apiBaseName + '/waitTask', async (ctx, next) => {
         const data = mergeParams(ctx);
         const host = data.host;
         const taskId = data.taskId;
@@ -205,8 +201,7 @@ export default createKoaRouter(function koaRouterRpc(router) {
         ctx.body = result(task);
     });
 
-    // 获取所有 rpc 列表
-    router.all(lc.apiBaseName + '/info', async (ctx, next) => {
+    router.all('获取所有 rpc 列表', lc.apiBaseName + '/info', async (ctx, next) => {
         ctx.body = result(storage.Rpcs);
     });
 
@@ -229,7 +224,7 @@ function scanTask(hosts) {
 
             for (const task of tasks) {
                 // 检查是否存在服务器
-                if(!sendTaskToServer(servers,task)){
+                if (!sendTaskToServer(servers, task)) {
                     // 已无服务器可运行
                     break;
                 }
@@ -246,9 +241,9 @@ function scanTask(hosts) {
  * @param {Task} task 任务
  * @returns {boolean} 是否成功发送
  */
-function sendTaskToServer(servers, task){
+function sendTaskToServer(servers, task) {
     for (const server of servers) {
-        if(server.isIdle()) {
+        if (server.isIdle()) {
             // 设置服务器，并将任务数据发送给服务器进行处理
             server.getTask();
             task.getTask();
@@ -265,7 +260,7 @@ function sendTaskToServer(servers, task){
  * @returns {object} 合并后的参数
  */
 function mergeParams(ctx) {
-    return { ...(ctx.request.query||{}), ...(ctx.request.body||{}) }
+    return { ...(ctx.request.query || {}), ...(ctx.request.body || {}) }
 }
 
 /**
