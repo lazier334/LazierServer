@@ -60,45 +60,6 @@ ${exportFuns.join("\n")}
 function safe(fun){ try { fun() } catch (e) { } }
 })({})`.replaceAll(this.objNameTag, objName)
     },
-    /**
-     * 基于 toString() 克隆函数
-     * @param {Function|String} fn 待克隆的函数
-     * @returns {Function} 克隆后的新函数
-     */
-    createFunction(fn) {
-        if (typeof fn === 'function') {
-            fn = new Function(`return ${fn.toString()}`)();
-        } else if (typeof fn === 'string') {
-            fn = new Function(`return ${fn}`)();
-        }
-        return fn;
-    },
-    /**
-     * 添加函数集合，支持冲突提示以及运行 obj.run
-     * @param {{[key: string]: Function | object}} obj 要添加的函数集合
-     * @returns {this} 自身
-     */
-    addFunctions(obj) {
-        for (const k in obj) {
-            if (typeof this[k] == 'function') {
-                throw new Error(k + '插件函数已存在!');
-            }
-            let fun = obj[k];
-            if (typeof fun?.run == 'function') {
-                fun = fun.run(obj, this);
-            }
-            this[k] = fun;
-        }
-        return this
-    },
-    /**
-     * 统一字符串的换行符格式
-     * @param {string} str 要格式化的字符串
-     * @returns {string} 格式化后的字符串
-     */
-    formattedLineBreaks(str) {
-        return str.replace(/\r\n|\r|\n/g, '\n')
-    }
 };
 hostDef.excludeKeys = Object.keys(hostDef);
 
