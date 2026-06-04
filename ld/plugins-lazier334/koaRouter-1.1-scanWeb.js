@@ -95,10 +95,7 @@ export default createKoaRouter(function koaRouterScanWeb(router) {
     return router
 })
 
-/** 
- * 尝试使用json类型返回没有后缀的文件数据  
- * 会把 sendOptions 对象挂载到 ctx 上面
- * 
+/**
  * @typedef {Object} SendFileType 可重写内容变更发送内容
  * @property {string} [sendFileFromPath] - 发送的文件在磁盘上的完整路径
  * @property {Object} [sendOptions] - 发送文件时的配置对象, **可重写**内容变更发送内容
@@ -111,9 +108,12 @@ export default createKoaRouter(function koaRouterScanWeb(router) {
  * @property {(error?: any) => Promise<void>} sendOptions.sendAfter - 使用 send 发送文件之后的处理函数
  * @property {() => Promise<void>} sendOptions.send - 使用 send 发送的代理函数
  */
+/** 
+ * 尝试使用json类型返回没有后缀的文件数据  
+ * 会把 sendOptions 对象挂载到 ctx 上面
+ */
 async function sendFile(ctx, filepath, opts, next) {
-    let fp = path.join(opts.root, filepath);
-    ctx.sendFileFromPath = fp;
+    let sendFileFromPath = path.join(opts.root, filepath);
 
     const sendOptions = { ctx, filename: filepath, opts, editTag: '.edit', newFilepath: null };
     const sends = (await plugins('send')).data;
@@ -173,8 +173,7 @@ async function sendFile(ctx, filepath, opts, next) {
     };
     let result;
     try {
-        // 已经找到文件的情况下，置空 ctx.body 字段，避免因为他的优先级从而优先使用 scanHar 的数据
-        ctx.body = undefined;
+        ctx.sendFileFromPath = sendFileFromPath;
         ctx.sendOptions = sendOptions;
         if (typeof next == 'function') await next();
         else await sendOptions.sendBefore();

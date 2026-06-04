@@ -19,7 +19,7 @@ const lc = {
 /**
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  */
-export default createKoaRouter(function koaRouterSystem(router) {
+export default createKoaRouter(function koaRouterSystem(router, T) {
     // 接口: 根目录重定向
     router.all('接口: 根目录重定向', '/', ctx => {
         const idnexPath = path.join(config.dataPath, 'web/index');
@@ -252,6 +252,37 @@ export default createKoaRouter(function koaRouterSystem(router) {
             }
             runCmd(command).catch(err => console.error('打开文件失败', err));
         }
+    });
+
+    router.all('系统路由 - 版权主页面文件处理', '/system/copyright', async (ctx, next) => {
+        /** @type {ctx & T} */
+        const ectx = ctx;
+        if (!ectx.sendFileFromPath) return;
+        ctx.type = 'text/html; charset=utf-8';
+        ctx.body = fs.readFileSync(ectx.sendFileFromPath, 'utf8').replaceAll('YYYY', new Date().getFullYear())
+            .replaceAll('公司名称', config.copyright.copyright ?? config.copyright.companyName)
+            .replaceAll('备案号', config.copyright.icp);
+        if (config.copyright.icp === '') {
+            ctx.body = ctx.body.replaceAll('<a href="https://beian.miit.gov.cn/" target="_blank"></a> |', '')
+        }
+    });
+    router.all('系统路由 - 版权联系方式文件处理', '/system/contact', async (ctx, next) => {
+        /** @type {ctx & T} */
+        const ectx = ctx;
+        if (!ectx.sendFileFromPath) return;
+        ctx.body = fs.readFileSync(ectx.sendFileFromPath, 'utf8').replaceAll('lazier334@lazier334.com', config.copyright.contact)
+    });
+    router.all('系统路由 - 版权隐私政策文件处理', '/system/privacy', async (ctx, next) => {
+        /** @type {ctx & T} */
+        const ectx = ctx;
+        if (!ectx.sendFileFromPath) return;
+        ctx.body = fs.readFileSync(ectx.sendFileFromPath, 'utf8').replaceAll('隐私政策', config.copyright.privacy)
+    });
+    router.all('系统路由 - 版权使用条款文件处理', '/system/terms', async (ctx, next) => {
+        /** @type {ctx & T} */
+        const ectx = ctx;
+        if (!ectx.sendFileFromPath) return;
+        ctx.body = fs.readFileSync(ectx.sendFileFromPath, 'utf8').replaceAll('使用条款', config.copyright.terms)
     });
 
     return router

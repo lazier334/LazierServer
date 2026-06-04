@@ -65,17 +65,19 @@ function selectEntry(ctx, entries) {
 }
 
 /**
+ * @typedef {Object} SendEntryType 可用于查询细节或者直接重写ctx.body
+ * @property {ENTRYTEMP} [entry] - entry对象
+ * @property {string|Buffer<ArrayBuffer>} [entryResponse] - 要响应的entry数据
+ */
+/**
  * 从 entries 列表选择一条数据并发送
  * @param {import('koa').Context} ctx
  * @param {[ENTRYTEMP]} entries 
- * 
- * @typedef {Object} SendEntryType 可用于查询细节或者直接重写ctx.body
- * @property {ENTRYTEMP} [entry] - entry对象
  */
 async function sendEntries(ctx, entries, next) {
     let entry = selectEntry(ctx, entries);
     let content = entry.response.content;
-    let body = content.text;
+    let entryResponse = content.text;
     let headers = entry.response.headers;
     try {
         if (entry.filepath) {
@@ -88,13 +90,20 @@ async function sendEntries(ctx, entries, next) {
     }
     try {
         if (content.encoding) {
-            body = Buffer.from(body, content.encoding)
+            entryResponse = Buffer.from(entryResponse, content.encoding)
         }
-        ctx.body = handlerHtmlBodyData(ctx, body)
+        entryResponse = handlerHtmlBodyData(ctx, entryResponse)
     } catch (err) {
         console.warn('Har设置响应内容失败', err)
     }
-    return await next();
+    ctx.entry = entry;
+    ctx.entryResponse = entryResponse;
+    let re = await next();
+    // 如果还没有被响应，那么就使用 ctx.entryResponse 的数据进行响应，其他路由可以修改 ctx.entryResponse 
+    if (ctx.body === undefined && !ctx.res.headersSent) {
+        re = ctx.body = ctx.entryResponse;
+    }
+    return re;
 }
 
 /**
