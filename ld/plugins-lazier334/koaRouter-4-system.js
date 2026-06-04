@@ -4,7 +4,7 @@ import { restartSystem } from './libs/sys-restart.js';
 import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseImport.js';
 import { runCmd, runCmdByExec } from './utils/util-cmd.js';
 
-const { plugins } = await getPluginsModule();
+const { plugins, getAllPlugin } = await getPluginsModule();
 const utilsModule = await getUtilsModule();
 const { authUser, downloadFileToPath, readKoaRouters } = utilsModule;
 const lc = {
@@ -180,6 +180,12 @@ export default createKoaRouter(function koaRouterSystem(router) {
         Object.entries(config.additionalRouter).forEach(([k, v]) => {
             re = re.concat(readRouterLayers(v.stack, '额外路由 - ' + k))
         });
+        return ctx.body = result(re);
+    });
+    // 接口: 获取路由插件的顺序
+    router.all('系统路由 - 获取路由插件的顺序', '/system/getRouterSort', async (ctx) => {
+        // 读取所有的路由插件的顺序
+        let re = await getAllPlugin('koaRouter');
         return ctx.body = result(re);
     });
 

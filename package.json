@@ -14,8 +14,8 @@
   "author": "lazier334",
   "type": "module",
   "scripts": {
-    "start": "node src/app.ts",
-    "dev": "nodemon src/app.ts",
+    "start": "npm i && node src/app.ts",
+    "dev": "node src/app.ts",
     "buildjs": "node ld/plugins/libs/genProxy.js",
     "build": "node ld/plugins/libs/buildAll.js"
   },
@@ -49,7 +49,6 @@
     "@types/koa__cors": "^5.0.1",
     "@types/koa__router": "^12.0.5",
     "@types/koa-send": "^4.1.6",
-    "@types/ws": "^8.18.1",
-    "nodemon": "^3.1.14"
+    "@types/ws": "^8.18.1"
   }
 }

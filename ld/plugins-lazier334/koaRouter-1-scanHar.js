@@ -41,7 +41,7 @@ export default createKoaRouter(function koaRouterScanHar(router) {
         // 文件未找到，放行到下一个路由
         if (entries) {
             // 发送数据
-            const re = sendEntries(ctx, entries);
+            const re = await sendEntries(ctx, entries, next);
             if (re) return re;
         }
         return await next();
@@ -68,8 +68,11 @@ function selectEntry(ctx, entries) {
  * 从 entries 列表选择一条数据并发送
  * @param {import('koa').Context} ctx
  * @param {[ENTRYTEMP]} entries 
+ * 
+ * @typedef {Object} SendEntryType 可用于查询细节或者直接重写ctx.body
+ * @property {ENTRYTEMP} [entry] - entry对象
  */
-function sendEntries(ctx, entries) {
+async function sendEntries(ctx, entries, next) {
     let entry = selectEntry(ctx, entries);
     let content = entry.response.content;
     let body = content.text;
@@ -91,7 +94,7 @@ function sendEntries(ctx, entries) {
     } catch (err) {
         console.warn('Har设置响应内容失败', err)
     }
-    return body;
+    return await next();
 }
 
 /**

@@ -85,7 +85,7 @@ export default createKoaRouter(function koaRouterScanWeb(router) {
                 return await sendFile(ctx, path.basename(filepath), {
                     root: path.dirname(filepath),
                     hidden: true
-                });
+                }, next);
             }
         }
         // 文件未找到，放行到下一个路由
@@ -95,8 +95,21 @@ export default createKoaRouter(function koaRouterScanWeb(router) {
     return router
 })
 
-/** 尝试使用json类型返回没有后缀的文件数据 */
-async function sendFile(ctx, filepath, opts) {
+/** 
+ * 尝试使用json类型返回没有后缀的文件数据  
+ * 会把 sendOptions 对象挂载到 ctx 上面
+ * 
+ * @typedef {Object} SendFileType 可重写内容变更发送内容
+ * @property {string} [sendFileFromPath] - 发送的文件在磁盘上的完整路径
+ * @property {Object} [sendOptions] - 发送文件时的配置对象, **可重写**内容变更发送内容
+ * @property {import('koa').DefaultContext} sendOptions.ctx - Koa 上下文
+ * @property {string} sendOptions.filename - 要发送的文件名
+ * @property {import('koa-send').SendOptions} sendOptions.opts - koa-send 的配置选项
+ * @property {() => Promise<void>} sendOptions.sendBefore - 使用 send 发送文件之前的处理函数
+ * @property {(error?: any) => Promise<void>} sendOptions.sendAfter - 使用 send 发送文件之后的处理函数
+ * @property {() => Promise<void>} sendOptions.send - 使用 send 发送的代理函数
+ */
+async function sendFile(ctx, filepath, opts, next) {
     let fp = path.join(opts.root, filepath);
     ctx.sendFileFromPath = fp;
 
@@ -114,32 +127,54 @@ async function sendFile(ctx, filepath, opts) {
             return;
         } catch (err) { }
     }
-    if (isHandlerHtmlBodyData(ctx)) {
-        const bodyFP = path.join(sendOptions.opts.root, sendOptions.filename);
-        // 修改读取的文件名
-        sendOptions.filename = sendOptions.filename + editTag + path.extname(sendOptions.filename);
-        const newBodyFP = path.join(sendOptions.opts.root, sendOptions.filename);
-        newFilepath = newBodyFP;
-        if (!fs.existsSync(newBodyFP)) {
-            // 不存在修改后的文件则进行创建
-            const body = fs.readFileSync(bodyFP, 'utf8');
-            const newBody = handlerHtmlBodyData(ctx, body);
-            // 创建文件
-            fs.writeFileSync(newBodyFP, newBody);
-        }
-    }
-    const result = await send(sendOptions.ctx, sendOptions.filename, sendOptions.opts);
-    if (config.switch.deleteHandlerHtmlBodyDataFile && newFilepath) {
-        // 请求流完成后删除生成的 .edit 文件(如果是文件夹也不删除)，用once避免多次触发
-        ctx.res.once('finish', async () => {
-            try {
-                if (fs.existsSync(newFilepath) && fs.statSync(newFilepath).isFile()) fs.unlinkSync(newFilepath);
-            } catch (deleteErr) {
-                // 处理删除失败的情况（比如文件已被删除、权限不足）
-                console.error(`删除 .edit 文件失败：${newFilepath}`, deleteErr.message);
-                console.error(deleteErr.stack);
+    /** 使用 send 发送文件前 */
+    sendOptions.sendBefore = async () => {
+        if (isHandlerHtmlBodyData(ctx)) {
+            const bodyFP = path.join(sendOptions.opts.root, sendOptions.filename);
+            // 修改读取的文件名
+            sendOptions.filename = sendOptions.filename + editTag + path.extname(sendOptions.filename);
+            const newBodyFP = path.join(sendOptions.opts.root, sendOptions.filename);
+            newFilepath = newBodyFP;
+            if (!fs.existsSync(newBodyFP)) {
+                // 不存在修改后的文件则进行创建
+                const body = fs.readFileSync(bodyFP, 'utf8');
+                const newBody = handlerHtmlBodyData(ctx, body);
+                // 创建文件
+                fs.writeFileSync(newBodyFP, newBody);
             }
-        });
+        }
+    };
+    /** 使用 send 发送文件后 */
+    sendOptions.sendAfter = async (error) => {
+        try {
+            if (error) console.log('sendAfter 错误信息:', error);
+            if (fs.existsSync(newFilepath) && fs.statSync(newFilepath).isFile()) fs.unlinkSync(newFilepath);
+        } catch (deleteErr) {
+            // 处理删除失败的情况（比如文件已被删除、权限不足、文件被锁定）
+            console.error(`删除 .edit 文件失败：${newFilepath}`, deleteErr.message);
+            console.error(deleteErr.stack);
+        }
+    };
+    /** 使用 send 发送的代理函数 */
+    sendOptions.send = async () => {
+        let re = await send(sendOptions.ctx, sendOptions.filename, sendOptions.opts)
+        if (config.switch.deleteHandlerHtmlBodyDataFile && newFilepath) {
+            // 请求流完成后删除生成的 .edit 文件(如果是文件夹也不删除)，用once避免多次触发
+            ctx.res.once('finish', async () => {
+                await sendOptions.sendAfter()
+            });
+        }
+        return re;
+    };
+    let result;
+    try {
+        ctx.sendOptions = sendOptions;
+        if (typeof next == 'function') await next();
+        else await sendOptions.sendBefore();
+        result = await sendOptions.send();
+    } catch (err) {
+        await sendOptions.sendAfter(err);
+        throw err;
     }
     return result;
 }
