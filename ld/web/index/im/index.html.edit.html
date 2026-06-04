@@ -1,0 +1,2959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>im</title>
+    <script src="/proxy.js"></script><script type="module">
+        import { Workbox } from '/res/workbox/releases/7.3.0/workbox-window.prod.mjs';
+
+        if ('serviceWorker' in navigator) {
+            const wb = new Workbox('/sw.js');
+
+            wb.register().then(registration => console.log('SW 注册成功'))
+                .catch(err => console.error('SW 注册失败:', err));;
+        }
+    </script>
+    <script>
+        // 清除缓存的函数
+        function clearCaches() {
+            return (async () => {
+                try {
+                    // 1. 取消注册所有 Service Worker
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                        console.log('Service Worker 已取消注册:', registration.scope);
+                    }
+                    // 2. 清理所有缓存
+                    const cacheNames = await caches.keys();
+                    for (const cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        console.log(`已删除缓存: ${cacheName}`);
+                    }
+                    console.log('SW清理成功');
+                } catch (err) {
+                    console.error('SW清理失败:', err);
+                    throw err;
+                }
+            })();
+        }
+    </script>
+    <!-- 引入Vue3 -->
+    <script src="../res/vue.global.prod.js"></script>
+    <!-- 引入element-plus样式文件 -->
+    <link rel="stylesheet" href="../res/index.css" />
+    <!-- 引入element-plus组件库 -->
+    <script src="../res/index.full.js"></script>
+    <!-- 引入axios -->
+    <script src="../res/axios.min.js"></script>
+    <!-- 引入多语言 -->
+    <script src="./langs.js"></script>
+    <!-- xxhash -->
+    <script src="res/xxhash-wasm.js"></script>
+    <!-- tus -->
+    <script src="res/tus.min.js"></script>
+    <!-- CryptoJs -->
+    <script src="res/crypto-js.min.js"></script>
+    <!-- marked -->
+    <script src="../res/marked.min.js"></script>
+    <!-- 其他模块需要在加载 monaco-editor 之前进行加载，否则可能会导致无法正常加载 -->
+    <!-- monaco-editor -->
+    <script src="https://unpkg.com/monaco-editor/min/vs/loader.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/monaco-editor/min/vs/editor/editor.main.css">
+    <!-- monaco-editor 和 pythen(pyodide) 都从第三方引入 -->
+</head>
+
+<body>
+    <div id="app">
+        <!-- 隐藏内容 -->
+        <el-container v-if="!nothidePage.left && !nothidePage.right" class="content">
+            <div class="center" style="width: 100%; color: cornflowerblue;">
+                <el-text type="primary" :class="nothidePage.bottom ? 'no-concise' : 'concise'"
+                    @click="nothidePage.bottom = !nothidePage.bottom">
+                    {{ new Date(currentTime).toLocaleString() }}
+                </el-text>
+            </div>
+        </el-container>
+
+        <!-- 左侧内容 -->
+        <el-container v-if="nothidePage.left" class="left-container">
+            <div class="top-section">
+                <el-header>
+                    <el-input v-model="searchQuery" :placeholder="i18n('搜索...')" class="input-with-select"
+                        @input="handleSearchInput">
+                        <template #prepend>
+                            <el-avatar v-if="user.showAvatar && typeof user.showAvatar == 'string'"
+                                :src="user.showAvatar" @click="login.loginPageVisible=true"></el-avatar>
+
+                            <el-avatar v-else @click="login.loginPageVisible=true">
+                                {{user.username}}
+                            </el-avatar>
+                        </template>
+                    </el-input>
+                </el-header>
+                <div>
+                    <div class="list-buts">
+                        <el-switch v-model="isShowFriendList" @change="handleSwitchChange('manual')" inline-prompt
+                            :active-text="i18n('用户列表')" :inactive-text="i18n('话题列表')"
+                            style="--el-switch-on-color: #409eff; --el-switch-off-color: #409eff">
+                        </el-switch>
+                    </div>
+                    <el-main>
+                        <el-scrollbar v-if="isShowFriendList">
+                            <div>
+                                <div v-for="item in showOnlineListData" :key="item.userId">
+                                    <div class="connect-item single-line-text vertical-center"
+                                        :class="{ 'is-selected': onlineSelect.includes(item.userId) }"
+                                        @click="handleOnlineSelect(item.userId)">
+                                        <el-checkbox class="checkbox-but"
+                                            :model-value="onlineSelect.includes(item.userId)"
+                                            @click="selectAndChangMode(item.userId, 'online', $event)"></el-checkbox>
+                                        <el-avatar :src="item.showAvatar" @click="login.loginPageVisible=true"
+                                            size="small"
+                                            v-if="item.showAvatar && typeof item.showAvatar == 'string'"></el-avatar>
+                                        <el-avatar v-else @click="login.loginPageVisible=true" size="small">
+                                            {{item.username}}
+                                        </el-avatar>
+                                        <el-text class="single-line-text">{{ item.username }}</el-text>
+                                    </div>
+                                </div>
+                            </div>
+                        </el-scrollbar>
+                        <el-scrollbar v-else>
+                            <div v-for="item in showMsgsListData" :key="item.topicId">
+                                <div class="connect-item single-line-text"
+                                    :class="{ 'is-selected': msgsSelect.includes(item.topicId) }"
+                                    @click="handleMsgsSelect(item)">
+                                    <div class="message-content">
+                                        <el-checkbox class="checkbox-but"
+                                            :model-value="msgsSelect.includes(item.topicId)"
+                                            @click="selectAndChangMode(item.topicId, 'msgs', $event)"></el-checkbox>
+                                        <el-text class="single-line-text">{{ item.name }}</el-text>
+                                    </div>
+                                    <div class="message-container">
+                                        <el-text class="message-content" style="color: #999;">{{ item.lastMsg.content
+                                            }}</el-text>
+                                        <el-text class="message-time">{{
+                                            new Date(item?.lastMsg?.time || 0).toLocaleTimeString().substring(0,5)
+                                            }}</el-text>
+                                    </div>
+                                </div>
+                            </div>
+                        </el-scrollbar>
+                    </el-main>
+                </div>
+            </div>
+        </el-container>
+
+        <!-- 右侧内容-消息页 -->
+        <el-container v-if="nothidePage.right && rightPage.now == rightPage.map.msgs" class="right-container">
+            <!-- <div class="msg-head top" :style="`width: ${tableWidth}px;z-index:2;background-color: #fff;`">
+                <div class="msg-head-title">{{selectTopic.name}}</div>
+            </div> -->
+            <div class="header header1">
+                <div class="msg-head-title msg-head-title1">
+                    <span :class="refreshMsgsTag?'refreshMsgsTag':'re-refreshMsgsTag'" @click="handleRefreshMsgs(this)"
+                        :title="i18n('刷新')">↻</span>
+                    {{selectTopic.name}}
+                    <el-text :title="i18n('总人数')">({{selectTopic.userTotal}})</el-text>
+                </div>
+                <!-- 右侧按钮 -->
+                <div class="header-right1">
+                    <el-text type="primary" @click="openTopicOptionsPage(selectTopic)">...</el-text>
+                </div>
+            </div>
+            <div class="auto-height">
+                <!-- 因为虚拟化表格有高度塌陷问题，无法正常使用，所以使用传统表格，后续可以考虑自定义虚拟化列表 -->
+                <div v-if="true" class="table-container">
+                    <el-table ref="tableRef" :data="messages" style="width: 100%" :height="tableHeight">
+                        <!-- 自定义列: 消息内容 -->
+                        <el-table-column>
+                            <template #default="{ row: msg, $index: rowIndex }">
+                                <div class="msg-container" @mouseover="hoveredRow = rowIndex"
+                                    @mouseleave="hoveredRow = null">
+                                    <div class="msg" :class="msg.userId === user.userId? 'myMsg myMsgBG' : ''">
+
+                                        <div class="msg-content">
+                                            <!-- 源码 -->
+                                            <div v-if="msg.id != editMsgId">
+                                                <pre>{{ msg.content }}</pre>
+                                            </div>
+
+                                            <!-- 编辑 -->
+                                            <div v-else>
+                                                <el-input v-model="msg.content" type="textarea" placeholder=""
+                                                    :rows="20<msg.content.split('\n').length ? 20 : (msg.content.split('\n').length < 5 ? 5 : msg.content.split('\n').length)" />
+                                            </div>
+
+                                            <!-- 预览 -->
+                                            <div v-if="messagesPlus?.[msg.id]?.view == 'render'" class="msg-render">
+                                                <div v-if="msg.type == 'js' || msg.type == 'py'">
+                                                    <iframe frameborder="0" class="msg-preview" src="about:blank"
+                                                        @load="runMsgInIframe(msg, $event.target)"></iframe>
+                                                </div>
+                                                <div v-else-if="msg.type == 'url'">
+                                                    <iframe frameborder="0" class="msg-preview"
+                                                        :src="msg.content"></iframe>
+                                                </div>
+                                                <div v-else-if="msg.type == 'image'">
+                                                    <el-image :src="fileUrl(msg.content)"
+                                                        :preview-src-list="previewTopicList" fit="contain"
+                                                        :initial-index="getPreviewTopicListIndex(msg.content)"
+                                                        :preview-teleported="true" class="msg-preview preview-image">
+                                                        <template #error>
+                                                            <!-- 自定义加载中/加载失败的占位内容（可选） -->
+                                                            <div slot="error" class="image-error-slot">
+                                                                {{fileUrl(url)}}
+                                                            </div>
+                                                        </template>
+                                                    </el-image>
+                                                </div>
+                                                <div v-else-if="msg.type == 'md' || msg.type == 'markdown'">
+                                                    <div v-html="renderedMarkdownByMsg(msg)" class="msg-preview"></div>
+                                                </div>
+                                                <div v-else>
+                                                    <pre>{{ msg.content }}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="msg-buts">
+                                            <el-button v-if="msg.senderror !== undefined" size="small">
+                                                {{ msg.senderror === false ? ' 〇' : 'X' }} </el-button>
+
+                                            <template
+                                                v-for="(but, index) in (msg.userId === user.userId ? msgButsMe : msgButsUser)">
+                                                <el-button :key="index"
+                                                    v-if="typeof but?.visible == 'function' ? but.visible(msg) : true"
+                                                    class="copy-button" size="small" @click="but.click(msg)"
+                                                    :style="but.style||''" :title="but.title(msg)">
+                                                    {{ typeof but.getBody == "function" ? (but.getBody(msg)
+                                                    ??
+                                                    but.title(msg)) : but.title(msg)}}
+                                                </el-button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+
+            <div class="bottom-section center" style="padding-top: 10px;">
+                <div class="inmsg-container">
+                    <el-button v-if="currentRows < currentRowsFull"
+                        @click="currentRows < currentRowsFull ? currentRows = currentRowsFull : ''" round
+                        style="margin-right:10px;">
+                        <span class="flip-vertical">⌵</span></el-button>
+                    <div class="inmsg-input">
+                        <div>
+                            <el-input v-show="!useEditor" v-model="inmsg" class="no-resize"
+                                :autosize="{ minRows: 1, maxRows: 20 }" autosize ref="inputRef" @input="checkRows"
+                                type="textarea" :placeholder="i18n('输入消息...')"></el-input>
+                            <div v-show="useEditor" id="editor-container" class="cancelCenter">
+                                <div ref="monacoEditor" class="monaco-editor-replacement"
+                                    :style="{ height: editorHeight + 'px', width: '99%' }">
+                                    <!-- 这里只要宽度不是100%就没问题 -->
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="image-container">
+                                <!-- 单张图片预览 -->
+                                <el-image v-for="(url, index) in uploadedFiles" :key="index" :src="fileUrl(url)"
+                                    :preview-src-list="previewList" :initial-index="index" fit="contain"
+                                    :preview-teleported="true" class="min-img preview-image">
+                                    <template #error>
+                                        <!-- 自定义加载中/加载失败的占位内容（可选） -->
+                                        <div slot="error" class="image-error-slot">
+                                            {{fileUrl(url)}}
+                                        </div>
+                                    </template>
+                                </el-image>
+                                <el-button v-if="0 < uploadedFiles.length" type="danger" size="small"
+                                    @click="clearUploadedFiles">{{i18n('清除')}}</el-button>
+                                <el-button v-if="0 < uploadedFiles.length" type="primary" size="small"
+                                    @click="sendFiles">{{i18n('单独发送')}}</el-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="currentRows < currentRowsFull" class="inmsg-sendbtn" style="margin-left:10px;">
+                        <el-button round type="primary" @click="sendMsgToServer()">{{i18n('发送')}}</el-button>
+                    </div>
+                </div>
+                <div v-if="currentRowsFull <= currentRows" class="inmsg-btns">
+                    <div>
+                        <el-button round @click="currentRows=1">⌵</el-button>
+                    </div>
+                    <div>
+                        <el-select v-model="msgTemplate.type" filterable allow-create default-first-option
+                            :reserve-keyword="false" placeholder="Choose tags for your article" style="width: 70px">
+                            <el-option-group :label="i18n('消息类型')">
+                                <el-option v-for="item in msgTemplate.typeList" :key="item.value" :label="item.label"
+                                    :value="item.value" />
+                            </el-option-group>
+                        </el-select>
+                    </div>
+                    <div>
+                        <el-button type="primary" round @click="selectFile">
+                            {{fileName || i18n('上传文件')}}</el-button>
+                        <input type="file" multiple id="fileInput" class="hide" @change="handleFileChange" />
+                        <div>
+                            <el-button v-if="0 < files.length" type="success" size="small"
+                                @click="uploadFiles">{{i18n('上传')}}</el-button>
+                            <el-button v-if="0 < files.length" type="danger" size="small"
+                                @click="clearFiles">{{i18n('清除')}}</el-button>
+                        </div>
+                    </div>
+                    <div>
+                        <el-button type="primary" round @click="sendMsgToServer()">{{i18n('发送')}}</el-button>
+                    </div>
+                    <div>
+                        <el-button type="primary" round @click="toggleNativeFullscreen()">{{i18n('全屏')}}</el-button>
+                    </div>
+                    <div>
+                        <el-button type="primary" round @click="useEditor=!useEditor">{{i18n('切换输入框')}}</el-button>
+                    </div>
+                </div>
+            </div>
+        </el-container>
+
+        <!-- 右侧内容-信息页 -->
+        <el-container v-if="nothidePage.right && rightPage.now == rightPage.map.showUser" class="right-container">
+            <div class="header">
+                <div class="msg-head-title">
+                    {{showUser?.userId == user.userId ? i18n('个人信息') : ( (user.superAdmin || user.isAdmin) ?
+                    i18n('管理用户信息') : i18n('用户信息'))}}
+                </div>
+            </div>
+            <!-- 个人信息 -->
+            <div v-if="showUser?.userId == user.userId" class="user-info-card">
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户ID') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ showUser?.userId }}</el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户头像地址') + ': '}}</strong></el-col>
+                    <el-col :span="14">
+                        <el-input v-model="showUser.avatar" :placeholder="showUser.avatar" clearable
+                            @change="handleEditAvatarChange"></el-input>
+                    </el-col>
+                    <el-col :span="2" style="text-align: center;">
+                        <el-avatar v-if="showUser.showAvatar && typeof showUser.showAvatar == 'string'"
+                            :src="showUser.showAvatar"></el-avatar>
+                        <el-avatar v-else>...</el-avatar>
+                    </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户名') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        <el-input v-model="showUser.username" :placeholder="showUser.username" clearable></el-input>
+                    </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户状态') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        <el-input v-model="showUser.status" :placeholder="showUser.status" clearable></el-input>
+                    </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('最后更新时间') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        {{ new Date(showUser?.lastUpdateTime ).toLocaleString() }}
+                    </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('是否管理员') + ': '}}</strong></el-col>
+                    <el-col :span="16"><el-switch v-model="showUser.isAdmin" disabled></el-switch></el-col>
+                </el-row>
+                <el-row v-if="showUser.superAdmin">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('超级管理员') + ': '}}</strong></el-col>
+                    <el-col :span="16"><el-switch v-model="showUser.superAdmin" disabled></el-switch></el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('过期时间') + ': '}}</strong></el-col>
+                    <el-col :span="16"><el-date-picker v-model="showUser.deadline" type="datetime"
+                            :placeholder="i18n('选择日期和时间')" disabled></el-date-picker></el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('旧密码') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        <el-input type="password" v-model="showUser.oldPassword" :placeholder="i18n('旧密码')"
+                            clearable></el-input>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('新密码') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        <el-input type="password" v-model="showUser.password" :placeholder="i18n('新密码')"
+                            clearable></el-input>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('再次输入新密码') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        <el-input type="password" v-model="showUser.password2" :placeholder="i18n('再次输入新密码')"
+                            clearable></el-input>
+                    </el-col>
+                </el-row>
+            </div>
+            <!-- 管理用户信息
+                超级管理员可更改：头像、名称、管理员、超级管理员、密码
+              -->
+            <div v-else-if="user.superAdmin || user.isAdmin" class="user-info-card">
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户ID') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ showUser?.userId }}</el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户头像地址') + ': '}}</strong></el-col>
+                    <el-col :span="14">
+                        <el-input v-model="showUser.avatar" :placeholder="showUser.avatar" clearable
+                            @change="handleEditAvatarChange" :disabled="!user.superAdmin"></el-input>
+                    </el-col>
+                    <el-col :span="2" style="text-align: center;">
+                        <el-avatar v-if="showUser.showAvatar && typeof showUser.showAvatar == 'string'"
+                            :src="showUser.showAvatar"></el-avatar>
+                        <el-avatar v-else>...</el-avatar>
+                    </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户名') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        <el-input v-model="showUser.username" :placeholder="showUser.username" clearable
+                            :disabled="!user.superAdmin"></el-input>
+                    </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户状态') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        <el-input v-model="showUser.status" :placeholder="showUser.status" clearable></el-input>
+                    </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('最后更新时间') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        {{ new Date(showUser?.lastUpdateTime ).toLocaleString() }}
+                    </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('是否管理员') + ': '}}</strong></el-col>
+                    <el-col :span="16"><el-switch v-model="showUser.isAdmin"
+                            :disabled="!user.superAdmin"></el-switch></el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('超级管理员') + ': '}}</strong></el-col>
+                    <el-col :span="16"><el-switch v-model="showUser.superAdmin"
+                            :disabled="!user.superAdmin"></el-switch></el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('过期时间') + ': '}}</strong></el-col>
+                    <el-col :span="16"><el-date-picker v-model="showUser.deadline" type="datetime"
+                            :placeholder="i18n('选择日期和时间') + ': '"></el-date-picker></el-col>
+                </el-row>
+                <el-row v-if="user.superAdmin">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('新密码') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        <el-input v-model="showUser.password" :placeholder="i18n('新密码')" clearable
+                            :disabled="!user.superAdmin"></el-input>
+                    </el-col>
+                </el-row>
+            </div>
+            <!-- 用户信息 -->
+            <div v-else class="user-info-card">
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户ID') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ showUser?.userId }}</el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户名') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ showUser?.username }}</el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户状态') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ showUser?.status }}</el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('最后更新时间') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        {{ new Date(showUser?.lastUpdateTime ).toLocaleString() }}
+                    </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('是否管理员') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ showUser?.isAdmin ? '是' : '否' }}</el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('超级管理员') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ showUser?.superAdmin ? '是' : '否' }}</el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('过期时间') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ (typeof showUser?.deadline == 'number' ? new
+                        Date(showUser?.deadline||0).toLocaleString() : showUser?.deadline)
+                        }}</el-col>
+                </el-row>
+            </div>
+            <div class="bottom-section center" v-if="showUser?.userId == user.userId">
+                <el-button type="primary" @click="updateAccount(showUser)">{{i18n('修改资料')}}</el-button>
+                <el-button type="primary" @click="updatePassword(showUser)">{{i18n('修改密码')}}</el-button>
+            </div>
+            <div class="bottom-section center"
+                v-if="showUser?.userId != user.userId && (user.superAdmin || user.isAdmin)">
+                <el-button type="primary" @click="updateAccount(showUser)">{{i18n('修改资料')}}</el-button>
+                <el-button type="primary" @click="handleOnlineSelect(showUser.userId)">{{i18n('重置资料')}}</el-button>
+            </div>
+        </el-container>
+
+        <!-- 右侧内容-话题配置页 -->
+        <el-container v-if="nothidePage.right && rightPage.now == rightPage.map.editTopic" class="right-container">
+            <!-- 话题的基本信息 -->
+            <div class="user-info-card">
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('话题ID') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ editTopic?.topicId }}</el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('话题标题') + ': '}}</strong></el-col>
+                    <el-col :span="16">
+                        <!-- 广场模式或管理员权限 -->
+                        <el-input v-model="editTopic.name" :placeholder="i18n('新密码')" clearable
+                            :disabled="!(editTopic.notAdmin || editTopic?.admins?.includes(user.userId))"></el-input>
+                    </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('人员总数') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ editTopic?.userTotal }}</el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('管理员总数') + ': '}}</strong></el-col>
+                    <el-col :span="16">{{ editTopic?.admins?.length }}</el-col>
+                </el-row>
+            </div>
+            <!-- 话题的用户信息 -->
+            <div class="user-info-card">
+                <!-- <div class="connect-item single-line-text vertical-center"
+                    @click="handleOnlineSelect(editTopic?.admins?.[0])">
+                    群主信息
+                    <el-avatar :src="item.showAvatar" @click="login.loginPageVisible=true" size="small"
+                        v-if="item.showAvatar && typeof item.showAvatar == 'string'"></el-avatar>
+                    <el-avatar v-else @click="login.loginPageVisible=true" size="small">
+                        {{item.username}}
+                    </el-avatar>
+                    <el-text class="single-line-text">{{ item.username }}</el-text>
+                </div>
+                -->
+                <!-- TODO 群主可以设置管理员 -->
+                <!-- TODO 普通用户可以拉其他用户进来 -->
+                <!-- TODO 管理员可以设置用户可见消息范围 -->
+            </div>
+            <!-- 话题的权限信息 -->
+            <div class="user-info-card">
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('广场模式') + ': '}}</strong></el-col>
+                    <!-- 广场模式或群主权限 -->
+                    <el-col :span="16"><el-switch v-model="editTopic.notAdmin"
+                            :disabled="!(editTopic.notAdmin || user.userId == editTopic?.admins?.[0])"></el-switch></el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-col :span="8" class="user-info-item-name"><strong>{{i18n('用户拉人加入') + ': '}}</strong></el-col>
+                    <!-- 广场模式或管理员权限 -->
+                    <el-col :span="16"><el-switch v-model="editTopic.addMode"
+                            :disabled="!(editTopic.notAdmin || editTopic?.admins?.includes(user.userId))"></el-switch></el-col>
+                </el-row>
+            </div>
+            <div class="bottom-section center">
+                <el-button v-if="editTopic.notAdmin || user.userId==editTopic?.admins?.[0]" type="primary"
+                    @click="onUpdateTopic(editTopic)">{{i18n('修改话题')}}</el-button>
+
+                <el-button v-if="user.userId==editTopic?.admins?.[0]" type="danger"
+                    @click="onDeleteTopic(editTopic)">{{i18n('删除话题')}}</el-button>
+
+                <el-button v-if="user.userId!=editTopic?.admins?.[0]" type="danger"
+                    @click="onExitTopic(editTopic)">{{i18n('退出话题')}}</el-button>
+            </div>
+        </el-container>
+
+        <!-- 右侧内容-欢迎页 -->
+        <el-container v-if="nothidePage.right && rightPage.now == rightPage.map.welcome" class="right-container">
+            <div class="header">
+                <div class="msg-head-title">im</div>
+            </div>
+            <div class="content">
+                <div class="center2" style="color: cornflowerblue;">{{i18n('欢迎使用该项目！')}}</div>
+            </div>
+            <div class="bottom-section center">
+                <el-button type="primary" @click="clickWelcome">{{ startNumber }}</el-button>
+            </div>
+        </el-container>
+
+        <!-- 右侧内容-设置页 -->
+        <el-container v-if="nothidePage.right && rightPage.now == rightPage.map.setting" class="right-container">
+            <div class="header">
+                <div class="msg-head-title">{{i18n('设置')}}</div>
+            </div>
+            <div class="content">
+                <div class="funs center settings-buts">
+                    <template v-for="(but, index) in settingsButs">
+                        <el-button :key="index" v-if="typeof but?.visible == 'function' ? but.visible(msg) : true"
+                            class="copy-button" type="info" size="small" round @click="but.click(msg)"
+                            :style="but.style||''" :title="but.title(msg)">
+                            {{ typeof but.getBody == "function" ? (but.getBody(msg) ??
+                            but.title(msg)) : but.title(msg)}}
+                        </el-button>
+                    </template>
+                </div>
+                <div>
+                    <el-input v-model="cryptoKey" type="text" :input-style="{ textAlign: 'center' }"
+                        :placeholder="i18n('加解密的秘钥')"></el-input>
+                    <div class="crypto-container">
+                        <div class="crypto-section">
+                            <el-input v-model="originData" type="textarea" :placeholder="i18n('需要加密的数据')"></el-input>
+                            <div class="center">
+                                <el-button type="primary" size="small" round
+                                    @click="onCryptoData()">{{i18n('加密')}}</el-button>
+                                <el-button type="primary" size="small" round
+                                    @click="copyOriginData()">{{i18n('复制')}}</el-button>
+                            </div>
+                        </div>
+
+                        <div class="crypto-section">
+                            <el-input v-model="cryptoData" type="textarea" :placeholder="i18n('需要解密的数据')"></el-input>
+                            <div class="center">
+                                <el-button type="primary" size="small" round
+                                    @click="onCryptoData('decode')">{{i18n('解密')}}</el-button>
+                                <el-button type="primary" size="small" round
+                                    @click="copyCryptoData()">{{i18n('复制')}}</el-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 版权栏 -->
+                <div class="copyright">
+                    <iframe src="/system/copyright" frameborder="0" scrolling="no"
+                        style="width: 100%; height: 50px;"></iframe>
+                </div>
+            </div>
+            <div class="bottom-section center">
+            </div>
+        </el-container>
+
+        <!-- 底部 -->
+        <div class="bottom-controls" v-if="nothidePage.bottom">
+            <div class="funs bottom">
+                <template v-if="isShowFriendList ? !(0 < onlineSelect.length) : !(0 < msgsSelect.length)">
+                    <el-button type="info" size="small" round @click="rightPage.now = rightPage.map.setting">{{
+                        i18n('⚙ 设置')}}</el-button>
+                    <el-button type="info" size="small" round @click="onReload()">{{i18n('↻ 刷新')}}</el-button>
+                </template>
+
+                <!-- 用户界面 -->
+                <template v-if="isShowFriendList">
+                    <el-button v-if="user.superAdmin" type="success" size="small" round
+                        @click="sa_onlineList(onlineSelect)">{{i18n('@ 全部用户')}}</el-button>
+                </template>
+
+                <template v-if="0 < onlineSelect.length && isShowFriendList">
+                    <el-button type="primary" size="small" round @click="onlineSelect.splice(0,onlineSelect.length)">{{
+                        i18n('x 取消')}}</el-button>
+                    <el-button type="success" size="small" round @click="createTopic()">{{i18n('+ 话题')}}</el-button>
+                    <el-button v-if="user.superAdmin || user.isAdmin" type="danger" size="small" round
+                        @click="sa_logoutAll(onlineSelect)">{{i18n('↓ 注销')}}</el-button>
+                </template>
+
+                <!-- 消息界面 -->
+                <template v-if="!isShowFriendList">
+                    <el-button v-if="user.superAdmin" type="success" size="small" round
+                        @click="sa_topicList(onlineSelect)">{{i18n('@ 全部话题')}}</el-button>
+                </template>
+                <template v-if="0 < msgsSelect.length && !isShowFriendList">
+                    <el-button type="primary" size="small" round @click="msgsSelect.splice(0,msgsSelect.length)">{{
+                        i18n('x 取消')}}</el-button>
+                    <el-button type="danger" size="small" round @click="deleteTopic()">{{i18n('- 话题')}}</el-button>
+                </template>
+
+                <el-button type="info" size="small" round @click="changeNothidePage(1)">{{i18n('👁 左')}}</el-button>
+                <el-button type="info" size="small" round @click="changeNothidePage(0)">{{i18n('👁 右')}}</el-button>
+            </div>
+        </div>
+
+        <!-- login page -->
+        <el-dialog v-model="login.loginPageVisible"
+            :title="user.username ? i18n('用户') + ': ' + user.username : i18n('登录')" width="400px">
+            <el-form :model="login.form" :rules="login.rules" ref="loginForm" label-width="80px">
+                <!-- 用户名 -->
+                <el-form-item :label="i18n('用户名', true)" prop="username">
+                    <el-input v-model="login.form.username" :placeholder="i18n('请输入你的用户名')"></el-input>
+                </el-form-item>
+                <!-- 密码 -->
+                <el-form-item :label="i18n('密码', true)" prop="password">
+                    <el-input v-model="login.form.password" type="password" :placeholder="i18n('请输入你的密码')"
+                        @keyup.enter.native="handlePasswordEnter()"></el-input>
+                </el-form-item>
+                <!-- 再次输入密码 -->
+                <el-form-item v-if="login.register" :label="i18n('密码', true)" prop="password">
+                    <el-input v-model="login.form.password2" type="password" :placeholder="i18n('请再次输入密码')"
+                        @keyup.enter.native="handlePasswordEnter('reg')"></el-input>
+                </el-form-item>
+                <!-- 登录按钮 -->
+                <el-form-item>
+                    <template #label>
+                        <el-checkbox v-model="login.register">
+                            <el-text size="small">{{i18n('注册')}}</el-text>
+                        </el-checkbox>
+                    </template>
+                    <el-button v-if="login.register" type="success" @click="handleRegister">{{i18n('注册')}}</el-button>
+                    <el-button v-else type="primary" @click="handleLogin">{{i18n('登录')}}</el-button>
+                    <el-button v-if="user.userId != -1" type="danger" @click="handleLogout">{{i18n('退出登录')}}</el-button>
+                    <el-button type="info" @click="login.loginPageVisible = false">{{i18n('取消')}}</el-button>
+                </el-form-item>
+                <el-text type="info" size="small">{{version}}</el-text>
+            </el-form>
+        </el-dialog>
+    </div>
+</body>
+
+</html>
+
+<style>
+    .concise {
+        font-size: 30px;
+        transform: scale(1.1);
+        transition: font-size 2s ease-in-out, transform 2s ease-in-out;
+    }
+
+    .no-concise {
+        font-size: 16px;
+        transform: scale(1);
+        transition: font-size 2s ease-in-out, transform 2s ease-in-out;
+    }
+
+    body {
+        margin: 0;
+        padding: 10px 0;
+    }
+
+    #app {
+        display: flex;
+    }
+
+    .left-container,
+    .right-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 92vh;
+        background-color: white;
+        z-index: 0;
+    }
+
+    .left-container {
+        width: 30%;
+        /* border-right: 1px solid #ccc; */
+    }
+
+    .right-container {
+        width: 70%;
+        margin: 0 5px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 16px;
+        z-index: 2;
+    }
+
+    .top-section {
+        flex: 1;
+        overflow: auto;
+    }
+
+    .bottom-section {
+        margin-top: auto;
+    }
+
+    .bottom-controls {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1;
+    }
+
+    .auto-height {
+        flex: 1;
+        overflow: auto;
+    }
+
+    .table-container {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .connect-item {
+        border-bottom: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 2px 10px;
+        margin: 3px 0;
+    }
+
+    .bottom {
+        position: absolute;
+        bottom: 0;
+    }
+
+    .top {
+        position: absolute;
+        top: 0;
+    }
+
+    .funs {
+        /* background-color: #fff; */
+        padding: 5px;
+    }
+
+    /* 
+    .funs>button {
+        margin-left: 5px !important;
+        margin: 0px 10px;
+    } */
+
+    .inmsg {
+        bottom: 10px;
+        z-index: 3;
+    }
+
+    .no-resize .el-textarea__inner {
+        resize: none;
+    }
+
+    .msg-head {
+        z-index: 1;
+        flex: 1;
+        padding-top: 10px;
+    }
+
+    .header1 {
+        display: flex;
+        align-items: center;
+    }
+
+    .msg-head-title {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .msg-head-title {
+        flex: 1;
+    }
+
+    .header-right1 {
+        margin-left: auto;
+    }
+
+    .inmsg-container {
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        width: 100%;
+        background-color: #fffffe;
+    }
+
+    .inmsg-input {
+        flex: 1;
+    }
+
+    .inmsg-sendbtn {
+        display: flex;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .inmsg-btns {
+        border-top: 1px solid #ebeef5;
+        margin-top: 5px;
+        padding-top: 5px;
+        text-align: left;
+
+    }
+
+    .inmsg-btns>* {
+        margin: 2px !important;
+    }
+
+    .inmsg-btns>div {
+        display: inline-block;
+    }
+
+    .msg-container {
+        width: 100%;
+        padding: 2px 20px;
+    }
+
+    .msg {
+        padding: 2px 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .myMsg {
+        right: 0;
+        text-align: right;
+    }
+
+    .myMsgBG {
+        background-color: #fafafa;
+    }
+
+    .table-container .el-table-v2 .el-table-v2__row {
+        border-bottom: none;
+    }
+
+    .table-container .el-table-v2 {
+        border: 1px solid #dcdfe6;
+    }
+
+    .el-input-group__prepend {
+        padding: 3px;
+        background-color: #ff000000;
+    }
+
+    .el-main {
+        padding-top: 0;
+    }
+
+    .list-buts {
+        text-align: center;
+    }
+
+    .msg-buts>* {
+        margin: 0 3px;
+        margin-left: 0 !important;
+    }
+
+    .inline-div {
+        display: inline-block;
+        margin: 0 0;
+    }
+
+    .checkbox-but {
+        margin-right: 5px !important;
+    }
+
+    .connect-item .checkbox-but {
+        visibility: hidden;
+    }
+
+    .connect-item:hover .checkbox-but {
+        visibility: visible;
+    }
+
+    .connect-item.is-selected .checkbox-but {
+        visibility: visible;
+    }
+
+    .single-line-text {
+        border-radius: 5px;
+        border-bottom: 1px solid transparent;
+        transition: border-bottom-color 0.3s ease;
+    }
+
+    .single-line-text:hover {
+        border-bottom: 1px solid #409eff;
+    }
+
+    .message-container {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .message-content {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .message-time {
+        flex-shrink: 0;
+        font-size: 30%;
+        color: #999;
+    }
+
+    .msg-content {
+        text-align: left;
+    }
+
+    .el-col {
+        margin: 5px 0;
+    }
+
+    .el-col:first-child {
+        margin-top: 0;
+    }
+
+    .el-col:last-child {
+        margin-bottom: 0;
+    }
+
+    .center {
+        text-align: center;
+    }
+
+    .center2 {
+        text-align: center;
+        margin-top: 50%;
+    }
+
+    .settings-buts>button {
+        margin: 5px;
+    }
+
+    pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-x: auto;
+    }
+
+    .flip-vertical {
+        display: inline-block;
+        transform: rotate(180deg);
+    }
+
+    .crypto-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        width: 100%;
+    }
+
+    .crypto-section {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        gap: 10px;
+    }
+
+    .refreshMsgsTag {
+        display: inline-block;
+        color: #409eff;
+        transition: transform 0.5s ease;
+        /* 平滑过渡 */
+    }
+
+    .re-refreshMsgsTag {
+        display: inline-block;
+        color: #409eff;
+        animation: rotate3 1s ease-in-out;
+        /* 1秒内完成3圈旋转 */
+        transform: rotate(1080deg);
+        /* 保持最终状态 */
+    }
+
+    @keyframes rotate3 {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(1080deg);
+            /* 360° × 3 = 1080° */
+        }
+    }
+
+    .hide {
+        display: none;
+    }
+
+    .min-img {
+        margin: 3px;
+        width: 10%;
+        height: 10%;
+    }
+
+    .image-error-slot {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        /* 其他样式 */
+        font-size: 10px;
+        max-height: 3.6em;
+        line-height: 1.2;
+        word-break: break-all;
+    }
+
+    .msg-render {
+        border: 1px solid #000;
+        border-radius: 5px;
+    }
+
+    .msg-preview {
+        width: 100%;
+    }
+</style>
+<style scoped>
+    .monaco-editor-replacement {
+        width: 100%;
+        max-width: 100%;
+        border: 1px solid #dcdfe6;
+        border-radius: 4px;
+        transition: border-color 0.2s, height 0.2s ease;
+        overflow: hidden;
+    }
+
+    .monaco-editor-replacement:hover {
+        border-color: #c0c4cc;
+    }
+
+    .monaco-editor-replacement:focus-within {
+        border-color: #409eff;
+        outline: none;
+    }
+
+    .cancelCenter {
+        text-align: left;
+    }
+</style>
+
+<style>
+    .vertical-center {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .user-info-item-name {
+        text-align: right;
+        padding-right: 10px;
+    }
+</style>
+
+<script>
+    /** 消息类型 */
+    const messageType = {
+        id: '#',        // 消息id
+        time: 0,        // 发送时间
+        userId: -1,     // 用户id
+        content: '',    // 消息内容
+        type: 'txt',    // 类型
+        updateTime: 0   // 消息更新时间
+    };
+
+    /** 话题类型 */
+    const topicType = {
+        auths: {
+        },
+        admins: [
+            // 第一个管理员是持有者
+        ],
+        topicId: -1,
+        name: 'topic',
+        lastMsg: messageType,
+        createTime: 0,
+        userTotal: 0,
+    };
+
+    const { createApp, ref, reactive } = Vue;
+    const { ElContainer, ElAside, ElMain, ElMenu, ElMenuItem, ElMessage, ElMessageBox, ElImageViewer } = ElementPlus;
+
+    try {
+        if (typeof i18n != 'function') throw new Error('i18n is not a function');
+    } catch {
+        console.warn('无效的多语言模块，使用默认的语言');
+        i18n = (t) => t;
+    }
+
+    var showNotLoginLog = false;
+    var tableRef = null;
+    // const showLog = console.log;
+    const showLog = () => { };
+    const API_PREFIX = '/im';
+    var tableContainerE = document.querySelector('.table-container');
+    var scanTableContainerTime = Date.now();
+    var leftContainerE = document.querySelector('.left-container');
+    var scanLeftContainerTime = Date.now();
+    var requesting = {};
+    var loginState = ref(false);
+    var monacoEditor = null;
+    var languageMap = {
+        'text': 'plaintext',
+        'js': 'javascript',
+        'py': 'python',
+        'md': 'markdown',
+    };
+    var runMsgMap = {
+        'js'(code) {
+            let re;
+            try {
+                re = eval(code);
+            } catch (error) {
+                re = (error.message + '\n' + error.stack).split(location.origin).join('');
+                const i = re.lastIndexOf('at Proxy.runMsg (/im/index.html');
+                if (i > 0) re = re.substring(0, i);
+            }
+            return re;
+        },
+        async 'py'(code) {
+            let re;
+            try {
+                re = await pyEval(code);
+            } catch (error) {
+                re = (error.message + '\n' + error.stack).split(location.origin).join('');
+                const i = re.lastIndexOf('at Proxy.runMsg (/im/index.html');
+                if (i > 0) re = re.substring(0, i);
+            }
+            return re;
+        },
+        'image': null,
+        'file': null,
+        'md': parseMarked,
+        'markdown': parseMarked,
+        'music': null,
+        'video': null,
+        'text': null,
+        'url': null,
+    };
+    const RightPageMap = {
+        msgs: 'msgs',
+        welcome: 'welcome',
+        showUser: 'showUser',
+        setting: 'setting',
+        editTopic: 'editTopic',
+    };
+
+    function delay(ms) {
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
+    }
+    /**
+     * 有一个bug，传递的 fetchPromise 已经发起了请求，所以在死循环中会导致有一堆请求，将 fetchPromise 改为一个获取 promise 的函数
+     * @param {()=>Promise} getFetchPromise
+     * @param {string} msg
+     * @param {(error:Error)=>void} errorCallback
+     * @returns {Promise} 
+     */
+    function warpFetch(getFetchPromise, msg, errorCallback) {
+        if (typeof window.requesting != 'object' || window.requesting == null) requesting = {};
+        if (requesting[msg]) return delay(1);
+        // 如果未登录，而且msg开头不是 # 那么就会被拒绝请求
+        if (!(loginState.value || (typeof msg == 'string' && msg.startsWith('#')))) {
+            return delay(5000).then((res) => {
+                if (showNotLoginLog) {
+                    throw new Error(loginState.value ? i18n('取消未登录时的请求') : i18n('未登录'))
+                }
+            });
+        }
+        showLog('请求中...', msg, requesting[msg]);
+        requesting[msg] = true;
+
+        return getFetchPromise().then(async response => {
+            // 检查响应是否成功
+            if (!response.ok) {
+                throw new Error(i18n('响应不是ok状态'));
+            }
+            showLog('请求完成' + msg);
+            // 将响应解析为文本
+            return await response.text();
+        }).then(text => {
+            let json;
+            try {
+                json = JSON.parse(text);
+            } catch (err) {
+                return text
+            }
+            if (json.code != undefined && json.code != 0) {
+                if (json?.code == 500 && (json?.msg?.includes?.('未登录') || json?.data?.includes?.('未登录'))) {
+                    loginState.value = false
+                }
+                throw new Error(json.msg || json.data || i18n('服务器错误!'));
+            }
+            return json.data ?? json;
+        }).catch(function (error) {
+            if (error.message == 'signal is aborted without reason') {
+                // 取消请求中断的错误日志
+                throw new Error(i18n('请求中断'));
+            }
+            if (showNotLoginLog || !error?.message?.includes('未登录')) {
+                showLog((msg || '请求失败!'), error);
+            }
+            if (typeof errorCallback == 'function') errorCallback(error);
+            else {
+                ElMessage.error((msg || i18n('请求失败!')) + ' ' + error.message);
+                throw error;
+            }
+        }).finally((res) => requesting[msg] = false);
+    }
+
+    const generateData = (columns, length = 200, prefix = 'row-') =>
+        Array.from({ length }).map((_, rowIndex) => {
+            return columns.reduce(
+                (rowData, column, columnIndex) => {
+                    rowData[column.dataKey] = `Row ${rowIndex} - Col ${columnIndex}`
+                    return rowData
+                },
+                {
+                    id: `${prefix}${rowIndex}`,
+                    parentId: null,
+                }
+            )
+        });
+
+    function genMsg(length, fix) {
+        return Array.from({ length }).map((_, rowIndex) => ({
+            id: rowIndex,
+            content: fix + ' Message ' + rowIndex,
+            userId: rowIndex % 2 == 0 ? rowIndex : fix
+        }))
+    }
+
+    var pyodide, puasePyodide;
+    /**
+     * 运行python代码
+     */
+    async function runPythonCode(code, pyPackages) {
+        if (puasePyodide) return ElMessage.warning(i18n('请稍等') + '...' + puasePyodide);
+        if (typeof pyodide != 'object' && typeof loadPyodide != 'function') {
+            puasePyodide = i18n('正在加载Python代码运行环境中')
+            ElMessage.warning(puasePyodide);
+            try {
+                // 加载 pyodide
+                await (new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.5/full/pyodide.js';
+                    script.onload = resolve;
+                    script.onerror = () => {
+                        reject(new Error(i18n('加载Python代码运行环境失败')));
+                    }
+                    document.head.appendChild(script);
+                }));
+                pyodide = await loadPyodide();
+                ElMessage.success(i18n('Python代码运行环境加载成功'));
+            } catch (error) {
+                console.error(error);
+                ElMessage.error(error.message);
+                return error;
+            }
+            puasePyodide = null;
+            if (typeof pyodide != 'object') return;
+        }
+        if (Array.isArray(pyPackages)) {
+            for (const pkg of pyPackages) {
+                ElMessage.info(i18n('正在加载python模块') + ': ' + pkg);
+                await pyodide.loadPackage(pkg);
+            }
+        }
+        return await pyodide.runPythonAsync(code);
+    }
+
+    /**
+     * 运行py代码，第一行为注释的js代码，例如
+     * ```py
+     * # ['numpy','pandas','scipy']
+     * import sys
+     * sys.version
+     * ```
+     */
+    async function pyEval(code) {
+        let pkgs = code.split('\n').shift();
+        // 清除两边的空白字符与前面的注释符号#
+        try {
+            pkgs = eval(`(${cleanCommentLine(pkgs)})`);
+        } catch (error) {
+            showLog(i18n('没有导包或解析失败'), error);
+            pkgs = [];
+        }
+        return await runPythonCode(code, pkgs)
+    }
+    /**
+     * 清除字符串前后空白，且必须匹配#注释开头，如果没有#开头，则返回空字符串
+     * @param {string} str - 输入字符串（如 "# ['numpy']  "）
+     * @returns {string} - 处理后的字符串（如 "['numpy']"） 
+     */
+    function cleanCommentLine(str) {
+        let re = str.trim();
+        if (re.startsWith('#')) {
+            while (re.startsWith('#')) re = re.substring(1);
+            re = re.trim();
+            return re;
+        } else return '';   // 如果没有#开头，则返回空字符串
+    }
+
+    /**
+     * 使用 marked 解析 Markdown
+     */
+    function parseMarked(str) {
+        return marked.parse(str);
+    }
+
+    /**
+     * Html使用
+     * 加密字符串
+     * @param {string} text 要加密的明文
+     * @returns {string} 加密后的字符串Base64格式
+     */
+    function encryptToBase64(text) {
+        const KEY = '9a8b7c6d5e412f3a2b1c0d9e8f7a6b5c';
+        const IV = CryptoJS.enc.Hex.parse('9a8b7c6d5e4f3a2b1caa0d9e8f7a6b5c');
+        const encrypted = CryptoJS.AES.encrypt(text, CryptoJS.enc.Utf8.parse(KEY), {
+            iv: IV,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+        });
+        return encrypted.toString();
+    }
+
+    createApp({
+        data() {
+            return {
+                previewTopicList: [],
+                xxHasher: null,
+                uploadedFiles: [],
+                fileName: '',
+                files: [],
+                filesHashCache: {
+
+                },
+                selectFileNameTimerId: '',
+                currentTime: 0,
+                currentTimeId: null,
+                currentRows: 1,
+                currentRowsFull: 5,
+                nothidePage: {
+                    left: true,
+                    right: true,
+                    bottom: true,
+                },
+                startNumber: 0,
+                leftWidth: null,
+                version: i18n('版本') + `1.2
+增加管管理用户的功能与其他优化
+1.1
+支持文件上传，但是文件上传不能使用自定义文件名，如果想要使用自定义文件名请手动操作添加 ?dfn=新名字 参数到下载请求中`,
+                rightPage: {
+                    now: RightPageMap.welcome,
+                    map: RightPageMap,
+                    def: RightPageMap.welcome
+                },
+                hoveredRow: null,
+                isShowFriendList: false,
+                loginState: loginState,
+                // 当前用户信息
+                user: {
+                    username: '',
+                    userId: -1,
+                    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
+                    // 如果想要显示头像，需要用axios请求到图片然后转成base64放到这个地方，否则显示名字
+                    showAvatar: '',
+                    superAdmin: false,
+                    isAdmin: false,
+                },
+                editUser: {
+                    username: '',
+                    userId: -1,
+                    avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
+                    // 如果想要显示头像，需要用axios请求到图片然后转成base64放到这个地方，否则显示名字
+                    showAvatar: '',
+                    password: '',
+                    password2: '',
+                    oldPassword: '',
+                },
+                // 查看的用户信息
+                showUser: null,
+                login: {
+                    loginPageVisible: false,
+                    register: false,
+                    form: {
+                        username: '',
+                        password: '',
+                        password2: ''
+                    },
+                },
+                inmsg: '',
+                searchQuery: '',
+                leftWidth: 0,
+                tableWidth: 350,
+                tableHeight: 569,
+                onlineSelect: [],
+                onlineListData: [],
+                showOnlineListData: [],
+                msgsSelect: [],
+                msgsListData: [],
+                showMsgsListData: [],
+                columns: [{
+                    key: 'column-1',
+                    dataKey: 'column-1',
+                    title: '',
+                }],
+                selectTopic: topicType,
+                selectTopicId: null,
+                fetchTimeStep: 5000,
+                monitorTopicFetchController: null,
+                monitorTopicFetchTime: 0,
+                lastMonitorTopicFetchTag: null,
+                monitorGetMsgsListFetchController: null,
+                monitorGetMsgsListFetchTime: 0,
+                monitorGetOnlineListFetchController: null,
+                monitorGetOnlineListFetchTime: 0,
+                messages: [],
+                messagesPlus: {
+                    '消息id': {
+                        其他操作: false,
+                        view: 'origin 源码(默认)' || 'render 渲染'
+                    }
+                },
+                msgs: {},
+                msgTemplate: {
+                    type: 'js',
+                    typeList: Object.keys(runMsgMap).map((item) => ({
+                        label: item,
+                        value: item
+                    })),
+                },
+                editMsgId: null,
+                settingsButs: [
+                    {
+                        title: (msg) => i18n('关于'),
+                        click: (msg) => this.onAbout(),
+                    },
+                    {
+                        title: (msg) => i18n('创建话题'),
+                        click: (msg) => this.createTopic(),
+                    },
+                    {
+                        title: (msg) => i18n('清理缓存'),
+                        click: (msg) => this.onClearCache(),
+                    },
+                    {
+                        title: (msg) => i18n('未命中的国际化字段数量') + `(${Object.keys(TextMap.__notFound).length})`,
+                        click: (msg) => this.showNotFoundText(),
+                    },
+                    {
+                        title: (msg) => i18n('保存数据库'),
+                        click: (msg) => this.onSaveDB(),
+                    },
+                ],
+                msgButsUser: [
+                    // {
+                    //     style: 'color:red;',
+                    //     title: (msg) => i18n('用户名'),
+                    //     visible: (msg) => true,
+                    //     getBody: (msg) => '显示内容',
+                    //     click: (msg) => this.copyContent(msg.content),
+                    // },
+                    {
+                        title: (msg) => i18n('用户名') + msg.username,
+                        click: (msg) => this.showUserInfoPageByUserId(msg.userId),
+                        getBody: (msg) => msg.username,
+                    },
+                    {
+                        title: (msg) => i18n('类型') + ': ' + msg.type,
+                        click: (msg) => this.runMsg(msg),
+                        getBody: (msg) => 't: ' + msg.type,
+                    },
+                    {
+                        title: (msg) => i18n('预览') + ': ' + msg.type,
+                        click: (msg) => {
+                            if (typeof this.messagesPlus[msg.id] != 'object') this.messagesPlus[msg.id] = {};
+                            this.messagesPlus[msg.id].view = (this.messagesPlus[msg.id].view == 'render' ? 'origin' : 'render');
+                        },
+                        getBody: (msg) => (this?.messagesPlus?.[msg.id]?.view == 'render' ? i18n('关闭预览') : i18n('预览')),
+                    },
+                    {
+                        title: (msg) => `${i18n('消息时间')}: ${new Date(msg.time).toLocaleString()}\n${i18n('更新时间')}: ${(0 < msg.updateTime ? new Date(msg.updateTime).toLocaleString() : '-')}`,
+                        click: (msg) => this.showText(`${i18n('消息时间')}: ${new Date(msg.time).toLocaleString()}\n${i18n('更新时间')}: ${(
+                            0 < msg.updateTime ? new Date(msg.updateTime).toLocaleString() : '-')}`.replaceAll('\n', '<br>'), i18n('消息时间')),
+                        getBody: (msg) => new Date(msg.time).toLocaleTimeString(),
+                    },
+                    {
+                        title: (msg) => i18n('复制'),
+                        click: (msg) => this.copyContent(msg.content),
+                    },
+                ],
+                msgButsMe: [
+                    // {
+                    //     title: (msg) => i18n('用户名'),
+                    //     visible: (msg) => true,
+                    //     getBody: (msg) => '显示内容',
+                    //     click: (msg) => this.copyContent(msg.content),
+                    // },
+                    {
+                        title: (msg) => i18n('复制'),
+                        click: (msg) => this.copyContent(msg.content),
+                    },
+                    {
+                        title: (msg) => i18n('删除'),
+                        click: (msg) => this.deleteMsg(msg),
+                    },
+                    {
+                        title: (msg) => i18n('编辑'),
+                        click: (msg) => this.editMsgId = msg.id,
+                        visible: (msg) => msg.id != this.editMsgId,
+                    },
+                    {
+                        title: (msg) => i18n('取消编辑'),
+                        click: (msg) => this.editMsgId = null,
+                        visible: (msg) => msg.id == this.editMsgId,
+                    },
+                    {
+                        title: (msg) => i18n('更新'),
+                        click: (msg) => this.updateMsg(msg),
+                        visible: (msg) => msg.id == this.editMsgId,
+                    },
+                    {
+                        title: (msg) => i18n('类型') + ': ' + msg.type,
+                        click: (msg) => this.runMsg(msg),
+                        getBody: (msg) => 't: ' + msg.type,
+                    },
+                    {
+                        title: (msg) => i18n('预览') + ': ' + msg.type,
+                        click: (msg) => {
+                            if (typeof this.messagesPlus[msg.id] != 'object') this.messagesPlus[msg.id] = {};
+                            this.messagesPlus[msg.id].view = (this.messagesPlus[msg.id].view == 'render' ? 'origin' : 'render');
+                        },
+                        getBody: (msg) => (this?.messagesPlus?.[msg.id]?.view == 'render' ? i18n('关闭预览') : i18n('预览')),
+                    },
+                    {
+                        title: (msg) => `${i18n('消息时间')}: ${new Date(msg.time).toLocaleString()}\n${i18n('更新时间')}: ${(0 < msg.updateTime ? new Date(msg.updateTime).toLocaleString() : '-')}`,
+                        click: (msg) => this.showText(`${i18n('消息时间')}: ${new Date(msg.time).toLocaleString()}\n${i18n('更新时间')}: ${(
+                            0 < msg.updateTime ? new Date(msg.updateTime).toLocaleString() : '-')}`.replaceAll('\n', '<br>'), i18n('消息时间')),
+                        getBody: (msg) => new Date(msg.time).toLocaleTimeString(),
+                    },
+                    {
+                        title: (msg) => i18n('用户名') + msg.username,
+                        click: (msg) => this.showUserInfoPageByUserId(msg.userId),
+                        getBody: (msg) => msg.username,
+                    },
+                ],
+                originData: '',
+                cryptoData: '',
+                cryptoKey: '',
+                refreshMsgsTag: false,
+                intes: {
+                    global: null,
+                    m_getMsg: null,
+                    m_onlineList: null,
+                    m_topicList: null
+                },
+                editor: null,
+                lineHeight: 20,
+                padding: 10, // 上下各5px
+                editorHeight: 30, // 初始高度 (1行)
+                adjustEditorHeightTimeout: null,
+                editorStatus: false,
+                useEditor: false,
+                avatarImageCache: [],
+                fristLoadUserInfo: true,
+                editTopic: {
+                },
+            }
+        },
+        computed: {
+            activeMessage() {
+                return this.messages[this.activeIndex];
+            },
+            // 生成全屏预览的图片URL列表
+            previewList() {
+                return this.uploadedFiles.map(file => this.fileUrl(file));
+            },
+        },
+        mounted() {
+            this.readUserInfo();
+            this.handleSwitchChange('monitor');
+            this.updateTableSize();
+            window.addEventListener('resize', this.updateTableSize);
+            this.currentTimeId = setInterval(() => this.currentTime = Date.now(), 100);
+            this.intes.global = setInterval(this.globalInte, 2000);
+        },
+        beforeUnmount() {
+            window.removeEventListener('resize', this.updateTableSize);
+            clearInterval(this.currentTimeId);
+        },
+        beforeDestroy() {
+            if (monacoEditor) {
+                monacoEditor.dispose();
+            }
+        },
+        watch: {
+            currentRows(newVal, oldVal) {
+                this.adjustEditorHeight()
+            },
+            'msgTemplate.type'(newVal, oldVal) {
+                this.upModelLanguage()
+            },
+            useEditor(newVal, oldVal) {
+                if (newVal) {
+                    this.writeText(this.inmsg)
+                } else {
+                    this.readText()
+                }
+            },
+        },
+        methods: {
+            i18n: i18n,
+            /**
+             * @params {string} pageName 页面名，可选项 {
+                        msgs: 'msgs',
+                        welcome: 'welcome',
+                        showUser: 'showUser',
+                    }
+             * @return {string|undefined} 正在使用的key
+             */
+            selectRightPage(pageName) {
+                let usePageName;
+                this.rightPage.now = this.rightPage.map[pageName] || this.rightPage.def;
+                for (const pn in this.rightPage.map) {
+                    const val = this.rightPage.map[pn];
+                    if (val == this.rightPage.now) {
+                        usePageName = pn;
+                        break;
+                    }
+                }
+                if (usePageName != pageName) console.warn('The page you are using does not exist.', pageName);
+                return usePageName;
+            },
+            handleOnlineSelect(userId) {
+                this.selectRightPage(RightPageMap.showUser);
+                this.readUserInfo(userId);
+            },
+            handleRefreshMsgs() {
+                this.refreshMsgsTag = !this.refreshMsgsTag;
+                const topic = this.showMsgsListData.find(msgs => msgs.topicId == this.selectTopicId)
+                this.handleMsgsSelect(topic, true);
+            },
+            handleMsgsSelect(topic, refresh) {
+                let topicId = topic.topicId;
+                this.selectRightPage(RightPageMap.msgs);
+                if (!refresh && this.selectTopicId == topicId) return;
+                this.selectTopic = topic;
+                this.selectTopicId = topicId;
+                this.readMsgList();
+                this.getMsg(false, 'monitorAddMsg');
+                this.scrollToBottom(null, 100);
+                this.checkRows();
+                this.initMonacoEditor();
+            },
+            readMsgList() {
+                // 请求消息数据
+                if (!Array.isArray(this.msgs[this.selectTopicId])) this.msgs[this.selectTopicId] = [];
+                this.messages = [...this.msgs[this.selectTopicId]];
+                this.updateTableSize();
+                // 读取所有的 图片消息进行收集
+                this.previewTopicList = this.messages.filter(msg => msg.type == 'image').map(msg => {
+                    return this.fileUrl(msg.content)
+                });
+
+                // 添加所有消息到消息配置中
+                const mp = this.messagesPlus = {};
+                this.messages.forEach(msg => this.messagesPlus[msg.id] = {});
+                // 图片和js默认开启预览
+                this.messages.filter(msg => {
+                    return msg.type == 'image'
+                }).map(msg => {
+                    mp[msg.id].view = 'render';
+                });
+            },
+            handleSearchInput() {
+                clearTimeout(this.searchTimeout); // 清除之前的定时器
+                this.searchTimeout = setTimeout(() => {
+                    this.handleSwitchChange()
+                }, 100); // 设置 100ms 的延迟
+            },
+            /**
+             * 刷新左侧列表数据
+             * 每次切换时延迟100ms刷新，这样可以避免连续切换导致连续刷新
+             * 如果是手动的话就先运行一次
+             */
+            handleSwitchChange(monitor) {
+                if (this.isShowFriendList) {
+                    if (monitor == 'manual') this.getOnlineList(100);
+                    monitor ? this.monitorGetOnlineList(monitor) : this.getOnlineList(100);
+                } else {
+                    if (monitor == 'manual') this.getMsgsList(100);
+                    monitor ? this.monitorGetMsgsList(monitor) : this.getMsgsList(100);
+                }
+            },
+            getMsgsList(delay) {
+                this.sortShowMsgsListData();
+                clearTimeout(this.getOnlineListTimeout); // 清除之前的定时器
+                this.getOnlineListTimeout = setTimeout(() => {
+                    warpFetch(() => fetch(API_PREFIX + '/msg/topicList'), '获取消息列表', () => { }).then(data => {
+                        this.msgsListData.splice(0, this.msgsListData.length, ...data);
+                        this.sortShowMsgsListData();
+                    });
+                }, 0 < Number(delay) ? Number(delay) : 2000); // 设置 2000ms 的延迟
+            },
+            async monitorGetMsgsList(monitor, InterruptMsg) {
+                // 如果有正在进行中的请求就取消掉
+                if (this.monitorGetMsgsListFetchController) {
+                    if (Date.now() < this.monitorGetMsgsListFetchTime) return;
+                    if (InterruptMsg) console.info('monitorGetMsgsList', i18n('打断信息'), InterruptMsg)
+                    this.monitorGetMsgsListFetchController.abort();
+                }
+
+                if (this?.user?.userId == null) return showLog('未登录');
+                this.intes.m_topicList = Date.now();
+                warpFetch(() => {
+                    // 创建新的请求
+                    const controller = new AbortController();
+                    this.monitorGetMsgsListFetchController = controller;
+                    this.monitorGetMsgsListFetchTime = Date.now() + this.fetchTimeStep;
+                    return fetch(API_PREFIX + '/msg/m_topicList', { signal: controller.signal })
+                }, '监控消息列表', () => { }).then(data => {
+                    if (data == undefined) { return; }
+                    this.msgsListData.splice(0, this.msgsListData.length, ...data);
+                    this.sortShowMsgsListData();
+                }).finally(res => {
+                    this.intes.m_topicList = null;
+                    this.monitorGetMsgsList(monitor);
+                });
+            },
+            getOnlineList(delay) {
+                this.sortShowOnlineListData();
+                clearTimeout(this.getOnlineListTimeout); // 清除之前的定时器
+                this.getOnlineListTimeout = setTimeout(() => {
+                    warpFetch(() => fetch(API_PREFIX + '/user/onlineList'), '获取在线用户列表', () => { }).then(data => {
+                        this.onlineListData.splice(0, this.onlineListData.length, ...data);
+                        this.completeAvatarImage(this.onlineListData);
+                        this.sortShowOnlineListData();
+                    });
+                }, 0 < Number(delay) ? Number(delay) : 2000); // 设置 2000ms 的延迟
+            },
+            async monitorGetOnlineList(monitor, InterruptMsg) {
+                // 如果有正在进行中的请求就取消掉
+                if (this.monitorGetOnlineListFetchController) {
+                    if (Date.now() < this.monitorGetOnlineListFetchTime) return;
+                    if (InterruptMsg) console.info('monitorGetOnlineList', i18n('打断信息'), InterruptMsg)
+                    this.monitorGetOnlineListFetchController.abort();
+                }
+
+                if (this?.user?.userId == null) return showLog('未登录');
+                this.intes.m_onlineList = Date.now();
+                warpFetch(() => {
+                    // 创建新的请求
+                    const controller = new AbortController();
+                    this.monitorGetOnlineListFetchController = controller;
+                    this.monitorGetOnlineListFetchTime = Date.now() + this.fetchTimeStep;
+                    return fetch(API_PREFIX + '/user/m_onlineList', { signal: controller.signal })
+                }, '监控在线用户列表', () => { }).then(data => {
+                    if (data == undefined) { return; }
+                    this.onlineListData.splice(0, this.onlineListData.length, ...data);
+
+                    this.sortShowOnlineListData();
+                }).finally(res => {
+                    this.intes.m_onlineList = null;
+                    this.monitorGetOnlineList(monitor);
+                });
+            },
+            scrollToBottom(num, time) {
+                if (0 < time) time = time < 2000 ? time : 500;
+                else time = 500;
+                setTimeout(() => {
+                    const tableE = this.$refs.tableRef.$el.querySelector('.el-table__body');
+                    // 滚动到底部，滚动到顶部的话给值 0 即可
+                    this.$refs.tableRef.setScrollTop(tableE.scrollHeight)
+                }, time);
+            },
+            // 虚拟表格的时候用的
+            scrollToBottom_bak(num, time) {
+                if (0 < time) time = time < 2000 ? time : 500;
+                else time = 500;
+                setTimeout(() => {
+                    this.$refs.tableRef.scrollToRow(num ?? this.messages.length - 1)
+                }, time);
+            },
+            sortShowMsgsListData() {
+                // 排序与搜索
+                this.showMsgsListData = this.msgsListData.filter(item => {
+                    if (0 < this.searchQuery.length) {
+                        return item.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+                    }
+                    return true
+                }).sort((a, b) => b?.lastMsg?.time - a?.lastMsg?.time);
+            },
+            sortShowOnlineListData() {
+                // 排序与搜索
+                this.showOnlineListData = this.onlineListData.filter(item => {
+                    if (0 < this.searchQuery.length) {
+                        return item.username.toLowerCase().includes(this.searchQuery.toLowerCase())
+                    }
+                    return true
+                }).sort((a, b) => {
+                    // 这个数组中，如果是当前登录的用户那么排到第一位，其他的按照在线时间
+                    if (a.userId === this.user.userId) return -1;
+                    if (b.userId === this.user.userId) return 1;
+                    return b.lastUpdateTime - a.lastUpdateTime;
+                });
+            },
+            sortInsertToTop(topicId) {
+                let index = this.showOnlineListData.findIndex(online => online.topicId == topicId);
+                let online = this.showOnlineListData[index];
+                if (online) {
+                    this.showOnlineListData.splice(index, 1);
+                    this.showOnlineListData.unshift(online);
+                } else {
+                    showLog('没有找到消息对象')
+                }
+            },
+            sendMsgToServer() {
+                let lmsg = this.inmsg;
+                if (this.useEditor) {
+                    lmsg = this.readText();
+                }
+                this.writeText('');
+                if (lmsg != '') {
+                    this.sendMsg(lmsg, 0);
+                }
+            },
+            deleteMsg(msg) {
+                warpFetch(() => fetch(API_PREFIX + '/msg/delMsg', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ...msg,
+                        topicId: this.selectTopicId
+                    })
+                }), '删除消息').then(data => {
+                    let i = this.msgs[this.selectTopicId].findIndex(m => m.id == msg.id);
+                    this.msgs[this.selectTopicId].splice(i, 1);
+                    i = this.messages.findIndex(m => m.id == msg.id);
+                    this.messages.splice(i, 1);
+                });
+            },
+            updateMsg(msg) {
+                warpFetch(() => fetch(API_PREFIX + '/msg/updateMsg', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ...msg,
+                        topicId: this.selectTopicId
+                    })
+                }), '删除消息').then(data => {
+                    ElMessage.success('消息已编辑');
+                    this.editMsgId = null;
+                });
+            },
+            sendMsg(msg, retry, sendSuccess) {
+                if (retry == undefined) retry = 0;
+                const dn = Date.now();
+                /* 当前的消息列表 */
+                const msgs = this.messages;
+
+                if (typeof msg == 'string') msg = {
+                    topicId: this.selectTopicId,// 消息ID，也就是文件名字
+                    userId: this.user.userId,   // 当前用户id，用于检验是否有权限
+                    sendTime: Date.now(),       // 发送时间
+                    // time: dn,                // 服务器收到的时间
+                    senderror: false,           // 发送失败，如果发送失败则会变成错误信息
+                    content: msg,               // 消息
+                    type: this.msgTemplate.type || 'txt'
+                };
+                if (typeof msg != 'object') return console.error('消息类型异常，发送失败'), alert('发送失败' + typeof msg);
+                if (!msg.topicId) msg.topicId = Date.now();
+
+                if (retry == 0) {
+                    msgs.push(msg);
+                    this.scrollToBottom();  // 滑到最底部
+                    this.sortInsertToTop(this.selectTopicId); // 排序消息
+                };
+                warpFetch(() => fetch(API_PREFIX + '/msg/addMsg', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(msg)
+                }), '发送消息', (error) => {
+                    if (typeof retry == 'number' && 0 < retry) retry = 0;
+                    if (5 < retry) {
+                        msg.senderror = error;
+                        return;
+                    }
+                    // 发送失败，重新发送
+                    setTimeout(() => {
+                        this.sendMsg(msg, retry + 1)
+                    }, (1000 * retry) + 1000)
+                }).then(data => {
+                    if (typeof data == 'object' && data.time) {
+                        console.log('消息发送成功', data);
+                        let i = msgs.indexOf(msg);
+                        if (-1 < i) msgs.splice(i, 1);
+                        if (typeof sendSuccess == 'function') sendSuccess(data);
+                    }
+                });
+            },
+            async monitorAddMsg(InterruptMsg) {
+                // 如果有正在进行中的请求就取消掉
+                if (this.monitorTopicFetchController) {
+                    if (Date.now() < this.monitorTopicFetchTime) return;
+                    if (InterruptMsg) console.info('monitorAddMsg', i18n('打断信息'), InterruptMsg)
+                    this.monitorTopicFetchController.abort();
+                }
+                const topicId = this.selectTopicId;
+                const msgs = this.msgs[this.selectTopicId];
+
+                if (this?.user?.userId == null) return showLog('未登录');
+                if (topicId == null) return showLog('topicId参数不存在');
+                if (topicId == this.lastMonitorTopicFetchTag) return showLog('topicId被临时标记为失效');
+                this.lastMonitorTopicFetchTag = null;   // 清理记录
+                this.intes.m_getMsg = Date.now();
+                warpFetch(() => {
+                    // 创建新的请求
+                    const controller = new AbortController();
+                    this.monitorTopicFetchController = controller;
+                    this.monitorTopicFetchTime = Date.now() + this.fetchTimeStep;
+                    return fetch(API_PREFIX + '/msg/m_getMsg', {
+                        signal: controller.signal,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            topicId,  // 消息ID，也就是文件名字
+                            endMsg: Array.isArray(msgs) ? msgs[msgs.length - 1] : null, // 用于截取最后的消息，这样下载到的数据可以直接追加到列表中
+                        })
+                    })
+                }, '监听最新消息' + this.selectTopicId, (error) => {
+                    if (error.message == '无权限操作!') {
+                        // 记录失效的话题id，切换即可恢复
+                        this.lastMonitorTopicFetchTag = topicId;
+                    }
+                }).then(data => {
+                    if (data == undefined) { return; }
+                    if (Array.isArray(data)) {
+                        data.forEach(msg => {
+                            msgs.push(msg);
+                            this.messages.push(msg);
+                        });
+                        // 滑到最底部
+                        this.scrollToBottom();
+                    }
+                }).finally(res => {
+                    this.intes.m_getMsg = null;
+                    this.monitorAddMsg();
+                })
+
+            },
+            /**
+             * @param {boolean} back 是否往上翻聊天记录
+             * 默认只会往下请求消息
+             * 如果传递了这个参数则往上请求
+             * 如果消息为空，那么会拉取最新的消息
+             * 每次请求消息数量上限为30条
+             */
+            getMsg(back, monitorAddMsg) {
+                back = !!back;
+                const topicId = this.selectTopicId;
+                const userId = this.user.userId;
+                const msgs = this.msgs[this.selectTopicId];
+                // 请求消息数据
+                // if (!Array.isArray(this.msgs[this.selectTopicId])) this.msgs[this.selectTopicId] = [];
+                // this.messages = [...this.msgs[this.selectTopicId]];
+
+                warpFetch(() => fetch(API_PREFIX + '/msg/getMsg', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        topicId,  // 消息ID，也就是文件名字
+                        userId, // 当前用户id，用于检验是否有权限
+                        endMsg: back ? msgs[0] : msgs[msgs.length - 1], // 用于截取最后的消息，这样下载到的数据可以直接追加到列表中
+                        back,
+                        limit: 30,
+                    })
+                }), '获取最新消息' + this.selectTopicId).then(data => {
+                    if (data) {
+                        let keys = {};
+                        let sort = false;
+                        msgs.forEach(msg => keys[msg.id] = msg.time);
+                        data.forEach(msg => {
+                            // 检测如果消息id不存在则保存消息
+                            if (keys[msg.id] == undefined) {
+                                msgs.push(msg);
+                                sort = true;
+                            }
+                        });
+                        // 给消息进行排序
+                        if (sort) msgs.sort((a, b) => a.time - b.time);
+                        if (topicId == this.selectTopicId) this.readMsgList();
+                        if (monitorAddMsg) this.monitorAddMsg();
+                    }
+                })
+            },
+            updateTableSize() {
+                if (!tableContainerE || tableContainerE.clientWidth == 0 || scanTableContainerTime < Date.now()) {
+                    // 如果无法读取到宽度则重新获取table容器
+                    tableContainerE = document.querySelector('.table-container');
+                    scanTableContainerTime = Date.now() + 1000;
+                }
+                if (tableContainerE) {
+                    this.tableWidth = tableContainerE.clientWidth;
+                    this.tableHeight = tableContainerE.clientHeight;
+                }
+                // 计算左侧宽度 this.leftWidth .left-container
+                if (!leftContainerE || leftContainerE.clientWidth == 0 || scanLeftContainerTime < Date.now()) {
+                    // 如果无法读取到宽度则重新获取table容器
+                    leftContainerE = document.querySelector('.left-container');
+                    scanLeftContainerTime = Date.now() + 1000;
+                }
+                if (leftContainerE) {
+                    this.leftWidth = leftContainerE.clientWidth;
+                }
+            },
+            handlePasswordEnter(regMode) {
+                if (this.login.register) {
+                    if (regMode) this.handleRegister();
+                } else {
+                    this.handleLogin();
+                }
+            },
+            handleLogin() {
+                warpFetch(() => fetch(API_PREFIX + '/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ...this.login.form, password: encryptToBase64(this.login.form.password) })
+                }), '#登录账号').then(data => {
+                    if (data != null) {
+                        this.login.form.password = '';
+                        loginState.value = true;
+                        this.readUserInfo();
+                        ElMessage.success(this.login.form.username + ' ' + i18n('登录成功!'));
+                        this.login.loginPageVisible = false;
+                    }
+                });
+            },
+            handleLogout() {
+                warpFetch(() => fetch(API_PREFIX + '/user/logout'), '注销登录').then(data => {
+                    ElMessage.success(i18n('已注销登录'));
+                    Object.keys(this.user).forEach(k => this.user[k] = '');
+                    loginState.value = false;
+                    Object.assign(this.user, {
+                        // 默认信息
+                        username: '',
+                        userId: -1,
+                        avatar: '',
+                        showAvatar: '',
+                    });
+                });
+            },
+            async handleRegister() {
+                if (this.login.form.password != this.login.form.password2) {
+                    ElMessage.warning(i18n('输入的密码不一致！'));
+                    return;
+                }
+                const pdSalt = await this.passwordSalt(this.login.form.password);
+                warpFetch(() => fetch(API_PREFIX + '/user/signUp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ...this.login.form, password: pdSalt })
+                }), '#注册账号').then(data => {
+                    this.login.form.password = '';
+                    loginState.value = true;
+                    this.readUserInfo();
+                    ElMessage.success(this.login.form.username + ' 登录成功!');
+                    this.login.loginPageVisible = false;
+                });
+            },
+            async updatePassword(showUser) {
+                if (!showUser) showUser = this.editUser;
+                if (showUser.password != showUser.password2) {
+                    return ElMessage.warning(i18n('输入的密码不一致！'));
+                }
+                if (typeof showUser.oldPassword != 'string' || showUser.oldPassword.length < 1) {
+                    return ElMessage.warning(i18n('请输入旧密码！'));
+                }
+                const pdSalt = await this.passwordSalt(showUser.password);
+                const oldPdSalt = await this.passwordSalt(showUser.oldPassword);
+                warpFetch(() => fetch(API_PREFIX + '/user/updatePassword', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        password: pdSalt,
+                        oldPassword: oldPdSalt,
+                    })
+                }), '修改密码').then(data => {
+                    ElMessage.success(i18n('密码修改成功!'));
+                });
+            },
+            async updateAccount(showUser) {
+                let pdSalt = null;
+                if (showUser.password) pdSalt = await this.passwordSalt(showUser.password);
+                warpFetch(() => fetch(API_PREFIX + '/user/updateAccount', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user: { ...showUser, ...(pdSalt ? { password: pdSalt } : {}) } })
+                }), '修改信息').then(data => {
+                    this.readUserInfo();
+                    ElMessage.success(i18n('修改成功!'));
+                });
+            },
+            // copyToUser(user){
+            //     for (const key in user) {
+            //         this.user[key] = user[key];
+            //     }
+            // },
+            readUserInfo(userId) {
+                warpFetch(() => fetch(API_PREFIX + '/user/info' + (userId != undefined ? '?userId=' + userId : '')
+                ), '#用户信息').then(data => {
+                    if (!data) return;
+                    data = reactive(data);
+                    console.log('用户信息', data)
+                    if (new Date(data.deadline).toString() == 'Invalid Date') {
+                        data.deadline = 0;
+                    }
+                    // 尝试下载头像信息
+                    this.completeAvatarImage(data);
+
+                    loginState.value = true;
+                    if (userId == undefined) {
+                        // 把用户信息添加到 user 里面
+                        this.user = data;
+                        this.editUser = data;
+                        // 刷新完用户信息后刷新数据列表
+                        this.handleSwitchChange();
+                    } else {
+                        this.showUser = data;
+                        if (this.showUser.userId == this.editUser.userId) {
+                            this.editUser = data;
+                        }
+                        if (this.user.userId == data.userId) {
+                            this.user = data;
+                        }
+                    }
+                }).finally(a => {
+                    if (this.fristLoadUserInfo) {
+                        if (this.user.userId == -1) {
+                            // 打开登录界面
+                            this.login.loginPageVisible = true;
+                        }
+                        this.fristLoadUserInfo = false
+                    }
+                });
+            },
+            handleEditAvatarChange() {
+                this.editUser.showAvatar = '';
+                this.completeAvatarImage(this.editUser);
+            },
+            downloadAvatarImage(url) {
+                if (url) {
+                    return fetch(url, { mode: 'cors' }).then(r => r.blob()).then(blob => {
+                        return new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = () => reject(new Error('FileReader error'));
+                            reader.readAsDataURL(blob);
+                        });
+                    })
+                } else console.log(i18n('无效的头像地址'), url)
+            },
+            onAbout() {
+                ElMessage(this.version)
+            },
+            onReload() {
+                location.reload()
+            },
+            onClearCache() {
+                clearCaches().then(r => {
+                    ElMessage.success(i18n('缓存已清除'));
+                    setTimeout(this.onReload, 500);
+                }).catch(e => {
+                    ElMessage.error(i18n('清除缓存失败'));
+                });
+            },
+            copyContent(content) {
+                // 复制内容到剪贴板
+                navigator.clipboard.writeText(content).then(() => {
+                    this.$message.success('copy succeed!');
+                }).catch(() => {
+                    this.$message.error('copy error!');
+                });
+            },
+            selectAndChangMode(id, type, event) {
+                // 阻止事件冒泡
+                event?.stopPropagation?.();
+
+                let targetList = this.onlineSelect;
+                if (type == 'msgs') {
+                    targetList = this.msgsSelect;
+                }
+
+                const index = targetList.indexOf(id);
+                if (-1 < index) {
+                    targetList.splice(index, 1);
+                } else {
+                    targetList.push(id);
+                }
+            },
+            createTopicApi(opts) {
+                if (!Array.isArray(opts.addUserIds)) {
+                    return;
+                }
+
+                const index = opts.addUserIds.findIndex(id => id == this.user.userId);
+                if (-1 < index) opts.addUserIds.splice(index, 1);
+
+                if (!opts.name) opts.name = new Date().toLocaleString();
+
+                warpFetch(() => fetch(API_PREFIX + '/msg/createTopic', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(opts)
+                }), i18n('创建话题')).then(data => {
+                    ElMessage.success(data.name + ' ' + i18n('话题创建成功!'));
+                });
+            },
+            createTopic() {
+                let onlineSelectIds = this.onlineSelect.filter(userId => userId != this.user.userId);
+                ElMessageBox.prompt(i18n('你确定要创建一个话题吗？'),
+                    i18n('创建{num}其他人的话题').replace('{num}', onlineSelectIds.length), {
+                    confirmButtonText: i18n('确定'),
+                    cancelButtonText: i18n('取消'),
+                    inputPlaceholder: i18n('请输入话题名称'),
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return i18n('话题名称为空');
+                        }
+                        return true;
+                    },
+                    inputErrorMessage: i18n('无效的输入'),
+                    type: 'warning',
+                }).then(({ value }) => {
+                    // 调用创建话题的 API
+                    this.createTopicApi({
+                        addUserIds: [...new Set(onlineSelectIds)],
+                        name: value,
+                    });
+                }).catch(() => { });
+            },
+            deleteTopicApi(topicIds) {
+                if (!Array.isArray(topicIds) || topicIds.length < 1) return;
+                warpFetch(() => fetch(API_PREFIX + '/msg/deleteTopic', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ topicIds })
+                }), i18n('删除话题')).then(data => {
+                    ElMessage.success(data.length + ' ' + i18n('话题删除成功!'));
+                });
+            },
+            deleteTopic() {
+                // 选择自己的话题
+                let names = [];
+                const sa = this.user.superAdmin;
+                let topicIds = this.msgsSelect.filter(topicId => {
+                    let topic = this.msgsListData?.find(t => t.topicId == topicId);
+                    if (sa || topic?.admins?.[0] == this.user?.userId) {
+                        names.push(topic.name);
+                        return true;
+                    }
+                    return false;
+                });
+                if (topicIds.length < 1) {
+                    ElMessage.warning(i18n('请选择至少1个自己的话题'));
+                    return;
+                }
+                ElMessageBox.confirm(i18n('删除{num}个话题').replace('{num}', topicIds.length) + ` '${names.join("', '")}'`,
+                    i18n('你确定要删除话题吗？'), {
+                    confirmButtonText: i18n('确定'),
+                    cancelButtonText: i18n('取消'),
+                    type: 'warning',
+                }).then(({ value }) => {
+                    // 调用删除话题的 API
+                    this.deleteTopicApi(topicIds);
+                }).catch(() => { });
+            },
+            async runMsgInIframe(msg, iframe) {
+                let data = await this.runMsg(msg, true);
+                iframe.contentWindow.document.body.innerHTML = data;
+            },
+            async runMsg(msg, closeShowText) {
+                let fun = runMsgMap[msg.type];
+                if (typeof fun != 'function') {
+                    fun = (text) => text;
+                }
+                let re = await fun(msg.content);
+                if (!closeShowText) this.showText(typeof re == 'string' ? re.replaceAll('\n', '<br>') : re, i18n('类型', true) + ': ' + msg.type, re);
+                return re;
+            },
+            showText(body, title, bodyOrg) {
+                let that = this;
+                ElMessageBox.alert(body, title, {
+                    dangerouslyUseHTMLString: true,
+                    confirmButtonText: i18n('复制', true),
+                    callback: action => {
+                        if (action == 'confirm') {
+                            that.copyContent(bodyOrg ?? body)
+                        }
+                    }
+                })
+            },
+            showUserInfoPageByUserId(userId) {
+                this.handleOnlineSelect(userId);
+            },
+            clickWelcome() {
+                this.startNumber++;
+                ElMessage.success('' + this.startNumber)
+            },
+            showNotFoundText() {
+                // TextMap.__notFound
+                this.showText(Object.keys(TextMap.__notFound).join('<br>'),
+                    i18n('未命中的国际化字段数量'), JSON.stringify(TextMap.__notFound, null, 2));
+            },
+            changeNothidePage(left) {
+                if (left) this.nothidePage.left = !this.nothidePage.left;
+                else this.nothidePage.right = !this.nothidePage.right;
+            },
+            checkRows() {
+                try {
+                    if (this.useEditor) {
+                        // monacoEditor 输入框
+                        const lineCount = monacoEditor.getModel().getLineCount();
+                        if (this.currentRows != lineCount) {
+                            this.currentRows = lineCount;
+                        }
+                    } else {
+                        // 输入框
+                        this.$nextTick(() => {
+                            const textarea = this.$refs.inputRef.$el.querySelector("textarea"); // 获取 textarea 元素
+                            if (textarea) {
+                                const height = parseFloat(window.getComputedStyle(textarea).height); // 获取 textarea 的实际高度
+                                const lineHeight = parseFloat(window.getComputedStyle(textarea).lineHeight); // 获取每行的高度
+                                this.currentRows = Math.floor(height / lineHeight); // 计算行数
+                            }
+                        });
+                    }
+                } catch (err) { }
+            },
+            copyOriginData() {
+                this.copyContent(this.originData)
+            },
+            copyCryptoData() {
+                this.copyContent(this.cryptoData)
+            },
+            onCryptoData(decode) {
+                warpFetch(() => fetch(API_PREFIX + '/cryptoDB', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        decode: !!decode,
+                        data: decode ? this.cryptoData : this.originData,
+                        key: this.cryptoKey,
+                    })
+                }), i18n('加解密数据')).then(data => {
+                    if (typeof data == 'object') data = JSON.stringify(data);
+                    if (decode) {
+                        this.originData = '' + data;
+                    } else {
+                        this.cryptoData = '' + data;
+                    }
+                });
+            },
+            selectFile() {
+                this.fileName = i18n('选择文件中...');
+                document.getElementById('fileInput').click();
+                this.selectFileNameTimerId = setTimeout(() => this.fileName = '', 5000)
+            },
+            handleFileChange(event) {
+                clearTimeout(this.selectFileNameTimerId);
+                const files = event.target.files;
+                this.files = (files ? Array.from(files) : []) || [];
+                if (this.files && 0 < this.files.length) {
+                    const selectedFile = files[0];
+                    // 更新文件名
+                    if (1 < this.files.length) this.fileName = `(${this.files.length}) ${selectedFile.name}`;
+                    else this.fileName = selectedFile.name;
+                } else {
+                    this.fileName = '';
+                }
+            },
+            async initXxHash() {
+                // 初始化xxHash
+                try {
+                    this.xxHasher = await xxhash();
+                    console.log(i18n('xxHash-WASM 初始化完成'));
+                    if (!this.xxHasher) throw new Error('xxhash is error')
+                } catch (err) {
+                    console.error(i18n('xxHash初始化失败'), err);
+                    ElMessage.error(i18n('哈希计算功能不可用，请刷新页面'));
+                    throw new Error(i18n('哈希计算功能不可用，请刷新页面'))
+                }
+            },
+            // 计算文件哈希（适配后端xxHashJS的32位版本）
+            async calculateFileHash(file) {
+                if (!this.xxHasher) await this.initXxHash();
+
+                const chunkSize = 2 * 1024 * 1024; // 2MB分片
+                const chunks = Math.ceil(file.size / chunkSize);
+                const seed = 8866; // 与后端保持一致的种子
+
+                // 使用32位哈希以匹配后端XXHashJS
+                const hash = this.xxHasher.create32(seed);
+
+                for (let i = 0; i < chunks; i++) {
+                    const chunk = file.slice(i * chunkSize, (i + 1) * chunkSize);
+                    const buffer = await chunk.arrayBuffer();
+                    hash.update(new Uint8Array(buffer));
+                }
+
+                return hash.digest().toString(16).padStart(8, '0');
+            },
+            async upFile(file, ppcb) {
+                try {
+                    if (!file) {
+                        throw new Error(i18n('请先选择文件'))
+                    }
+                    let fn = file.name;
+                    let fileHash;
+                    if (!this.filesHashCache[fn]) {
+                        showLog("正在计算文件哈希...");
+                        fileHash = this.filesHashCache[fn] = await this.calculateFileHash(file);
+                        showLog(`文件校验中 (xxHash: ${fileHash.substring(0, 8)}...)`);
+                    } else fileHash = this.filesHashCache[fn];
+
+                    // 初始化上传（检查文件是否存在）
+                    const initResponse = await fetch('/uploads/init', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            filename: file.name,
+                            fileSize: file.size,
+                            fileHash: fileHash
+                        })
+                    });
+
+                    const initData = await initResponse.json();
+
+                    if (initData.skipUpload) {
+                        showLog(`文件已存在 ${initData.message}`);
+                        return initData;
+                    }
+
+                    // 格式化字节大小
+                    function formatBytes(bytes, decimals = 2) {
+                        if (bytes === 0) return '0 Bytes';
+                        const k = 1024;
+                        const dm = decimals < 0 ? 0 : decimals;
+                        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                        const i = Math.floor(Math.log(bytes) / Math.log(k));
+                        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+                    }
+                    // 配置TUS上传
+                    currentUpload = new tus.Upload(file, {
+                        endpoint: '/uploads/files',
+                        uploadUrl: initData.tusEndpoint,
+                        metadata: {
+                            filename: file.name,
+                            filetype: file.type,
+                            filehash: fileHash
+                        },
+                        chunkSize: 5 * 1024 * 1024, // 数据分片5MB分片
+                        retryDelays: [0, 1000, 3000, 5000],
+                        onError: (error) => {
+                            console.error("上传失败:", error);
+                        },
+                        onProgress: (bytesUploaded, bytesTotal) => {
+                            const percent = Math.round((bytesUploaded / bytesTotal) * 100);
+                            showLog(`上传进度: ${percent}% (${formatBytes(bytesUploaded)}/${formatBytes(bytesTotal)})`);
+                            if (typeof ppcb == 'function') ppcb(bytesUploaded, bytesTotal, percent)
+                        },
+                        onSuccess: () => {
+                            console.info("上传完成！");
+                        }
+                    });
+
+                    // 检查是否有未完成的上传
+                    const previousUploads = await currentUpload.findPreviousUploads();
+                    if (previousUploads.length > 0) {
+                        console.log("检测到未完成的上传，自动续传...");
+                        currentUpload.resumeFromPreviousUpload(previousUploads[0]);
+                    }
+
+                    currentUpload.start();
+                } catch (error) {
+                    console.error("上传错误:", error);
+                    ElMessage.error(`上传失败: ${error.message}`);
+                    return error
+                }
+            },
+            async uploadFiles() {
+                this.uploadedFiles = [];
+                let end = false;
+                for (let i = 0; i < this.files.length; i++) {
+                    const file = this.files[i];
+                    let prefix = i18n('上传中...') + `(${i}/${this.files.length})`;
+                    this.fileName = prefix + `[${i18n('正在计算文件哈希...')}]`;
+                    let re = await this.upFile(file, (a, b, pp) => {
+                        console.log('pp', pp)
+                        if (100 <= pp && end) this.fileName = `(${this.files.length}) ` + i18n('已全部上传');
+                        else this.fileName = prefix + `[${pp}%]`
+                    });
+                    if (re?.fileId) {
+                        this.uploadedFiles.push(re.fileId);
+                        this.writeText(this.inmsg + `\n${re.fileId}`);
+                    }
+                }
+                end = true;
+                this.fileName = `(${this.files.length}) ` + i18n('已全部上传');
+            },
+            clearFiles() {
+                try {
+                    this.files.splice(0, this.files.length);
+                } catch (err) {
+                    this.uploadedFiles = []
+                }
+                this.fileName = '';
+            },
+            clearUploadedFiles() {
+                this.uploadedFiles.splice(0, this.uploadedFiles.length);
+            },
+            fileUrl(url) {
+                return url.startsWith('http') ? url : ('/uploads/down/' + url);
+            },
+            /**
+             * 发送文件列表
+             */
+
+            async sendFiles() {
+                const files = [...this.uploadedFiles];
+
+                // 递归处理队列
+                const processNext = async (index = 0) => {
+                    if (index >= files.length) return; // 所有文件处理完成
+
+                    const fn = files[index];
+                    if (!fn) {
+                        console.error(i18n('无效的消息内容'), fn);
+                        return processNext(index + 1);
+                    }
+
+                    try {
+                        // 包装sendMsg为Promise，以便await
+                        await new Promise((resolve, reject) => {
+                            this.sendMsg({
+                                topicId: this.selectTopicId,// 消息ID，也就是文件名字
+                                userId: this.user.userId,   // 当前用户id，用于检验是否有权限
+                                sendTime: Date.now(),       // 发送时间
+                                // time: Date.now(),        // 服务器收到的时间
+                                senderror: false,           // 发送失败，如果发送失败则会变成错误信息
+                                content: fn,                // 消息
+                                type: 'image'
+                            }, 0, (data) => {
+                                // 从uploadedFiles中移除已发送文件
+                                const i = this.uploadedFiles.indexOf(fn);
+                                if (i !== -1) this.uploadedFiles.splice(i, 1);
+                                resolve(data); // 回调完成，继续下一个
+                            }
+                            );
+                        });
+                    } catch (error) {
+                        console.error('文件发送失败:', error);
+                    } finally {
+                        processNext(index + 1); // 无论成功失败，继续下一个
+                    }
+                };
+
+                await processNext(0); // 从第一个文件开始
+            },
+            getPreviewTopicListIndex(content) {
+                let index = this.previewTopicList.indexOf(this.fileUrl(content));
+                return 0 <= index ? index : this.previewTopicList.length;
+            },
+            globalInte() {
+                // 检查监控是否都在，不在就重新启动监控
+                if (!this.intes.m_getMsg) this.monitorAddMsg();
+                if (!this.intes.m_onlineList) this.monitorGetOnlineList();
+                if (!this.intes.m_topicList) this.monitorGetMsgsList();
+            },
+            /** 使用 marked 解析 Markdown */
+            renderedMarkdownByMsg(msg) {
+                return parseMarked(msg?.content || '');
+            },
+            initMonacoEditor() {
+                this.editorStatus = false;
+                let that = this;
+                this.$nextTick(() => {
+                    // 原始路径 https://unpkg.com/monaco-editor/min/vs
+                    require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor/min/vs' } });
+                    require(['vs/editor/editor.main'], function () {
+                        monacoEditor = monaco.editor.create(that.$refs.monacoEditor, {
+                            value: that.inmsg,
+                            language: 'javascript',
+                            theme: 'vs',
+                            automaticLayout: true,
+                            wordWrap: 'on',
+                            minimap: {
+                                enabled: true,
+                                autohide: true,     // 鼠标不在右侧时自动隐藏
+                                showSlider: 'mouseover', // 鼠标悬停时显示滑块
+
+                            },
+                            scrollBeyondLastLine: false,
+                            lineNumbers: 'on',
+                            folding: true,
+                            lineDecorationsWidth: 0,
+                            lineNumbersMinChars: 0,
+                            padding: { top: 5, bottom: 5 },
+                            fontSize: 14,
+                            lineHeight: that.lineHeight,
+                            renderWhitespace: 'none',
+                            overviewRulerBorder: false,
+                            hideCursorInOverviewRuler: true,
+                            // showSlider: 'always', // 始终显示滑块
+                            scrollbar: {
+                                vertical: 'hidden',
+                                horizontal: 'auto',
+                                handleMouseWheel: true
+                            }
+                        });
+
+                        // 设置 placeholder
+                        monacoEditor.updateOptions({
+                            placeholder: i18n('输入消息...')
+                        });
+
+                        // 内容变化事件
+                        monacoEditor.onDidChangeModelContent(() => {
+                            // that.inmsg = monacoEditor.getValue();
+                            that.adjustEditorHeight(monacoEditor);
+                            that.checkRows(); // 调用原有的行数检查方法
+                        });
+
+                        // 初始调整高度
+                        that.adjustEditorHeight(monacoEditor, true);
+                        this.editorStatus = true;
+                    });
+                })
+            },
+            readText() {
+                try {
+                    var content = monacoEditor.getValue();
+                    return this.inmsg = content
+                } catch (err) {
+                    console.error('读取输入内容失败', err)
+                }
+            },
+            writeText(text) {
+                try {
+                    monacoEditor.setValue(text);
+                } catch (err) {
+                    console.error('设置输入内容失败', err)
+                }
+                return this.inmsg = text
+            },
+            /**
+             * 调节输入框的宽高
+             */
+            adjustEditorHeight(editor, focus) {
+                try {
+                    if (!editor) editor = monacoEditor;
+                    const contentHeight = editor.getContentHeight();
+                    const maxHeight = this.lineHeight * 20 + this.padding;
+                    let currentRows = this.currentRows < 2 ? 2 : this.currentRows;
+                    const rowsHeight = this.lineHeight * currentRows;
+                    const useH = Math.min(contentHeight, maxHeight, rowsHeight);
+                    if (focus) {
+                        this.editorHeight = useH;
+                    } else {
+                        clearTimeout(this.adjustEditorHeightTimeout); // 清除之前的定时器
+                        this.adjustEditorHeightTimeout = setTimeout(() => {
+                            this.editorHeight = useH;
+                        }, 300); // 设置 300ms 的延迟
+                    }
+                } catch (error) {
+                    console.warn('调整输入框高度失败', error)
+                }
+            },
+            upModelLanguage() {
+                // 获取当前模型并设置新语言
+                const model = monacoEditor.getModel();
+                monaco.editor.setModelLanguage(model, languageMap[this.msgTemplate.type] || this.msgTemplate.type); // 切换为JavaScript语法高亮
+            },
+            async toggleNativeFullscreen() {
+                if (!this.useEditor) {
+                    ElMessage.info(i18n('普通输入框无法开启全屏模式'));
+                    return;
+                }
+                const container = this.$refs.monacoEditor;
+
+                try {
+                    if (!document.fullscreenElement) {
+                        await container.requestFullscreen();
+                        container.style.background = 'white';
+                    } else {
+                        if (document.exitFullscreen) {
+                            await document.exitFullscreen();
+                        }
+                    }
+                    this.editor.layout();
+                } catch (err) {
+                    console.error('全屏错误:', err);
+                }
+            },
+            onSaveDB() {
+                warpFetch(() => fetch(API_PREFIX + '/msg/save'), i18n('保存数据'), () => { }).then(data => {
+                    ElMessage.success(i18n('保存数据') + ' ' + data)
+                });
+            },
+            sa_logoutAll() {
+                // 注销所有登录
+                let onlineSelectIds = [...new Set(this.onlineSelect)];
+                ElMessageBox.confirm(i18n('你确定要注销这些用户的登录状态吗？'),
+                    i18n('注销{num}人的登录状态').replace('{num}', onlineSelectIds.length), {
+                    confirmButtonText: i18n('确定'),
+                    cancelButtonText: i18n('取消'),
+                    type: 'warning',
+                }).then(({ value }) => {
+                    // 批量注销登录
+                    warpFetch(() => fetch(API_PREFIX + '/user/sa_logoutAll', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ userIds: onlineSelectIds })
+                    }), i18n('注销登录')).then(data => {
+                        ElMessage.success(i18n('已注销登录'));
+                        this.getOnlineList(0);
+                    });
+                }).catch(() => { });
+            },
+            sa_onlineList() {
+                warpFetch(() => fetch(API_PREFIX + '/user/sa_onlineList'), '获取全部在线用户列表')
+                    .then(data => {
+                        this.onlineListData.splice(0, this.onlineListData.length, ...data);
+                        this.completeAvatarImage(this.onlineListData);
+                        this.sortShowOnlineListData();
+                    });
+            },
+            completeAvatarImage(userList) {
+                if (!Array.isArray(userList)) userList = [userList];
+                userList.forEach(user => {
+                    // 尝试下载头像信息
+                    try {
+                        if (user.avatar) {
+                            if (this.avatarImageCache[user.avatar]) {
+                                user.showAvatar = this.avatarImageCache[user.avatar]
+                            } else {
+                                this.downloadAvatarImage(user.avatar).then(base64Data => {
+                                    this.avatarImageCache[user.avatar] = base64Data
+                                    user.showAvatar = base64Data;
+                                }).catch(e => {
+                                    showLog('头像下载失败', e)
+                                })
+                            }
+                        }
+                    } catch (error) {
+                        showLog('头像加载失败', error)
+                    }
+                })
+            },
+            sa_topicList() {
+                warpFetch(() => fetch(API_PREFIX + '/msg/sa_topicList'), '获取全部话题列表').then(data => {
+                    this.msgsListData.splice(0, this.msgsListData.length, ...data);
+                    this.sortShowMsgsListData();
+                });
+            },
+            async passwordSalt(password) {
+                return await warpFetch(() => fetch(API_PREFIX + '/user/passwordSalt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password })
+                }), '获取加密后的密码');
+            },
+            openTopicOptionsPage(topic) {
+                console.log('topic', topic);
+                this.editTopic = topic;
+                this.selectRightPage(RightPageMap.editTopic);
+            },
+            onDeleteTopic(topic) {
+                if (!topic) {
+                    return;
+                }
+                // 选择自己的话题
+                if (topic?.admins?.[0] != this.user?.userId) {
+                    ElMessage.warning(i18n('无法删除他人的话题'));
+                    return;
+                }
+                ElMessageBox.confirm(i18n('删除话题'),
+                    i18n('你确定要删除话题 {name} 吗？').replace('{name}', topic.name), {
+                    confirmButtonText: i18n('确定'),
+                    cancelButtonText: i18n('取消'),
+                    type: 'warning',
+                }).then(({ value }) => {
+                    // 调用删除话题的 API
+                    this.deleteTopicApi([topic.topicId]);
+                }).catch(() => { });
+            },
+            onUpdateTopic(topic) {
+                if (!topic) {
+                    return;
+                }
+                warpFetch(() => fetch(API_PREFIX + '/msg/updateTopic', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(topic)
+                }), i18n('更新话题')).then(data => {
+                    ElMessage.success(data.name + ' ' + i18n('话题更新成功!'));
+                });
+            },
+            onExitTopic(topic) {
+                if (!topic) {
+                    return;
+                }
+                ElMessageBox.confirm(i18n('退出话题'),
+                    i18n('你确定要退出话题 {name} 吗？').replace('{name}', topic.name), {
+                    confirmButtonText: i18n('确定'),
+                    cancelButtonText: i18n('取消'),
+                    type: 'warning',
+                }).then(({ value }) => {
+                    warpFetch(() => fetch(API_PREFIX + '/msg/exitTopic', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(topic)
+                    }), i18n('退出话题')).then(data => {
+                        ElMessage.success(data.name + ' ' + i18n('话题已退出'));
+                    });
+                }).catch(() => { });
+
+            },
+        }
+    })
+        .use(ElementPlus)
+        .mount('#app');
+</script>
