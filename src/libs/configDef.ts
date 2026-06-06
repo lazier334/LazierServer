@@ -229,6 +229,7 @@ const config = {
     versionBanner: `当前服务器版本 v.{version} - {detail}`,
     /** 版本信息 */
     version: {
+        "1.2.1(26060600)": `= 合并端口`,
         "1.2.0(26033000)": `= 优化系统
 - 移除第三方插件 GlobalProxy
 = 系统其他优化`,
@@ -270,14 +271,10 @@ const config = {
     genProxyTargetFile: "proxy.js",
     /** 本地开发环境中插入的代码, 代码会插入到 index.html 文件中<body>标签内的开头 */
     indexInsertCode: "<script src=\"/proxy.js\"></script>",
-    /** http 服务器端口 */
+    /** http 与 ws 服务器端口 */
     portHttp: 3000,
-    /** https 服务器端口 */
+    /** https 与 wss 服务器端口 */
     portHttps: 3001,
-    /** websocket 服务器端口 */
-    portWS: 3010,
-    /** websockets 服务器端口 */
-    portWSS: 3011,
     /** 代理地址, 用于下载文件进行文件自动补全 */
     proxy: "http://localhost:7890",
     /** 自动补全的域名列表 */
