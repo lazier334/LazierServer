@@ -193,14 +193,14 @@ async function sendFile(ctx, filepath, opts, next) {
  * @returns {"api.demo.com/assets/index.js" | undefined} 选中的文件路径
  */
 async function selectFileByDomains(ctx, domainsMap, api) {
-    // 优先使用 参 数 ctx.query.dir 的  
-    // 其次使用 插件选择的，但是插件里可以删除参数 
-    // 最后默认使用 第一个 
+    // 优先使用参数 ctx.query.dir 的  
+    // 其次使用插件选择的，但是插件里可以删除参数 
+    // 最后默认使用第一个 
     let domains = Object.keys(domainsMap);
     let selectFolder = await (await plugins('selectFileByDomains')).use(domains, domainsMap, ctx) || domains[0];
 
     if (ctx.query.dir) {
-        let priorityDir = domains.find((item) => item === ctx.query.dir);
+        let priorityDir = domains.find((item) => item.replaceAll('\\', '/').endsWith(ctx.query.dir.replaceAll('\\', '/')));
         if (priorityDir) selectFolder = priorityDir;
     }
 
