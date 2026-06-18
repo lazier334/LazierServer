@@ -4,11 +4,16 @@
 ## 核心技术栈
 **`JS/TS` + `Koa`**
 
+## 全局安装与启动
+* **1. 下载项目** 使用git命令克隆main分支 `git clone https://github.com/lazier334/LazierServer.git`
+* **2. 安装项目** 使用命令 `npm i -g .`
+* **3. 启动项目** 使用命令 `ls334`
+* **4. 停止项目** 使用命令 `ls334 stop`
+
 ## 快速启动
 
 * **1. 下载项目** 使用git命令克隆main分支 `git clone https://github.com/lazier334/LazierServer.git`
-* **2. 安装依赖** 在项目目录中使用命令 `npm i` 
-* **3. 启动项目** 使用命令 `npm start`
+* **2. 启动项目** 使用命令 `npm start`
 
 ## docker
 * 可以直接[前往docker镜像页](https://github.com/lazier334/LazierServer/pkgs/container/lazierserver)复制对应镜像的命令进行下载使用

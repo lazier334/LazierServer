@@ -1,7 +1,7 @@
 {
   "name": "lazierserver",
-  "version": "1.2.1(26060600)",
-  "description": "= 合并端口",
+  "version": "1.3.0(26061800)",
+  "description": "+ 增加 ls334 命令控制",
   "homepage": "https://github.com/lazier334/LazierServer#readme",
   "bugs": {
     "url": "https://github.com/lazier334/LazierServer/issues"
@@ -13,6 +13,10 @@
   "license": "Copyright (c) 2025-2026 lazier334\r\n保留所有权利。\r\n\r\n1. 本项目**仅授权用于学习研究目的**，禁止任何形式的复制、修改、分发、商业利用或其他行为。  \r\n2. **无论是否获得授权**，使用者应对所有行为承担法律责任及风险，本人**拒绝承担任何直接/间接责任**。",
   "author": "lazier334",
   "type": "module",
+  "bin": {
+    "lazierserver": "./src/app.ts",
+    "ls334": "./src/app.ts"
+  },
   "scripts": {
     "start": "npm i && node src/app.ts",
     "dev": "node src/app.ts",
@@ -29,6 +33,7 @@
     "@koa/router": "^15.3.1",
     "@tus/file-store": "^2.0.0",
     "@tus/server": "^2.3.0",
+    "commander": "^15.0.0",
     "iconv-lite": "^0.7.2",
     "javascript-obfuscator": "^5.3.0",
     "koa": "^3.1.2",

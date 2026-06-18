@@ -1,4 +1,5 @@
 import path from 'path';
+import version from './version.ts';
 import { fileURLToPath, pathToFileURL } from 'url';
 
 type NullObject = { [key: string]: any; };
@@ -228,35 +229,7 @@ const config = {
     /** banner显示模版 */
     versionBanner: `当前服务器版本 v.{version} - {detail}`,
     /** 版本信息 */
-    version: {
-        "1.2.1(26060600)": `= 合并端口`,
-        "1.2.0(26033000)": `= 优化系统
-- 移除第三方插件 GlobalProxy
-= 系统其他优化`,
-        "1.1.1(26021100)": `+ 增加打包系统
-= 优化提示信息, 更方便开发插件
-= 系统其他优化`,
-        "1.1.0(26010700)": `从js迁移到ts, 优化提示信息, 更方便开发插件
-= 其他优化`,
-        "1.0.2(25121200)": `增加im与whistle并优化代码
-+ 增加 github actions 自动打包版本
-+ 增加 im 插件
-+ 增加 whistle 控制项（需要手动安装 whistle ）
-+ 增加 web/utils 工具网页自动扫描
-+ 增加备案信息配置项 copyright.icp
-= 其他优化`,
-        "1.0.1(25090100)": `增加部分能力并优化代码
-
- + 增加同目录多文件检测与选择规则（不支持匹配所有项，仅支持无编码与全编码两种的计算）
- + 增加自动添加 proxy.js 插件到 html 接口文件中的功能
- + 增加不同编码同时匹配
- + 增加默认的session
- + 增加加解密数据接口
- + 增加 响应代码为400及以上的接口访问数据 查看与清除接口
- - 清理部分多余的代码
- = 其他优化`,
-        "1.0.0(25081400)": `一个可以快速搭建的服务器`
-    },
+    version: version || { "1.0.0(25081400)": `一个可以快速搭建的服务器` },
     /** 输入路径 */
     rootDir: `{/ldDirName/}/web`,
     /** 输出路径 */

@@ -3,13 +3,14 @@ import path from 'path';
 import { pathToFileURL } from 'url';
 import defConfig from './configDef.ts';
 type ConfigType = typeof defConfig;
+const __dirname = defConfig.get__dirname(import.meta.url);
 /**
  * 设定外部配置数据位置，主要控制 banner.txt 和 conf.ts 两个文件  
  * 在 conf.ts 中可以继续配置这个路径属性 "ldDirName" ，配置后，
  * 在后续的调用中将会把数据写入配置的位置。
  * 但是默认的配置和banner固定为默认路径 "./ld/"
  */
-defConfig.ldConfigPath = path.join(defConfig.get__dirname(import.meta.url), '../../ld/conf.ts');
+defConfig.ldConfigPath = path.join(__dirname, '../../ld/conf.ts');
 const ldDirName = path.dirname(defConfig.ldConfigPath);
 if (!fs.existsSync(ldDirName)) {
     fs.mkdirSync(ldDirName);
@@ -40,6 +41,15 @@ config.genInsertInsertCode = config.genInsertInsertCode.replaceAll('proxy.js', c
 const bannerPath = path.join(config.ldDirName, 'banner.txt');
 if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
     config.versionBanner = fs.readFileSync(bannerPath, 'utf8')
+}
+
+// 4. 检查如果运行的路径不是当前程序的路径里，那么就将其添加到web和plugin路径
+const nowDir = process.cwd();
+const lsDir = path.join(__dirname, '../../');
+if (!nowDir.replaceAll('/', '').replaceAll('\\', '').includes(lsDir.replaceAll('/', '').replaceAll('\\', ''))) {
+    console.info('将当前文件夹作为web与plugin目录', nowDir);
+    config.otherWebPath.push(nowDir);
+    config.pluginDirs.push(nowDir);
 }
 
 // 使用配置

@@ -1,12 +1,31 @@
+#!/usr/bin/env node
 import Koa from 'koa';
 import http from 'http';
 import https from 'https';
+import { Command } from 'commander';
 import { WebSocketServer } from 'ws';
 import { initKoa, bindWebSocketServer } from './libs/initKoa.ts';
 import { fs, path, config } from './libs/config.ts';
 import { plugins } from './libs/plugins.ts';
 
-(async (): Promise<void> => {
+const runfile = path.join(config.get__dirname(import.meta.url), 'start.log');
+const program = new Command();
+program.name('lazierserver')
+    .description('LaizerServer 服务器')
+    .version(Object.keys(config.version).shift() || '-');
+program.command('start', { isDefault: true })
+    .description('启动服务器')
+    .action(main);
+program.command('stop').alias('kill')
+    .description('停止服务器')
+    .action(async () => {
+        console.log('正在停止服务器...');
+        if (fs.existsSync(runfile))
+            fs.unlinkSync(runfile);
+    });
+program.parse(process.argv);
+
+async function main(): Promise<void> {
     const app = new Koa();
     // 系统启动阶段
     await (await plugins('systemStart')).use({ fs, path, config, app });
@@ -14,6 +33,16 @@ import { plugins } from './libs/plugins.ts';
     await initKoa(app);
     // 启动监听端口空闲后启动服务器
     startServers();
+
+    // 检查文件用于做删除文件时退出
+    fs.writeFileSync(runfile, new Date().toLocaleString());
+    const interval = setInterval(() => {
+        if (!fs.existsSync(runfile)) {
+            console.warn('由于状态文件被删除, 正在退出服务器');
+            clearInterval(interval);
+            process.exit(0);
+        }
+    }, 1000);
 
     /** 
      * 等待端口监听，每间隔 1 秒尝试一次  
@@ -46,4 +75,4 @@ import { plugins } from './libs/plugins.ts';
             });
         });
     }
-})()
+}
