@@ -82,11 +82,11 @@ jobs:
     - name: Create ZIP package
       run: |
         # 排除指定文件夹，创建zip包
-        zip -r ${{ env.TAG_NAME }}.zip . \
+        zip -r LazierServer-${{ env.TAG_NAME }}.zip . \
           -x "*.git/*" ".github/*" ".vscode/*" ".idea/*" \
           -x "node_modules/*" "dist/*" "*.zip"
         mkdir -p dist
-        mv ${{ env.TAG_NAME }}.zip dist/
+        mv LazierServer-${{ env.TAG_NAME }}.zip dist/
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -99,7 +99,7 @@ jobs:
           
           ## Changes
           ${{ env.COMMIT_MSG }}
-        files: dist/${{ env.TAG_NAME }}.zip
+        files: dist/LazierServer-${{ env.TAG_NAME }}.zip
         draft: false
         prerelease: false
       env:
