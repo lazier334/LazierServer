@@ -217,7 +217,8 @@ async function selectFileByDomains(ctx, domainsMap, api) {
 function getAllWebDir(dir) {
     let re = [];
     try {
-        re = fs.readdirSync(dir).filter((item) => fs.statSync(path.join(dir, item)).isDirectory())
+        re = fs.readdirSync(dir).filter(name => (config.switch.scanWebOnlyDoamin ? name.includes('.') : true)
+            && fs.statSync(path.join(dir, name)).isDirectory())
             .map(domain => path.join(dir, domain));
     } catch (err) {
         console.warn(`扫描目录时异常(目录: ${dir})`, err);

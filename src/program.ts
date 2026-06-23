@@ -48,6 +48,24 @@ program.command('restart').aliases(['reboot'])
         }
     });
 
+program.command('clean').aliases(['clear'])
+    .description('清理日志')
+    .action(async () => {
+        callback = (main, config) => {
+            new Set(config.logger.dailyRotateFileList.map(e => path.dirname(e.filename))).forEach(dir => {
+                console.log('清理目录:', dir)
+                try {
+                    if (fs.existsSync(dir)) {
+                        fs.rmSync(dir, { recursive: true, force: true });
+                    }
+                } catch (err) {
+                    console.log('清理失败', dir);
+                    console.log(err);
+                }
+            })
+        }
+    });
+
 program.command('adddir').aliases(['serverdir', 'add'])
     .description('添加服务器目录')
     .argument('[directory]', '服务器目录路径', process.cwd())
@@ -72,8 +90,9 @@ program.command('stop').aliases(['kill', 'halt'])
     .description('停止服务器')
     .action(async () => {
         console.log('正在停止服务器...');
-        if (fs.existsSync(runfile))
+        if (fs.existsSync(runfile)) {
             fs.unlinkSync(runfile);
+        }
         process.exit(0);
     });
 

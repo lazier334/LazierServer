@@ -27,15 +27,15 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
      * 监控配置，当配置发生变更的时候进行重启
      */
     async function monitorConfig() {
-        const confInfo = await readConfigInfo();
+        const confInfo = await readFlattenConfigInfo();
         chokidar.watch(config.ldConfigPath).on('change', async () => {
             // 检查配置对象是否有变更
             try {
-                const newConfInfo = await readConfigInfo();
+                const newConfInfo = await readFlattenConfigInfo();
                 // 先对比 keys 是否一样，不一样就直接标记需要重启
-                let restartFlag = confInfo.key != newConfInfo.key;
+                let restartFlag = confInfo.keyStr != newConfInfo.keyStr;
                 if (!restartFlag) {
-                    for (const k of confInfo.confKeys) {
+                    for (const k of confInfo.flatKeys) {
                         if (confInfo.flatConf[k] != newConfInfo.flatConf[k]) {
                             // 标记需要重启
                             restartFlag = true;
@@ -113,15 +113,16 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
          * 读取扁平化的配置与key字符串
          * @returns 
          */
-        async function readConfigInfo() {
+        async function readFlattenConfigInfo() {
             const stat = fs.statSync(config.ldConfigPath);
             const conf = (await import(pathToFileURL(config.ldConfigPath).href + '?ts=' + stat.mtimeMs)).default;
-            const confKeys = Object.keys(conf).sort();
+            const flatConf = flattenObject(conf);
+            const flatKeys = Object.keys(flatConf).sort();
 
             return {
-                flatConf: flattenObject(conf),
-                confKeys: confKeys,
-                key: confKeys.join('')
+                flatConf,
+                flatKeys,
+                keyStr: flatKeys.join('')
             }
         };
     }

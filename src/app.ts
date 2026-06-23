@@ -1,11 +1,11 @@
 #!/usr/bin/env node
+import { callback, runfile } from './program.ts';
 import Koa from 'koa';
 import http from 'http';
 import https from 'https';
 import chokidar from 'chokidar';
 import { WebSocketServer } from 'ws';
 import { plugins } from './libs/plugins.ts';
-import { callback, runfile } from './program.ts';
 import { fs, path, config } from './libs/config.ts';
 import { initKoa, bindWebSocketServer } from './libs/initKoa.ts';
 
@@ -45,7 +45,6 @@ async function main(): Promise<void> {
             bindWebSocketServer(new WebSocketServer({ server }));
         }
         server.listen(port, () => {
-            console.log('');
             console.log(` http|ws  服务器已运行:   http://localhost:${port} | ws://localhost:${port}`);
 
             // 2. 创建 HTTP + WS 共用服务器
