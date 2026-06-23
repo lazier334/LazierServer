@@ -1,8 +1,7 @@
-
 import fs from 'fs';
 import path from 'path';
 import { Command } from 'commander';
-import defConfig from './libs/configDef.ts';
+import defConfig from './configDef.ts';
 
 const __dirname = import.meta.dirname;
 const nowDir = process.cwd();

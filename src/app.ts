@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { callback, runfile } from './program.ts';
+import { callback, runfile } from './libs/program.ts';
 import Koa from 'koa';
 import http from 'http';
 import https from 'https';
