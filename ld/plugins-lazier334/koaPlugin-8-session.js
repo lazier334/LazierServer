@@ -1,6 +1,6 @@
-import { createKoaPlugin } from './types/index.ts';
 import session from 'koa-session';
 import { config } from './libs/baseImport.js';
+import { createKoaPlugin } from './types/index.ts';
 
 const sessionMiddleware = session(config.session, config.app);
 

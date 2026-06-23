@@ -1,6 +1,7 @@
-import { createKoaRouter } from './types/index.ts';
-import * as globalUtils from './utils/utils.js';
 import all from './utils/utils-im.js';
+import * as globalUtils from './utils/utils.js';
+import { createKoaRouter } from './types/index.ts';
+
 const {
     Config,
     imConfig,

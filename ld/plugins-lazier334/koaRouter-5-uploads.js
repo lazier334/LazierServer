@@ -1,11 +1,11 @@
-import { createKoaRouter } from './types/index.ts';
 import send from 'koa-send';
 import crypto from 'crypto';
-import { lc, db } from './utils/utils-upload.js';
-import { fs, path, config } from './libs/baseImport.js';
-import { xxhash } from './utils/utils-base.js';
-import { Server, EVENTS } from '@tus/server';
 import { FileStore } from '@tus/file-store';
+import { Server, EVENTS } from '@tus/server';
+import { xxhash } from './utils/utils-base.js';
+import { lc, db } from './utils/utils-upload.js';
+import { createKoaRouter } from './types/index.ts';
+import { fs, path, config } from './libs/baseImport.js';
 
 /**
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external

@@ -1,7 +1,7 @@
-import { createKoaRouter } from './types/index.ts';
 import send from 'koa-send';
-import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
+import { createKoaRouter } from './types/index.ts';
 import { handlerHtmlBodyData, isHandlerHtmlBodyData } from './utils/util-router.js';
+import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
 
 const { plugins, pathDeduplication } = await getPluginsModule();
 /** @type {import('../../src/libs/utils.ts')} */

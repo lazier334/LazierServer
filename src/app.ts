@@ -2,6 +2,7 @@
 import Koa from 'koa';
 import http from 'http';
 import https from 'https';
+import chokidar from 'chokidar';
 import { Command } from 'commander';
 import { WebSocketServer } from 'ws';
 import { initKoa, bindWebSocketServer } from './libs/initKoa.ts';
@@ -36,13 +37,10 @@ async function main(): Promise<void> {
 
     // 检查文件用于做删除文件时退出
     fs.writeFileSync(runfile, new Date().toLocaleString());
-    const interval = setInterval(() => {
-        if (!fs.existsSync(runfile)) {
-            console.warn('由于状态文件被删除, 正在退出服务器');
-            clearInterval(interval);
-            process.exit(0);
-        }
-    }, 1000);
+    chokidar.watch(runfile).on('unlink', async () => {
+        console.warn('由于状态文件被删除, 正在退出服务器');
+        process.exit(0);
+    });
 
     /** 
      * 等待端口监听，每间隔 1 秒尝试一次  
@@ -50,7 +48,7 @@ async function main(): Promise<void> {
      * @param {number} [num=3] 等待次数
      * @param {https.Server} server 服务器对象
      */
-    function startServers(num = 3, server: any = null) {
+    function startServers(num: number = 3, server: any = null) {
         let port = config['portHttp'];
         if (!server) {
             // 1. 创建 HTTPS + WSS 共用服务器

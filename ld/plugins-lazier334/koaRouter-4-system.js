@@ -1,8 +1,8 @@
-import { createKoaRouter } from './types/index.ts';
 import send from 'koa-send';
+import { createKoaRouter } from './types/index.ts';
 import { restartSystem } from './libs/sys-restart.js';
-import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseImport.js';
 import { runCmd, runCmdByExec } from './utils/util-cmd.js';
+import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseImport.js';
 
 const { plugins, getAllPlugin } = await getPluginsModule();
 const utilsModule = await getUtilsModule();
