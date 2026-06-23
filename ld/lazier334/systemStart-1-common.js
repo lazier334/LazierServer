@@ -117,7 +117,6 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
             const stat = fs.statSync(config.ldConfigPath);
             const conf = (await import(pathToFileURL(config.ldConfigPath).href + '?ts=' + stat.mtimeMs)).default;
             const confKeys = Object.keys(conf).sort();
-            console.log('confKeys', confKeys)
 
             return {
                 flatConf: flattenObject(conf),

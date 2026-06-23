@@ -1,7 +1,7 @@
 import { createKoaRouter } from './types/index.ts';
-import runCmd from '../plugins-lazier334/utils/util-cmd.js';
-import result from '../plugins-lazier334/utils/util-result.js';
-import { exportFunction } from '../plugins-lazier334/externals/demo.js';
+import runCmd from '../lazier334/utils/util-cmd.js';
+import result from '../lazier334/utils/util-result.js';
+import { exportFunction } from '../lazier334/externals/demo.js';
 
 /**
  * koa 路由插件的demo  

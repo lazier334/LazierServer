@@ -214,7 +214,7 @@ const config = {
 
         return true;
     },
-    /** ld 文件夹名称 */
+    /** ld 文件夹名称，这个字段被用于作为旧数据，所以最好使用 updateLdDirName 函数来更新他，避免其他路径修改异常 */
     ldDirName: ldDirName,
     /** 系统配置 */
     system,

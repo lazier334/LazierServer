@@ -7,7 +7,11 @@ const configTest: Partial<Config> = {
 }
 // 服务器资源目录，plugins 和 web 共同所在的目录
 var serverDir = [];
-try { serverDir = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'serverDir.json'), 'utf8')); } catch { };
+try {
+    serverDir = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'serverDir.json'), 'utf8'));
+    // 在此处对文件夹路径做定位与排序
+    serverDir = serverDir.map((dir: string) => path.resolve(import.meta.dirname, dir)).sort();
+} catch { };
 
 /**
  * 用户自定义配置  
@@ -42,7 +46,9 @@ export default {
         /** 是否开启自动跨域 */
         autoCors: false,
         cors: false,
-        autoComplete: false
+        autoComplete: false,
+        /** 扫描web的时候仅扫描域名文件夹 */
+        scanWebOnlyDoamin: true
     },
     appendButsData: [
         {
@@ -59,12 +65,12 @@ export default {
         }
     ],
     otherWebPath: [
-        "{/ldDirName/}/web-lazier334",
+        "{/ldDirName/}/lazier334",
         ...serverDir
     ],
     pluginDirs: [
         "{/ldDirName/}/plugins",
-        "{/ldDirName/}/plugins-lazier334",
+        "{/ldDirName/}/lazier334",
         ...serverDir
     ],
     copyright: {

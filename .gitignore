@@ -15,6 +15,6 @@ LazierServer*
 ld/plugins/temporary/
 !ld/plugins/externals/global-proxy/GlobalProxy.exe
 ld/plugins/externals/global-proxy
-ld/uploads
 *.edit.*
 ld/imdbs/
+uploads

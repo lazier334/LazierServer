@@ -11,14 +11,13 @@ const __dirname = import.meta.dirname;
  * 但是默认的配置和banner固定为默认路径 "./ld/"
  */
 defConfig.ldConfigPath = path.join(__dirname, '../../ld/conf.ts');
-const ldDirName = path.dirname(defConfig.ldConfigPath);
-if (!fs.existsSync(ldDirName)) {
-    fs.mkdirSync(ldDirName);
+const dataPath = path.dirname(defConfig.ldConfigPath);
+if (!fs.existsSync(dataPath)) {
+    fs.mkdirSync(dataPath);
 }
 
 // @ts-expect-error
 var config: ConfigType = {
-    ldDirName,
     /** 打包时插入的代码，代码会插入到 index.html 文件中<body>标签内的开头 */
     genInsertInsertCode: `<script>(()=>{var xhr=new XMLHttpRequest();xhr.open('GET',src=((url,name3)=>{url=new URL(url);let hs=url.host.split('.');if(3<=hs.length)hs[0]=name3;return url.href.replace(url.host,hs.join('.'))})(window.location.origin,'static')+'proxy.js?timestamp='+Date.now(),false);xhr.send(null);eval(xhr.responseText)})()</script>`,
 };
@@ -38,7 +37,7 @@ if (fs.existsSync(defConfig.ldConfigPath) && fs.statSync(defConfig.ldConfigPath)
 config.genInsertInsertCode = config.genInsertInsertCode.replaceAll('proxy.js', config.genProxyTargetFile || defConfig.genProxyTargetFile);
 
 // 3. 读取 banner.txt 文件内容
-const bannerPath = path.join(config.ldDirName, 'banner.txt');
+const bannerPath = path.join(dataPath, 'banner.txt');
 if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
     config.versionBanner = fs.readFileSync(bannerPath, 'utf8')
 }
@@ -47,7 +46,7 @@ if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
 config = defConfig.useConfig(config, defConfig);
 
 // 设置数据文件夹
-config.updateLdDirName(config.ldDirName, true);
+config.updateLdDirName(dataPath, true);
 
 /**
  * 获取当前文件的储存空间，可以通过 process.G.getNowFileStorage 使用  
