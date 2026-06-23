@@ -28,7 +28,7 @@ const lc = config.selectConfig({
         ].map(domain => [domain, domain]))
     }
 });
-const lastDirname = path.resolve(config.get__dirname(import.meta.url), '..');
+const lastDirname = path.resolve(import.meta.dirname, '..');
 if (!lc.outdir.startsWith(lastDirname)) lc.outdir = path.join(lastDirname, lc.outdir);
 if (lc.rootDir.startsWith(lastDirname)) lc.indir = lc.rootDir;
 else lc.indir = path.join(lastDirname, lc.rootDir);

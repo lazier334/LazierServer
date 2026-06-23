@@ -1,4 +1,3 @@
-import type Router from '@koa/router';
 
 /** send的配置对象 */
 type SendOptions = {

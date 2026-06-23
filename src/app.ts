@@ -9,7 +9,7 @@ import { initKoa, bindWebSocketServer } from './libs/initKoa.ts';
 import { fs, path, config } from './libs/config.ts';
 import { plugins } from './libs/plugins.ts';
 
-const __dirname = config.get__dirname(import.meta.url);
+const __dirname = import.meta.dirname;
 const nowDir = process.cwd();
 const lsDir = path.join(__dirname, '../');
 const runfile = path.join(__dirname, 'start.log');

@@ -31,7 +31,6 @@ type ConfigUtilsType = {
     useConfig: typeof appendObj;
     readVersion: typeof readVersion;
     isMainModule: typeof isMainModule;
-    get__dirname: typeof get__dirname;
     getNowFileStorage: typeof getNowFileStorage;
 };
 
@@ -47,7 +46,6 @@ const ConfigUtils: ConfigUtilsType = {
     useConfig: appendObj,
     readVersion,
     isMainModule,
-    get__dirname,
     getNowFileStorage,
 }
 /** ld 文件夹名称 */
@@ -742,15 +740,6 @@ function isMainModule(currentFileUrl?: string, proc: NodeJS.Process = process): 
     const currentFilePath = fileURLToPath(new URL(currentFileUrl));         // 当前文件路径
     return entryScriptPath === currentFilePath;
 };
-
-/**
- * 用于给mjs获取当前的文件夹路径
- * @param url 需要传递 import.meta.url 当前模块的完整路径, 必须要传递
- * @returns 文件夹路径 '/root/Project/LazierServer/src/libs'
- */
-function get__dirname(url: string): string {
-    return path.dirname(fileURLToPath(url))
-}
 
 /**
  * 获取当前文件的储存空间  

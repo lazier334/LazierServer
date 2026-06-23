@@ -13,6 +13,19 @@
   "license": "Copyright (c) 2025-2026 lazier334\r\n保留所有权利。\r\n\r\n1. 本项目**仅授权用于学习研究目的**，禁止任何形式的复制、修改、分发、商业利用或其他行为。  \r\n2. **无论是否获得授权**，使用者应对所有行为承担法律责任及风险，本人**拒绝承担任何直接/间接责任**。",
   "author": "lazier334",
   "type": "module",
+  "exports": {
+    "./types": {
+      "types": "./ld/plugins/types/index.d.ts",
+      "default": "./ld/plugins/types/index.ts"
+    }
+  },
+  "files": [
+    "ld/",
+    "src/",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
     "lazierserver": "./src/app.ts",
     "ls334": "./src/app.ts"
@@ -21,7 +34,8 @@
     "start": "npm i && node src/app.ts",
     "dev": "node src/app.ts",
     "buildjs": "node ld/plugins/libs/genProxy.js",
-    "build": "node ld/plugins/libs/buildAll.js"
+    "build": "node ld/plugins/libs/buildAll.js",
+    "build:types": "tsc"
   },
   "engines": {
     "node": ">=24.0.0",
@@ -55,6 +69,7 @@
     "@types/koa__cors": "^5.0.1",
     "@types/koa__router": "^12.0.5",
     "@types/koa-send": "^4.1.6",
-    "@types/ws": "^8.18.1"
+    "@types/ws": "^8.18.1",
+    "typescript": "^6.0.3"
   }
 }

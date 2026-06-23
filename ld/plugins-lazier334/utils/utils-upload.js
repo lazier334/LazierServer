@@ -16,7 +16,7 @@ const lc = {
     /** 基础路由 */
     BASEAPI: '/uploads',
     /** 上传路径 */
-    dbDir: path.join(config.dataPath, 'uploads'),
+    dbDir: path.join(import.meta.dirname, '../uploads'),
     /** 配置文件名 */
     dbName: 'map.json',
     xxhashSeed: 8866,

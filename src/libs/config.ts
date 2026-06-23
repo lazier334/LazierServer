@@ -3,7 +3,7 @@ import path from 'path';
 import { pathToFileURL } from 'url';
 import defConfig from './configDef.ts';
 type ConfigType = typeof defConfig;
-const __dirname = defConfig.get__dirname(import.meta.url);
+const __dirname = import.meta.dirname;
 /**
  * 设定外部配置数据位置，主要控制 banner.txt 和 conf.ts 两个文件  
  * 在 conf.ts 中可以继续配置这个路径属性 "ldDirName" ，配置后，

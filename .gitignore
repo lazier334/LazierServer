@@ -11,7 +11,7 @@ ld/logs
 !ld/web/index
 logs
 LazierServer*
-dist
+# dist  # 允许发布 .d.ts 声明文件到 npm
 ld/plugins/temporary/
 !ld/plugins/externals/global-proxy/GlobalProxy.exe
 ld/plugins/externals/global-proxy

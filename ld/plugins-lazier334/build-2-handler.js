@@ -31,7 +31,7 @@ const lc = config.selectConfig({
     /** 更多日志 */
     moreLog: false
 });
-const lastDirname = path.resolve(config.get__dirname(import.meta.url), '..');
+const lastDirname = path.resolve(import.meta.dirname, '..');
 if (!lc.outdir.startsWith(lastDirname)) lc.outdir = path.join(lastDirname, lc.outdir);
 
 /**
