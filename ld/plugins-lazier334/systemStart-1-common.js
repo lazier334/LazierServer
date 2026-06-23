@@ -18,7 +18,7 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
     }
 
     // 监控配置，当配置发生变更的时候进行重启
-    monitorConfig(fs, config);
+    monitorConfig();
 
     config.app = app;
     app.keys = config.session.keys;
@@ -32,6 +32,7 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
             // 检查配置对象是否有变更
             try {
                 const newConfInfo = await readConfigInfo();
+                // 先对比 keys 是否一样，不一样就直接标记需要重启
                 let restartFlag = confInfo.key != newConfInfo.key;
                 if (!restartFlag) {
                     for (const k of confInfo.confKeys) {
@@ -42,18 +43,49 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
                         }
                     }
                 }
-                if (restartFlag) {
-                    // 重启
-                    if (process.platform == 'win32') restartSystem(config.system.restart.restartCmdWin);
-                    else if (process.platform === 'darwin') restartSystem(config.system.restart.restartCmdMac);
-                    else restartSystem(config.system.restart.restartCmdLinux);
-                } else {
-                    throw new Error('配置未发生变更，故不重启');
+                restart(restartFlag);
+            } catch (err) {
+                // 配置无效的时候不进行重启
+            }
+        });
+        // 尝试读取 serverDir.json 文件
+        /** serverDir.json 文件路径 */
+        const serverDirPath = path.join(path.dirname(config.ldConfigPath), 'serverDir.json');
+        /** 读取 serverDir.json 配置文件 */
+        const readServerDir = () => {
+            let re;
+            try { re = JSON.parse(fs.readFileSync(serverDirPath, 'utf8')); } catch { }
+            return (Array.isArray(re) ? re : []).sort()
+        }
+        const cacheServerDir = readServerDir();
+        const cacheServerDirString = String(cacheServerDir);
+
+        chokidar.watch(serverDirPath).on('change', async () => {
+            // 检查配置对象是否有变更
+            try {
+                const nowServerDir = readServerDir();
+                if (String(nowServerDir) != cacheServerDirString) {
+                    restart(true);
                 }
             } catch (err) {
                 // 配置无效的时候不进行重启
             }
         });
+
+        /**
+         * 尝试重启
+         * @param {boolean} restartFlag 
+         */
+        function restart(restartFlag) {
+            if (restartFlag) {
+                // 重启
+                if (process.platform == 'win32') restartSystem(config.system.restart.restartCmdWin);
+                else if (process.platform === 'darwin') restartSystem(config.system.restart.restartCmdMac);
+                else restartSystem(config.system.restart.restartCmdLinux);
+            } else {
+                throw new Error('配置未发生变更，故不重启');
+            }
+        }
 
         /**
          * 将一个对象进行扁平化, 例如将 {"a":12,"b":{"b1":21,"b2":22},"c":31} 

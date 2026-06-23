@@ -1,8 +1,13 @@
+import fs from 'fs';
+import path from 'path';
 import type configDef from '../src/libs/configDef';
 type Config = typeof configDef;
 const configTest: Partial<Config> = {
     // 这里可以用来快速查询与测试系统配置列表
 }
+// 服务器资源目录，plugins 和 web 共同所在的目录
+var serverDir = [];
+try { serverDir = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'serverDir.json'), 'utf8')); } catch { };
 
 /**
  * 用户自定义配置  
@@ -54,11 +59,13 @@ export default {
         }
     ],
     otherWebPath: [
-        "{/ldDirName/}/web-lazier334"
+        "{/ldDirName/}/web-lazier334",
+        ...serverDir
     ],
     pluginDirs: [
         "{/ldDirName/}/plugins",
-        "{/ldDirName/}/plugins-lazier334"
+        "{/ldDirName/}/plugins-lazier334",
+        ...serverDir
     ],
     copyright: {
         icp: "" // 隐藏备案信息

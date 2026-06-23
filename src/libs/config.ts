@@ -43,15 +43,6 @@ if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
     config.versionBanner = fs.readFileSync(bannerPath, 'utf8')
 }
 
-// 4. 检查如果运行的路径不是当前程序的路径里，那么就将其添加到web和plugin路径
-const nowDir = process.cwd();
-const lsDir = path.join(__dirname, '../../');
-if (!nowDir.replaceAll('/', '').replaceAll('\\', '').includes(lsDir.replaceAll('/', '').replaceAll('\\', ''))) {
-    console.info('将当前文件夹作为web与plugin目录', nowDir);
-    config.otherWebPath.push(nowDir);
-    config.pluginDirs.push(nowDir);
-}
-
 // 使用配置
 config = defConfig.useConfig(config, defConfig);
 
