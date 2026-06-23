@@ -1,7 +1,7 @@
 import type Router from '@koa/router';
 import type { PluginResult } from './plugins.ts';
-import type { SendFileType } from '../../lazier334/koaRouter-1.1-scanWeb.ts';
-import type { SendEntryType } from '../../lazier334/koaRouter-1-scanHar.ts';
+import type { SendFileType } from '../../lazier334/koaRouter-1.1-scanWeb.js';
+import type { SendEntryType } from '../../lazier334/koaRouter-1-scanHar.js';
 
 /** 提供多个类型聚合，用于类型提示 */
 type extendTypes = SendFileType & SendEntryType;

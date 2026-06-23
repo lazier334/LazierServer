@@ -8,3 +8,4 @@ import createSystemStart from './systemStart.ts';
 import createGenProxy from './genProxy.ts';
 import createBuild from './build.ts';
 export { createIndexData, createKoaPlugin, createKoaRouter, createSelectFileByDomains, createWebsocketApis, createWebsocketMsgs, createSystemStart, createGenProxy, createBuild };
+export * from "../libs/baseImport.ts";

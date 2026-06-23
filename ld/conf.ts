@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import type configDef from '../src/libs/configDef';
+import type configDef from '../src/libs/configDef.ts';
 type Config = typeof configDef;
 const configTest: Partial<Config> = {
     // 这里可以用来快速查询与测试系统配置列表

@@ -9,5 +9,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["ld/plugins/types/**/*.ts"]
+  "include": ["ld/plugins/types/**/*.ts", "ld/lazier334/types/selectFileByDomains.ts"]
 }

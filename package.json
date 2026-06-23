@@ -15,8 +15,8 @@
   "type": "module",
   "exports": {
     "./types": {
-      "types": "./ld/plugins/types/index.d.ts",
-      "default": "./ld/plugins/types/index.ts"
+      "types": "./ld/lazier334/types/index.d.ts",
+      "default": "./ld/lazier334/types/index.ts"
     }
   },
   "files": [

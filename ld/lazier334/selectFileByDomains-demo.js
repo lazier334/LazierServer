@@ -1,4 +1,4 @@
-import { createSelectFileByDomains } from './types/index.ts';
+import { createSelectFileByDomains } from '../plugins/types/index.ts';
 
 /**
  * 多路径存在同一api时的选择算法插件的demo

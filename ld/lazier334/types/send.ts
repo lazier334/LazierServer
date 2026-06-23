@@ -1,3 +1,4 @@
+import type { PluginResult } from './plugins.ts';
 
 /** send的配置对象 */
 type SendOptions = {
@@ -12,7 +13,7 @@ type SendOptions = {
 /**
  * send 插件函数
  */
-type SendFunction = (sendOptions: SendOptions) => void;
+type SendFunction = (sendOptions: SendOptions) => PluginResult;
 
 /**
  * 创建 send 插件的类型提示函数  

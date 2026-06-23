@@ -10,12 +10,15 @@
 * **3. 启动项目** 使用命令 `ls334`
 * **4. 停止项目** 使用命令 `ls334 stop`
 
-### 快速开发
+### 快速开发（类型提示不完善，请以原始项目为准）
+> **类型提示不完善，请以原始项目为准**
 
 1. 完成上述全局安装
 2. 创建一个空文件夹，并从文件夹里使用命令启动服务器，**该文件夹不能位于当前项目LazierServer的文件夹内** 
 3. 直接把当前文件夹作为web与plugins的共用文件夹使用
-4. 创建一个插件 **可以通过导入 `lazierserver/types` 来获得提示信息**
+4. 先使用 `npm init` 初始化
+5. 然后使用 `npm link lazierserver` 关联项目
+6. 创建一个插件 **可以通过导入 `lazierserver/types` 来获得提示信息**
     ```js
     import { createKoaRouter } from 'lazierserver/types';
 
@@ -26,7 +29,7 @@
         return router
     })
     ```
-5. 创建一个静态资源文件夹 `a.b` 并把静态资源放进文件夹内，例如: `a.b/index.html` ，可通过 `switch.scanWebOnlyDoamin` 进行配置是否使用`.`作为筛选，**默认情况下文件夹必须至少含有一个 `.` 才能被识别为web资源**
+7. 创建一个静态资源文件夹 `a.b` 并把静态资源放进文件夹内，例如: `a.b/index.html` ，可通过 `switch.scanWebOnlyDoamin` 进行配置是否使用`.`作为筛选，**默认情况下文件夹必须至少含有一个 `.` 才能被识别为web资源**
 
 ## 普通快速启动
 
