@@ -96,6 +96,75 @@ program.command('stop').aliases(['kill', 'halt'])
         process.exit(0);
     });
 
+const files: Record<string, string> = {
+    'indexData-1-temp.js': `import { createIndexData } from 'lazierserver/types';
+
+export default createIndexData(async function indexData(arr) {
+    if (false) arr.push(...[
+        {
+            icon: "",
+            name: "{directory}",
+            mark: "选项 - {directory}",
+            urls: [
+                {
+                    text: "打开",
+                    url: "/{directory}"
+                }
+            ],
+        },
+    ]);
+    return arr;
+})`,
+    'koaRouter-1-temp.js': `import { createKoaRouter } from 'lazierserver/types';
+
+export default createKoaRouter(function koaRouter(router, T) {
+    // 接口
+    router.all('/{directory}', async (ctx, next) => {
+        /** @type {ctx & T} 完整的ctx提示信息 */
+        const ectx = ctx;
+        ectx.sendOptions.filename = '_' + ectx.sendOptions.filename;
+        console.log(ectx.sendOptions.filename)
+    });
+    return router
+})`,
+    'package.json': `{
+    "name": "{directory}",
+    "version": "1.0.0",
+    "description": "通过lazierserver创建的项目: {directory}",
+    "license": "ISC",
+    "author": "",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "start":"ls334",
+        "link":"npm link lazierserver",
+        "dev":"ls334"
+    }
+}
+`,
+}
+program.command('create').aliases(['c', 'template'])
+    .description('创建项目模版')
+    .argument('[directory]', '文件夹名称', 'ls334')
+    .action(async (directory) => {
+        console.log('正在创建模版:', directory);
+        const basedir = process.cwd();
+        const targetPath = path.join(basedir, directory);
+        if (!fs.existsSync(targetPath)) {
+            fs.mkdirSync(targetPath);
+            const dirname = path.basename(targetPath);
+            for (const name in files) {
+                fs.writeFileSync(path.join(targetPath, name), files[name].replaceAll('{directory}', dirname))
+            }
+            console.info(directory, '项目已创建');
+            console.log('正在安装依赖中...');
+            const { execSync } = await import('child_process');
+            execSync('npm run link', { cwd: targetPath });
+            console.log(`依赖安装完成, 可使用以下命令快速启动项目: \ncd ${targetPath} \nls334`);
+        } else console.error(directory, '文件(夹)已存在!目标路径:', targetPath)
+        process.exit(0);
+    });
+
 program.parse(process.argv);
 
 export {
