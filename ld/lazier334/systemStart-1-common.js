@@ -13,8 +13,14 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
     // 监控配置，当配置发生变更的时候进行重启
     monitorConfig();
 
+    // 保存全局对象
     config.app = app;
     app.keys = config.session.keys;
+
+    // 捕获请求的错误信息
+    app.on('error', (err, ctx) => {
+        console.warn('该请求发生程序外错误', ctx.path, '\n', err)
+    });
 
     /**
      * 监控配置，当配置发生变更的时候进行重启
