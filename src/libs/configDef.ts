@@ -237,7 +237,7 @@ const config = {
     /** 生成插件时导出的函数列表, 根据需求选择导出 */
     genProxyExportKeys: ["initPlugin"],
     /** 导出插件-存放的文件夹 */
-    genProxyTargetDir: `{/ldDirName/}/web/plugin`,
+    genProxyTargetDir: `{/ldDirName/}/web/web.plugin`,
     /** 导出插件-导出的文件名 */
     genProxyTargetFile: "proxy.js",
     /** 本地开发环境中插入的代码, 代码会插入到 index.html 文件中<body>标签内的开头 */
@@ -562,7 +562,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         setStack: 'ls-set-stack',
     },
     /** 临时下载的文件的目录 */
-    tempDownDir: `{/ldDirName/}/web/temporary`,
+    tempDownDir: `{/ldDirName/}/web/web.temporary`,
     /**
      * koa的对象
      * @type {import('koa')}
