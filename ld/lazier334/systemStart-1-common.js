@@ -19,7 +19,7 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
 
     // 捕获请求的错误信息
     app.on('error', (err, ctx) => {
-        console.warn('该请求发生程序外错误', ctx.path, '\n', err)
+        console.warn('该请求发生LS之外的错误', ctx.path, '\n', err)
     });
 
     /**
