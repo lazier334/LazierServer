@@ -7,8 +7,8 @@ export { runCmd, restartSystem }
  * 运行 startCmd 命令启动系统
  * @param {'../../bin/start.bat'} startCmd 启动命令
  */
-function restartSystem(startCmd) {
-    runCmd(startCmd, [], () => process.exit(0))
+function restartSystem() {
+    runCmd(process.argv[0], process.argv.slice(1), () => process.exit(0))
 }
 
 /**
@@ -19,6 +19,7 @@ function restartSystem(startCmd) {
  * @param {(code)=>{}} closeCallback code==0则为正常运行结束，结束1秒后才运行这个回调
  */
 function runCmd(command, args, spawnCallback = () => { }, closeCallback = () => { }) {
+    console.log('运行命令:', command, args);
     const child = spawn(command, args, {
         stdio: 'inherit',   // 将输出重定向到当前控制台
         shell: true,        // 使用 shell 执行命令

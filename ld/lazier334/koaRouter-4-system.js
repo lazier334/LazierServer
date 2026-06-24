@@ -46,10 +46,7 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
     // 接口: 重启服务器
     router.all('系统路由 - 重启服务器', '/system/restart', async (ctx, next) => {
         if (!authUser(ctx).superAdmin) return next();
-
-        if (process.platform == 'win32') restartSystem(config.system.restart.restartCmdWin);
-        else if (process.platform === 'darwin') restartSystem(config.system.restart.restartCmdMac);
-        else restartSystem(config.system.restart.restartCmdLinux);
+        restartSystem();
         ctx.body = result('重启中...');
     });
 

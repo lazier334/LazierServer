@@ -78,10 +78,7 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
          */
         function restart(restartFlag) {
             if (restartFlag) {
-                // 重启
-                if (process.platform == 'win32') restartSystem(config.system.restart.restartCmdWin);
-                else if (process.platform === 'darwin') restartSystem(config.system.restart.restartCmdMac);
-                else restartSystem(config.system.restart.restartCmdLinux);
+                restartSystem()
             } else {
                 throw new Error('配置未发生变更，故不重启');
             }
