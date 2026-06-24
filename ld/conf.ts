@@ -23,14 +23,6 @@ export default {
     portHttps: 3001,
     portWS: 3010,
     portWSS: 3011,
-    genProxyExportKeys: [
-        "initPlugin",
-        "urlHandlerInit",
-        "proxyXHRAndFetch",
-        "proxyDocmentHeadAppendChild",
-        "removeScriptElement",
-        "proxyWebSocket"
-    ],
     times: {
         pluginStagesUpdateStep: 10000
     },

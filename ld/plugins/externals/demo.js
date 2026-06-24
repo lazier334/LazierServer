@@ -1,4 +1,4 @@
-console.log('这是一个外部的js脚本demo')
+console.log('这是一个外部的js脚本demo', Date.now())
 
 export {
     exportFunction

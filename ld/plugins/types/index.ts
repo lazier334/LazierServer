@@ -4,8 +4,6 @@ import createKoaRouter from './koaRouter.ts';
 import createWebsocketApis from './websocketApis.ts';
 import createWebsocketMsgs from './websocketMsgs.ts';
 import createSystemStart from './systemStart.ts';
-import createGenProxy from './genProxy.ts';
-import createBuild from './build.ts';
 
 export {
     createIndexData,
@@ -13,7 +11,5 @@ export {
     createKoaRouter,
     createWebsocketApis,
     createWebsocketMsgs,
-    createSystemStart,
-    createGenProxy,
-    createBuild
+    createSystemStart
 }

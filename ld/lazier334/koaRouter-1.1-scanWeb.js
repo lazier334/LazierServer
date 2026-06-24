@@ -228,8 +228,6 @@ function getAllWebDir(dir) {
 
 /** 添加其他文件夹访问路径 */
 function pushDir(dirs) {
-    // 插件文件夹
-    dirs.push(config.genProxyTargetDir);
     // 其他的web文件夹
     if (config.switch.allWebDir) {
         config.otherWebPath.forEach(web => dirs.splice(dirs.length, 0, ...getAllWebDir(web)));

@@ -1,2 +1,2 @@
 #!/bin/bash
-node buildVersion.cjs
+node syncVersion.cjs

@@ -62,12 +62,12 @@ class Stage {
  *  - systemStart: 系统启动阶段
  *  - koaPlugin: koa插件
  *  - koaRouter: 接口路由
- *  - selectFileByDomains: 选择域名
- *  - genProxy: 构建网页插件的函数插件
  *  - indexData: 首页列表数据
  *  - websocketMsgs: websocket消息
  *  - websocketApis: websocket接口
- *  - send: 发送文件的处理
+ *  - selectFileByDomains: 选择域名(lazier334需求)
+ *  - send: 发送文件的处理(lazier334需求)
+ *  - 其他: 实际项目需求
  */
 const stages: Record<string, any> = {};
 if (typeof config.pluginStages != 'object') {

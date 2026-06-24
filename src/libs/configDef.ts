@@ -188,8 +188,6 @@ const config = {
         this.ldDirName = newLdDirName;
         /** 输入路径 */
         this.rootDir = replaceAllStr(this.rootDir);
-        /** 导出插件-存放的文件夹 */
-        this.genProxyTargetDir = replaceAllStr(this.genProxyTargetDir);
         /** 插件目录列表 */
         this.pluginDirs.forEach((e, i) => this.pluginDirs[i] = replaceAllStr(e));
         /** 外部配置路径, 改文件所在的 ld 目录也用于存放自定义插件 */
@@ -223,16 +221,8 @@ const config = {
     rootDir: `{/ldDirName/}/web`,
     /** 输出路径 */
     outdir: "dist",
-    /** 打包时插入的代码, 代码会插入到 index.html 文件中<body>标签内的开头 */
-    genInsertInsertCode: "<script src=\"/b41e93b2-009a-4be6-8d16-cb3c3e176620\"></script>",
-    /** 生成插件时导出的函数列表, 根据需求选择导出 */
-    genProxyExportKeys: ["initPlugin"],
-    /** 导出插件-存放的文件夹 */
-    genProxyTargetDir: `{/ldDirName/}/web/web.plugin`,
-    /** 导出插件-导出的文件名 */
-    genProxyTargetFile: "proxy.js",
     /** 本地开发环境中插入的代码, 代码会插入到 index.html 文件中<body>标签内的开头 */
-    indexInsertCode: "<script src=\"/proxy.js\"></script>",
+    indexInsertCode: '<script src="/proxy.js"></script>',
     /** http 与 ws 服务器端口 */
     portHttp: 3000,
     /** https 与 wss 服务器端口 */
@@ -514,10 +504,6 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         autoComplete: true,
         /** 扫描全部文件夹, 开启后会扫描web中的所有文件夹, 否则只扫描指定的 domainList 配置中的内容, 这不影响扫描全部的har文件 */
         allWebDir: true,
-        /** 导出插件-强制开启https, 会让插件强制把所有请求转为https */
-        genProxyForceHttps: true,
-        /** 一键打包时是否生成新的插件 */
-        genAllGenProxy: true,
         /** 本地开发使用生产环境模式 */
         indexUseProdMode: false,
         /** 开启添加栈追踪 */

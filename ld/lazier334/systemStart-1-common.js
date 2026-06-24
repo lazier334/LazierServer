@@ -10,13 +10,6 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
     // 打印版本日志
     console.info(config.showVersion());
 
-    // 检测 proxy.js 是否生成，如果没有生成，那么指定代码进行生成
-    if (!fs.existsSync(path.join(config['genProxyTargetDir'], 'proxy.js'))) {
-        console.warn('开发环境插件 proxy.js 不存在，生成该插件');
-        const genProxyPath = pathToFileURL(path.join(import.meta.dirname, '../plugins/libs/genProxy.js'));
-        await (await import(genProxyPath)).default();
-    }
-
     // 监控配置，当配置发生变更的时候进行重启
     monitorConfig();
 
