@@ -126,7 +126,7 @@ function getPlguinUpdateTime(filepath) {
  * @param {string} rootDir har文件所在文件夹
  * @returns {boolean} 有没有成功更新内容
  */
-function detectUpdate(rootDir = config.rootDir) {
+function detectUpdate(rootDir) {
     if (!config.switch.dynamicOperation && 0 < Object.keys(lc.apiMap).length) return false;
     // 检测文件名是否全部一致
     let fileTag = fs.readdirSync(rootDir).sort().join('');

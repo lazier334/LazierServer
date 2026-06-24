@@ -22,16 +22,23 @@ var config: ConfigType = {
     genInsertInsertCode: `<script>(()=>{var xhr=new XMLHttpRequest();xhr.open('GET',src=((url,name3)=>{url=new URL(url);let hs=url.host.split('.');if(3<=hs.length)hs[0]=name3;return url.href.replace(url.host,hs.join('.'))})(window.location.origin,'static')+'proxy.js?timestamp='+Date.now(),false);xhr.send(null);eval(xhr.responseText)})()</script>`,
 };
 
-// 1. 读取 ld 的配置文件进行合并
-if (fs.existsSync(defConfig.ldConfigPath) && fs.statSync(defConfig.ldConfigPath).isFile()) {
+// 1. 读取 ld 的配置文件进行合并，配置选择优先级 运行路径的配置文件 > 项目的配置文件 > 默认配置
+const getConfig = async (filepath: string): Promise<Partial<ConfigType> | undefined> => {
     try {
-        let conf = (await import(pathToFileURL(defConfig.ldConfigPath).href)).default;
-        config = { ...config, ...(conf as Partial<ConfigType>) };
-    } catch (err) {
-        console.error('加载外部配置失败');
-        throw err;
-    }
+        return (await import(pathToFileURL(filepath).href)).default as Partial<ConfigType>;
+    } catch { }
 }
+const cwdConfigPath = path.join(process.cwd(), 'conf.ts');
+let conf = await getConfig(cwdConfigPath);
+if (!conf) {
+    conf = await getConfig(defConfig.ldConfigPath);
+    if (!conf) {
+        conf = {};
+        console.info('使用系统默认配置');
+    } else console.info('使用配置文件:', defConfig.ldConfigPath);
+} else console.info('使用配置文件:', cwdConfigPath);
+
+config = { ...config, ...conf };
 
 // 2. 替换插入的代码中的 "proxy.js" 为实际配置的文件名
 config.genInsertInsertCode = config.genInsertInsertCode.replaceAll('proxy.js', config.genProxyTargetFile || defConfig.genProxyTargetFile);
