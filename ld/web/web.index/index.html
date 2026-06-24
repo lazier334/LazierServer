@@ -587,6 +587,7 @@
                 return 'https://' + rawUrl;
             },
             openUrl(url) {
+                if (url.startsWith('javascript:')) return eval(url.replace('javascript:', ''));
                 url = this.normalizeUrl(url);
                 if (this.copyLinkStatus) this.copyText(url);
                 else if (url.includes('openApi')) {

@@ -19,6 +19,9 @@ export default createIndexData(async function indexDataDemo(arr) {
         try {
             // 添加 whistle 相关
             const whistleProxyServer = '127.0.0.1:8899';
+            // 添加 whistle 相关
+            const host = '127.0.0.1';
+            const port = '8899';
             re = re.concat([
                 {
                     icon: "",
@@ -27,7 +30,23 @@ export default createIndexData(async function indexDataDemo(arr) {
                     urls: [
                         {
                             text: "打开",
-                            url: "/system/systemProxy?openApi=true&open=true&proxyServer=" + whistleProxyServer
+                            url: `javascript:(${(async (host, port) => {
+                                try {
+                                    const bypassKey = 'bypass';
+                                    let bypass = localStorage.getItem(bypassKey);
+                                    if (bypass == null) bypass = '*.example.com;localhost;127.*;192.168.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*';
+                                    const { value } = await ElMessageBox.prompt('建议使用复制粘贴来编写规则', '请输入 bypass 规则', {
+                                        confirmButtonText: '开启代理',
+                                        cancelButtonText: '取消',
+                                        inputValue: bypass
+                                    });
+                                    localStorage.setItem(bypassKey, value)
+                                    bypass = value;
+                                    this.openUrl(`/system/systemProxy?openApi=true&open=true&host=${host}&port=${port}&bypass=${bypass}`)
+                                } catch (err) {
+                                    console.log('已取消', err)
+                                }
+                            }).toString()})('${host}','${port}')`
                         },
                         {
                             text: "关闭",
@@ -49,15 +68,15 @@ export default createIndexData(async function indexDataDemo(arr) {
                             url: "/system/whistle?openApi=true"
                         },
                         {
-                            text: "测试",
-                            url: `http://${whistleProxyServer}`
+                            text: "Whistle 主页",
+                            url: `http://${host}:${port}`
                         },
                         {
                             text: "Rules-外部代理",
                             url: "# * proxy://127.0.0.1:7890"
                         },
                         {
-                            text: "Rules-抓取文件",
+                            text: "Rules-抓取文件-从reqHeaders读取",
                             url: "# * resWrite://`D:/W2/${reqHeaders.host}/` excludeFilter://localhost  excludeFilter://*.bing.com"
                         },
                         {
@@ -66,7 +85,7 @@ export default createIndexData(async function indexDataDemo(arr) {
                         },
                         {
                             text: "Rules-转发单个接口",
-                            url: "# */shared/984721902a/index.json https://`localhost:3001${reqHeaders.pathname}`"
+                            url: "# */shared/984721902a/index.json https://`localhost:3001${url.pathname}`"
                         }
                     ],
                 }

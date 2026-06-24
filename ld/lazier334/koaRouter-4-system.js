@@ -1,7 +1,8 @@
 import send from 'koa-send';
+import { runCmd } from './utils/util-cmd.js';
+import sysproxy from '@mihomo-party/sysproxy';
 import { createKoaRouter } from './types/index.ts';
 import { restartSystem } from './libs/sys-restart.js';
-import { runCmd, runCmdByExec } from './utils/util-cmd.js';
 import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseImport.js';
 
 const { plugins, getAllPlugin } = await getPluginsModule();
@@ -187,27 +188,27 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
     });
 
     // 接口：读取搜索快捷关键词按钮数据
-    router.all('系统路由 - 开关系统代理(仅限windows)', '/system/systemProxy', async (ctx) => {
+    router.all('系统路由 - 开关系统代理', '/system/systemProxy', async (ctx) => {
         /** @type {"127.0.0.1:8080"} 代理服务器地址 */
-        const open = ctx.request.query.open;
-        const opt = open ? '开启' : '关闭';
+        const open = ctx.request.query.open == 'true';
         try {
             if (open) {
-                const proxyServer = ctx.request.query.proxyServer;
-                await runCmdByExec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 1 /f`);
-                if (proxyServer) await runCmdByExec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyServer /t REG_SZ /d "${proxyServer}" /f`);
+                const host = ctx.request.query.host || '127.0.0.1';
+                const port = ctx.request.query.port || '7890';
+                const bypass = ctx.request.query.bypass;
+                if (!bypass) throw new Error('参数 bypass 不合法! 示例: "*.example.com;localhost;127.*;192.168.*"');
+                // 开启代理
+                sysproxy.triggerManualProxy(true, host, parseInt(port, 10), bypass);
+                ctx.body = `已开启系统代理, 代理服务器 ${host}:${port} 跳过规则: "${bypass}"`;
             } else {
-                runCmdByExec(`reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings" /v ProxyEnable /t REG_DWORD /d 0 /f`)
+                // 关闭代理
+                sysproxy.triggerManualProxy(false, '', 0, '');
+                ctx.body = `已关闭系统代理`;
             }
-
-            await runCmdByExec(`powershell -Command "& { Add-Type -TypeDefinition '[DllImport(\\\"user32.dll\\\")] public static extern int SendMessageTimeout(int, int, int, string, int, int, out int);'; $null = [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); }"`);
-            // 会按下F5按键
-            // await runCmdByExec(`powershell -Command "& { Add-Type -TypeDefinition '[DllImport(\\\"user32.dll\\\")] public static extern int SendMessageTimeout(int, int, int, string, int, int, out int);'; $null = [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.SendKeys]::SendWait('{F5}'); }"`);
-
-            ctx.body = `已${opt}系统代理`;
         } catch (err) {
-            console.log(`系统代理${opt}失败!`, err);
-            ctx.body = `系统代理${opt}失败!` + err.message;
+            let msg = `系统代理${open ? '开启' : '关闭'}失败!`;
+            console.log(msg, err);
+            ctx.body = msg + err.message;
         }
     });
 
