@@ -225,8 +225,8 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
         }
     });
 
-    router.all('系统路由 - 打开web文件夹', '/system/openWeb', async (ctx) => {
-        let filepath = ctx.request?.body?.filepath || ctx.request?.query?.filepath || config.rootDir;
+    router.all('系统路由 - 打开文件夹', '/system/openCwd', async (ctx) => {
+        let filepath = ctx.request?.body?.filepath || ctx.request?.query?.filepath || process.cwd();
         openFileExplorer(filepath);
         ctx.body = `尝试使用文件管理器打开文件夹: ${filepath}`
 
@@ -248,7 +248,11 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
                 default:
                     throw new Error(`Unsupported platform: ${process.platform}`);
             }
-            runCmd(command).catch(err => console.error('打开文件失败', err));
+            runCmd(command).catch(err => {
+                if (err.message != 'Command failed with code 1') {
+                    console.error('打开文件失败', err)
+                }
+            });
         }
     });
 

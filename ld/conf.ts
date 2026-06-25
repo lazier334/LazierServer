@@ -51,9 +51,9 @@ export default {
         },
         {
             avatarText: "/web",
-            text: "打开web目录",
-            tooltip: "尝试使用文件管理器打开web目录（主要用于windows系统）",
-            fun: "this.openPage('/system/openWeb')"
+            text: "打开运行目录",
+            tooltip: "尝试使用文件管理器打开运行目录（主要用于windows系统）",
+            fun: "this.openPage('/system/openCwd')"
         }
     ],
     otherWebPath: [
