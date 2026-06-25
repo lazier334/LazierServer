@@ -137,8 +137,10 @@ export default createKoaRouter(function koaRouter(router, T) {
     "main": "index.js",
     "scripts": {
         "start":"ls334",
-        "link":"npm link lazierserver",
         "dev":"ls334"
+    },
+    "dependencies": {
+        "lazierserver": "file:${path.join(import.meta.dirname, '../../').replaceAll('\\', '/')}"
     }
 }
 `,
@@ -158,9 +160,13 @@ program.command('create').aliases(['c', 'template'])
             }
             console.info(directory, '项目已创建');
             console.log('正在安装依赖中...');
-            const { execSync } = await import('child_process');
-            execSync('npm run link', { cwd: targetPath });
-            console.log(`依赖安装完成, 可使用以下命令快速启动项目: \ncd ${targetPath} \nls334`);
+            const { spawnSync } = await import('child_process');
+            spawnSync('npm', ['i'], {
+                cwd: targetPath,
+                stdio: 'inherit',
+                shell: process.platform === 'win32'
+            });
+            console.log(`\n依赖安装完成, 可使用以下命令快速启动项目: \ncd ${targetPath} \nls334`);
         } else console.error(directory, '文件(夹)已存在!目标路径:', targetPath)
         process.exit(0);
     });
