@@ -29,7 +29,7 @@ export default createIndexData(async function indexDataDemo(arr) {
                     mark: "网络 - 系统代理",
                     urls: [
                         {
-                            text: "打开",
+                            text: "配置并打开",
                             url: `javascript:(${(async (host, port) => {
                                 try {
                                     const bypassKey = 'bypass';
@@ -42,6 +42,19 @@ export default createIndexData(async function indexDataDemo(arr) {
                                     });
                                     localStorage.setItem(bypassKey, value)
                                     bypass = value;
+                                    this.openUrl(`/system/systemProxy?openApi=true&open=true&host=${host}&port=${port}&bypass=${bypass}`)
+                                } catch (err) {
+                                    console.log('已取消', err)
+                                }
+                            }).toString()})('${host}','${port}')`
+                        },
+                        {
+                            text: "直接打开",
+                            url: `javascript:(${((host, port) => {
+                                try {
+                                    const bypassKey = 'bypass';
+                                    let bypass = localStorage.getItem(bypassKey);
+                                    if (bypass == null) bypass = '*.example.com;localhost;127.*;192.168.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*';
                                     this.openUrl(`/system/systemProxy?openApi=true&open=true&host=${host}&port=${port}&bypass=${bypass}`)
                                 } catch (err) {
                                     console.log('已取消', err)
