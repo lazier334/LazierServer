@@ -44,7 +44,11 @@ export default createKoaRouter(function koaRouterScanHar(router) {
             const re = await sendEntries(ctx, entries, next);
             if (re) return re;
         }
-        return await next();
+        try {
+            // 如果上面已经 发送数据 就会导致这里报错
+            return await next();
+        } catch (err) {
+        }
     });
 
     return router
