@@ -38,17 +38,11 @@ export default createKoaRouter(function koaRouterScanHar(router) {
         if (!entries && api.endsWith('/index.html')) {
             entries = lc.apiMap[api.substring(0, api.length - 'index.html'.length)];
         }
-        // 文件未找到，放行到下一个路由
         if (entries) {
             // 发送数据
-            const re = await sendEntries(ctx, entries, next);
-            if (re) return re;
-        }
-        try {
-            // 如果上面已经 发送数据 就会导致这里报错
-            return await next();
-        } catch (err) {
-        }
+            return await sendEntries(ctx, entries, next);
+            // 文件未找到，放行到下一个路由
+        } else return await next();
     });
 
     return router
