@@ -69,15 +69,17 @@ export default createKoaRouter(function koaRouterScanWeb(router) {
             let fileFolder = Object.keys(domainDirs).find(d => filepath.includes(path.basename(d)));
             // 检测文件大小如果为0，或者文件不存在，那么就去下载
             if (fileFolder && (!fs.existsSync(filepath) || fs.readFileSync(filepath).length <= 0) && config.switch.autoComplete) {
-                if (!pushDir([]).includes(fileFolder) && fileFolder.startsWith(config.rootDir)) {
-                    // 尝试转成域名，规则查看 getAllWebDir() 和 pushDir() 
-                    const domain = fileFolder.replace(/.*[\\/]/, '');
-                    if (domain) {
-                        const urlObj = new URL(ctx.request.href);
-                        const url = urlObj.href.replace(urlObj.host, domain);
-                        console.log(`[文件大小为0，开始下载]: ${url} (${filepath})`);
-                        filepath = (await downloadFileToPath(url, filepath)) || filepath;
-                    }
+                // 从完整文件地址中拿到主文件夹
+                let inDomains = domainList.filter(e => path.resolve(fileFolder).startsWith(path.resolve(e)));
+                // 按照字符长度排序，越长的字符匹配度越高就越排前面
+                inDomains.sort((a, b) => b.length - a.length);
+                // 尝试将最长的文件夹转成域名
+                const domain = inDomains[0]?.replace(/.*[\\/]/, '');
+                if (domain) {
+                    const urlObj = new URL(ctx.request.href);
+                    const url = urlObj.href.replace(urlObj.host, domain);
+                    console.log(`[文件大小为0，开始下载]: ${url} (${filepath})`);
+                    filepath = (await downloadFileToPath(url, filepath)) || filepath;
                 }
             }
             // 当文件存在的时候才进行发送
