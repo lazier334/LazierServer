@@ -54,7 +54,25 @@ export default {
             text: "打开运行目录",
             tooltip: "尝试使用文件管理器打开运行目录（主要用于windows系统）",
             fun: "this.openPage('/system/openCwd')"
-        }
+        },
+        {
+            avatarText: 'tus',
+            text: '文件上传',
+            tooltip: '上传文件到服务器',
+            fun: `this.openPage('/uploads/index.html')`
+        },
+        {
+            avatarText: 'stack',
+            text: '接口分析',
+            tooltip: '分析接口的堆栈信息',
+            fun: `this.openPage('/stack/index.html')`
+        },
+        {
+            avatarText: 'plugins',
+            text: '插件仓库',
+            tooltip: '在线管理插件列表',
+            fun: `this.openPage('/plugin-mgmt/index.html')`
+        },
     ],
     otherWebPath: [
         "{/ldDirName/}/lazier334",

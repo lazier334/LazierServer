@@ -399,24 +399,6 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             debugMode: true,
             fun: `this.openPage('/edit/index.html?filepath=indexData-list.json')`
         },
-        {
-            avatarText: 'tus',
-            text: '文件上传',
-            tooltip: '上传文件到服务器',
-            fun: `this.openPage('/uploads/index.html')`
-        },
-        {
-            avatarText: 'stack',
-            text: '接口分析',
-            tooltip: '分析接口的堆栈信息',
-            fun: `this.openPage('/stack/index.html')`
-        },
-        {
-            avatarText: 'plugins',
-            text: '插件仓库',
-            tooltip: '在线管理插件列表',
-            fun: `this.openPage('/plugin-mgmt/index.html')`
-        },
     ] as ButDataItem[],
     /** 插件目录列表 */
     pluginDirs: [] as string[],
