@@ -78,13 +78,6 @@
                 </div>
             </el-tooltip>
 
-            <el-tooltip effect="dark" :content="`点击按钮将复制链接且不打开链接`" placement="bottom">
-                <div class="but-s-item operate" @click="changeCopyLinkStatus">
-                    <el-avatar class="but-s-item-avatar">{{copyLinkStatus}}</el-avatar>
-                    <el-text class="but-s-item-text" type="primary" size="large">复制链接</el-text>
-                </div>
-            </el-tooltip>
-
             <el-tooltip effect="dark" :content="`开启或关闭基于workbox的worker缓存`" placement="bottom">
                 <div class="but-s-item operate" @click="changeWorkboxStatus">
                     <el-avatar class="but-s-item-avatar">{{workboxStatus}}</el-avatar>
@@ -111,7 +104,18 @@
                     </template>
                 </el-input>
             </el-col>
-            <div style="margin: 0 10px;"></div>
+            <el-dropdown @command="handleUrlMod" trigger="click" style="margin: 0 10px;padding-top: 8px;">
+                <span class="el-dropdown-link">
+                    {{ reUrlMods[urlMod] || 'URL默认模式' }} ⌵
+                </span>
+                <template #dropdown>
+                    <el-dropdown-menu>
+                        <el-dropdown-item v-for="item in urlModOptions" :key="item.value" :command="item.value">
+                            {{ item.label }}
+                        </el-dropdown-item>
+                    </el-dropdown-menu>
+                </template>
+            </el-dropdown>
             <el-col :span="7">
                 <el-input v-model="store.searchButtom" @input="debouncedHandleData" placeholder="选项按钮包含的文字">
                     <template #prepend>
@@ -396,15 +400,33 @@
         try {
             openWorkbox = JSON.parse(localStorage.getItem('workboxStatus'));
         } catch (error) { }
+        const urlMods = {
+            复制文本: 'copyText',
+            运行代码: 'javascript',
+            请求接口: 'openApi',
+            页内小窗打开: 'openInIframe',
+            当前标签页打开: 'openInNowWindow',
+            URL默认模式: '',
+        };
+        const reUrlMods = Object.fromEntries(Object.entries(urlMods).map(([k, v]) => [v, k]));
+        const urlModOptions = Object.keys(urlMods)
+            .filter(key => key !== 'default')
+            .map(key => ({
+                label: key,         // 显示文本
+                value: urlMods[key] // 实际选中值
+            }));
 
         return {
+            urlModOptions: urlModOptions,
+            urlMods: urlMods,
+            reUrlMods: reUrlMods,
+            urlMod: '',
             workboxStatus: !!openWorkbox,
-            copyLinkStatus: false,
             autoCompleteStatus: false,
             currentPage: 1,
             pageSize: parseInt((new URLSearchParams(location.search)).get("pageSize")) || 100,
             pageSizes: [10, 20, 30, 40, 100, 200, 300, 500, 1000, 3000, 5000, 10000],
-            title: "Tip: 使用系统打开的url可以通过uri参数 openApi访问接口, openInIframe页内打开, openInNowWindow当前页打开",
+            title: "",
             loading: {},
             store: {
                 searchKeyword: "",
@@ -506,6 +528,7 @@
         mounted() {
             this.resetPage();
             window.addEventListener('scroll', this.handleScroll);
+            ElMessage.info('Tip: 使用系统打开的url可以通过uri参数 openApi访问接口, openInIframe页内打开, openInNowWindow当前页打开');
         },
         beforeUnmount() {
             window.removeEventListener('scroll', this.handleScroll);
@@ -560,6 +583,9 @@
                     console.error(error);
                 }).finally((res) => this.loading[msg] = false);
             },
+            handleUrlMod(mod) {
+                this.urlMod = mod;
+            },
             /**
              * 规范化 URL：
              * - 如果缺少协议，自动补全 `https://`
@@ -587,17 +613,38 @@
                 return 'https://' + rawUrl;
             },
             openUrl(url) {
-                if (url.startsWith('javascript:')) return eval(url.replace('javascript:', ''));
-                url = this.normalizeUrl(url);
-                if (this.copyLinkStatus) this.copyText(url);
-                else if (url.includes('openApi')) {
-                    ElMessage.info('正在请求Api中...' + url);
-                    this.warpAxios(axios(url).then(res => {
-                        ElMessage.success('Api响应: ' + (res.data.msg || res.data || res));
-                    }), '打开链接失败', true);
-                } else if (url.includes('openInIframe')) openFloatPage(url);
-                else if (url.includes('openInNowWindow')) location.href = url;
-                else window.open(url);
+                let mod = this.urlMod;
+                if (!mod) {
+                    if (url.startsWith('javascript:')) mod = this.urlMods.运行代码;
+                    else if (url.includes('openApi')) mod = this.urlMods.请求接口;
+                    else if (url.includes('openInIframe')) mod = this.urlMods.页内小窗打开;
+                    else if (url.includes('openInNowWindow')) mod = this.urlMods.当前标签页打开;
+                }
+
+                switch (mod) {
+                    case this.urlMods.复制文本:
+                        this.copyText(url);
+                        break;
+                    case this.urlMods.运行代码:
+                        eval(url.replace('javascript:', ''));
+                        url = this.normalizeUrl(url);
+                        break;
+                    case this.urlMods.请求接口:
+                        ElMessage.info('正在请求Api中...' + url);
+                        this.warpAxios(axios(url).then(res => {
+                            ElMessage.success('Api响应: ' + (res.data.msg || res.data || res));
+                        }), '打开链接失败', true);
+                        break;
+                    case this.urlMods.页内小窗打开:
+                        openFloatPage(url);
+                        break;
+                    case this.urlMods.当前标签页打开:
+                        location.href = url;
+                        break;
+                    // 新窗口打开
+                    default:
+                        window.open(url);
+                }
             },
             openPage(url) {
                 openFloatPage(url);
@@ -670,10 +717,6 @@
             },
             updateStore() {
                 localStorage.setItem('store', JSON.stringify(this.store));
-            },
-            changeCopyLinkStatus() {
-                this.copyLinkStatus = !this.copyLinkStatus;
-                ElMessage.success('复制链接状态 ' + this.copyLinkStatus)
             },
             changeWorkboxStatus() {
                 this.workboxStatus = !this.workboxStatus;

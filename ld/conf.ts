@@ -68,10 +68,16 @@ export default {
             fun: `this.openPage('/stack/index.html')`
         },
         {
-            avatarText: 'plugins',
+            avatarText: 'plgs',
             text: '插件仓库',
             tooltip: '在线管理插件列表',
             fun: `this.openPage('/plugin-mgmt/index.html')`
+        },
+        {
+            avatarText: 'files',
+            text: 'web文件列表',
+            tooltip: '查看所有的web静态资源文件列表',
+            fun: `this.openPage('/web文件列表.html')`
         },
     ],
     otherWebPath: [

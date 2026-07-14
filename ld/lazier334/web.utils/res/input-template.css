@@ -1,0 +1,10 @@
+#app {
+    /* 最大占屏幕80%宽度，最小占20%宽度 */
+    max-width: 80vw;
+    min-width: 20vw;
+    /* 居中显示 + 上下边距 + 内边距 */
+    margin: 50px auto;
+    padding: 20px;
+    /* 保证内边距不撑开容器 */
+    box-sizing: border-box;
+}

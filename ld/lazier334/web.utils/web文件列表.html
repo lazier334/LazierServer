@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>web文件列表</title>
+<link rel="stylesheet" href="./res/input-template.css">
+
+<div id="app">
+    <div id="head">
+        <h1>Web文件列表</h1>
+        <div class="toolbar">
+            <n-input v-model:value="searchText" placeholder="搜索文件名..." style="width: 250px; text-align: left;"
+                clearable></n-input>
+            <n-button type="primary" :loading="loading" :disabled="loading" @click="loadFiles(false)">全部文件</n-button>
+            <n-button type="primary" :loading="loading" :disabled="loading" @click="loadFiles(true)">仅重复文件</n-button>
+        </div>
+        <div class="status">{{ status }}</div>
+    </div>
+
+    <n-data-table v-if="tableData.length" :columns="columns" :data="tableData" :bordered="false" :single-line="false"
+        striped></n-data-table>
+</div>
+
+<script type="importmap">
+{"imports": {"vue": "./res/vue.prod@3.5.32.mjs","naive": "./res/naiveui.prod@2.44.1.mjs"} }
+</script>
+<script type="module">
+    import * as vue from 'vue';
+    import * as naive from 'naive';
+    const { createApp, ref, watch, h } = vue;
+    const { NButton, NInput, NDataTable, NTag, NA, NSpace } = naive;
+
+    const app = createApp({
+        setup() {
+            const searchText = ref('');
+            const cachedData = ref(null);
+            const status = ref('点击按钮加载数据');
+            const loading = ref(false);
+            const tableData = ref([]);
+            let debounceTimer = null;
+
+            function filterData() {
+                if (!cachedData.value) { tableData.value = []; return; }
+                const search = searchText.value.toLowerCase();
+                tableData.value = Object.entries(cachedData.value)
+                    .filter(([api, files]) => {
+                        if (!search) return true;
+                        return api.toLowerCase().includes(search) ||
+                            files.some(fp => fp.toLowerCase().includes(search));
+                    })
+                    .map(([api, files]) => ({ api, files }));
+                status.value = tableData.value.length ? '共 ' + tableData.value.length + ' 个API路径' : '无数据';
+            }
+
+            const columns = [
+                { title: '#', key: 'index', width: 60, align: 'center', render: (_, index) => index + 1 },
+                {
+                    title: 'API路径',
+                    key: 'api',
+                    render(row) {
+                        const badge = row.files.length > 1
+                            ? h(NTag, { type: 'error', size: 'small' }, () => row.files.length)
+                            : null;
+                        return h(NSpace, { align: 'center' }, () => [
+                            badge,
+                            h(NA, { href: row.api, target: '_blank' }, () => row.api)
+                        ]);
+                    }
+                },
+                {
+                    title: '文件路径',
+                    key: 'files',
+                    render(row) {
+                        return h('div', row.files.map(fp => {
+                            const apiBase = row.api.split('?')[0];
+                            const href = apiBase + '?src=' + encodeURIComponent(fp);
+                            return h('div', [
+                                h(NA, { href, target: '_blank' }, () => fp)
+                            ]);
+                        }));
+                    }
+                }
+            ];
+
+            async function loadFiles(repeat) {
+                loading.value = true;
+                status.value = '加载中...';
+                try {
+                    const params = new URLSearchParams();
+                    if (repeat) params.set('repeat', 'true');
+                    if (searchText.value) params.set('search', searchText.value);
+
+                    const res = await fetch('/system/webFiles?' + params.toString());
+                    cachedData.value = await res.json();
+                    filterData();
+                } catch (e) {
+                    status.value = '请求失败: ' + e.message;
+                } finally {
+                    loading.value = false;
+                }
+            }
+
+            watch(searchText, () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(filterData, 500);
+            });
+
+            return { searchText, status, columns, tableData, loadFiles };
+        }
+    });
+
+    app.use(naive).mount('#app');
+</script>
+
+<style>
+    #app {
+        max-width: 100vw;
+        text-align: center;
+    }
+
+    .toolbar {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .status {
+        color: #7f8c8d;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .search {
+        width: 300px;
+    }
+</style>

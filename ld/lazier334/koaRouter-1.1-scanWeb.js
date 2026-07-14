@@ -94,8 +94,65 @@ export default createKoaRouter(function koaRouterScanWeb(router) {
         return await next();
     });
 
+    router.all(('扫描web文件列表', '/system/webFiles'), async (ctx, next) => {
+        // 如果开启了全部文件夹，那么重新扫描
+        if (config.switch.allWebDir) {
+            domainList = getAllWebDir(config.rootDir);
+            domainList = pushDir(domainList);
+        }
+        const files = {};
+        domainList.forEach(dir => {
+            if (fs.existsSync(dir)) scanFiles(dir, files)
+        });
+
+        // 是否有重复
+        if (ctx.request.query?.repeat) {
+            for (const k in files) {
+                const v = files[k];
+                if (v.length <= 1) delete files[k];
+            }
+        }
+
+        const search = decodeURIComponent(ctx.request.query?.search || '').toLowerCase();
+        if (typeof search == 'string' && search != '') {
+            for (const k in files) {
+                const v = files[k];
+                // 如果 key 不存在关键词
+                // 且文件路径也不存在关键词
+                // 则删除该数据
+                if (!k.toLowerCase().includes(search) && !v.find(fp => fp.toLowerCase().includes(search))) {
+                    delete files[k];
+                }
+            }
+        }
+        ctx.body = files;
+    });
+
     return router
 })
+
+/**
+ * 扫描文件列表
+ * @param {string} dir 要扫描的文件夹
+ * @param {object} re 保存扫描结果
+ */
+function scanFiles(dir, re = {}, basedir) {
+    if (basedir == undefined) basedir = dir;
+    fs.readdirSync(dir).forEach(name => {
+        const p = path.join(dir, name);
+        const st = fs.statSync(p);
+        if (st.isDirectory()) {
+            // 递归扫描
+            scanFiles(p, re, basedir)
+        } else {
+            // 拿到具体的api和保存文件
+            const api = path.posix.join('/', dir.replace(basedir, '').replaceAll('\\', '/'), name);
+            if (Array.isArray(re[api])) re[api].push(p);
+            else re[api] = [p];
+        }
+    });
+    return re;
+}
 
 /**
  * @typedef {Object} SendFileType 可重写内容变更发送内容
