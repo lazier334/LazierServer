@@ -100,7 +100,7 @@ const files: Record<string, string> = {
     'indexData-1-temp.js': `import { createIndexData } from 'lazierserver/types';
 
 export default createIndexData(async function indexData(arr) {
-    if (false) arr.push(...[
+    arr.push(...[
         {
             icon: "",
             name: "{directory}",
@@ -122,8 +122,14 @@ export default createKoaRouter(function koaRouter(router, T) {
     router.all('/{directory}', async (ctx, next) => {
         /** @type {ctx & T} 完整的ctx提示信息 */
         const ectx = ctx;
-        ectx.sendOptions.filename = '_' + ectx.sendOptions.filename;
-        console.log(ectx.sendOptions.filename)
+        if (ectx.sendOptions?.filename) {
+            // 示例: 在原本将要使用的文件名称前面加上前缀 _ 
+            ectx.sendOptions.filename = '_' + ectx.sendOptions.filename;
+            console.log(ectx.sendOptions.filename);
+        } else {
+            // 示例: 响应文字
+            ctx.body = 'hello {directory}!';
+        }
     });
     return router
 })`,
