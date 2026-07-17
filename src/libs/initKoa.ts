@@ -1,5 +1,6 @@
 import type Koa from 'koa';
 import type { Server } from 'ws';
+import type { IncomingMessage } from 'http';
 import WebSocket from 'ws';
 import { config } from './config.ts';
 import { completeFile, readKoaRouters } from './utils.ts';
@@ -116,7 +117,7 @@ function koaCompose(middlewares: Koa.Middleware[]): Koa.Middleware {
  */
 function bindWebSocketServer(WS: Server): Server {
     WS.on('error', (err) => console.error('WebSocket Error:', err.message));
-    WS.on('connection', async function connection(ws: WebSocket) {
+    WS.on('connection', async function connection(ws: WebSocket, req: IncomingMessage) {
         console.log('WebSocket 客户端已连接');
         ws.on('message', function incoming(message: Buffer | string) {
             let msg = message;
@@ -130,7 +131,7 @@ function bindWebSocketServer(WS: Server): Server {
                     console.debug('处理ws消息时异常', err)
                 }
             });
-            plugins('websocketApis').then(mod => mod.use(msg, message, ws))
+            plugins('websocketApis').then(mod => mod.use(msg, message, ws, req))
         });
         ws.on('close', function close() {
             console.log('客户端断开连接')
