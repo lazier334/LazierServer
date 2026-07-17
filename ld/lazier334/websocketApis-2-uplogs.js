@@ -3,13 +3,13 @@ import { fs, path, config } from './libs/baseImport.js'
 
 const lc = {
     dirpath: path.join(config.dataPath, 'logs'),
-    logPrefix: 'uplogs'
+    logPrefix: 'uplogs-'
 };
 
 /** 
  * 使用时需要传递客户端的消息进来，进行路由识别与操作
  */
-export default createWebsocketApis(async function websocketApisDemo(msg, message, ws) {
+export default createWebsocketApis(async function websocketApisDemo(msg, message, ws, req) {
     if ('/uplogs' == req.url.split('?').shift()) {
         const name = msg.name;
         if (typeof name == 'string') {
