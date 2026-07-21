@@ -28,11 +28,11 @@ if (description) {
     console.log(`description: ${description}`);
 } else console.log(`说明未更新 description: ${description}`);
 // 版权
-if (fs.existsSync(LICENSE_FilePath) && fs.statSync(LICENSE_FilePath).isFile()) {
-    let LICENSE = fs.readFileSync(LICENSE_FilePath, { encoding: 'utf8' });
-    packageJson.license = LICENSE;
-    packageLockJson.packages[""].license = LICENSE;
-}
+// if (fs.existsSync(LICENSE_FilePath) && fs.statSync(LICENSE_FilePath).isFile()) {
+//     let LICENSE = fs.readFileSync(LICENSE_FilePath, { encoding: 'utf8' });
+//     packageJson.license = LICENSE;
+//     packageLockJson.packages[""].license = LICENSE;
+// }
 
 fs.writeFileSync('../package.json', JSON.stringify(packageJson, null, 2) + '\n');
 fs.writeFileSync('../package-lock.json', JSON.stringify(packageLockJson, null, 2) + '\n');
