@@ -32,6 +32,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Update version from input
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+
       - name: Publish to npm
         run: |
           VERSION=$(node -p "require('./package.json').version")
