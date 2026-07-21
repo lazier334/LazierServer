@@ -46,7 +46,7 @@ LazierServer/
 ├─ bin/                     // 脚本工具
 ├─ ld/                      // ⭐项目数据插件
 │  ├─ banner.txt            // banner图
-│  ├─ conf.ts               // 本地配置
+│  ├─ conf.js               // 本地配置
 │  ├─ lazier334/            // 插件与静态资源共用的文件夹，预设插件与站点，由 [lazier334](https://github.com/lazier334) 提供
 │  │  ├─ classes/           // 插件用到的类
 │  │  ├─ externals/         // 第三方插件的主代码

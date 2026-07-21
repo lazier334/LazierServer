@@ -3,11 +3,14 @@
     "target": "ES2024",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "rootDir": "src",
     "declaration": true,
-    "emitDeclarationOnly": true,
-    "allowImportingTsExtensions": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "rewriteRelativeImportExtensions": true
   },
-  "include": ["ld/plugins/types/**/*.ts", "ld/lazier334/types/selectFileByDomains.ts"]
+  "include": ["src/**/*.ts"]
 }

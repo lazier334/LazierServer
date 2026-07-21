@@ -26,7 +26,7 @@ type IndexDataArray = IndexDataItem[];
 /**
  * indexData 插件函数
  */
-type IndexDataFunction = (arr: IndexDataArray) => PluginResult;
+export type IndexDataFunction = (arr: IndexDataArray) => PluginResult;
 
 /**
  * 创建 indexData 插件的类型提示函数

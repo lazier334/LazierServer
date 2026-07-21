@@ -13,7 +13,7 @@ type SendOptions = {
 /**
  * send 插件函数
  */
-type SendFunction = (sendOptions: SendOptions) => PluginResult;
+export type SendFunction = (sendOptions: SendOptions) => PluginResult;
 
 /**
  * 创建 send 插件的类型提示函数  

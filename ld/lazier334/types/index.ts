@@ -1,9 +1,8 @@
 export * from '../../plugins/types/index.ts';
+import { createPlugin } from '../../plugins/types/index.ts';
 
-import createSelectFileByDomains from './selectFileByDomains.ts';
-import createSend from './send.ts';
+import type { SelectFileByDomainsFunction } from './selectFileByDomains.ts';
+import type { SendFunction } from './send.ts';
 
-export {
-    createSelectFileByDomains,
-    createSend
-}
+export const createSelectFileByDomains = createPlugin as (fun: SelectFileByDomainsFunction) => SelectFileByDomainsFunction;
+export const createSend = createPlugin as (fun: SendFunction) => SendFunction;

@@ -9,7 +9,7 @@ type extendTypes = SendFileType & SendEntryType;
 /**
  * koaRouter 插件函数
  */
-type KoaRouterFunction = (router: Router, types: extendTypes) => PluginResult;
+export type KoaRouterFunction = (router: Router, types: extendTypes) => PluginResult;
 
 /**
  * 创建 koaRouter 插件的类型提示函数  

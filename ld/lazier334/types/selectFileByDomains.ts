@@ -22,7 +22,7 @@ type DomainToFileMap = { [key: string]: string };
 /**
  * selectFileByDomains 插件函数
  */
-type SelectFileByDomainsFunction = (domainList: DomainList, domainsMap: DomainToFileMap, ctx: Context) => Omit<PluginResult, 'result'> & {
+export type SelectFileByDomainsFunction = (domainList: DomainList, domainsMap: DomainToFileMap, ctx: Context) => Omit<PluginResult, 'result'> & {
     /** 返回选中的域名 */
     result: string
 };

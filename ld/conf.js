@@ -1,19 +1,17 @@
 import fs from 'fs';
 import path from 'path';
-import type configDef from '../src/libs/configDef.ts';
-type Config = typeof configDef;
-const configTest: Partial<Config> = {
-    // 这里可以用来快速查询与测试系统配置列表
-}
+import configDef from '../dist/libs/configDef.js';
+
 // 服务器资源目录，plugins 和 web 共同所在的目录
 var serverDir = [];
 try {
     serverDir = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'serverDir.json'), 'utf8'));
     // 在此处对文件夹路径做定位与排序
-    serverDir = serverDir.map((dir: string) => path.resolve(import.meta.dirname, dir)).sort();
+    serverDir = serverDir.map((dir) => path.resolve(import.meta.dirname, dir)).sort();
 } catch { };
 
 /**
+ * @type {configDef}
  * 用户自定义配置  
  * 只有这里的配置信息会被导出  
  * 上面是便捷查询、测试使用，实际变量未使用

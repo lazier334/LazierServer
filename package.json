@@ -21,19 +21,21 @@
   },
   "files": [
     "ld/",
-    "src/",
+    "dist/",
     "package.json",
     "README.md",
     "LICENSE"
   ],
+  "main": "dist/app.js",
   "bin": {
-    "lazierserver": "src/app.ts",
-    "ls334": "src/app.ts"
+    "lazierserver": "dist/app.js",
+    "ls334": "dist/app.js"
   },
   "scripts": {
-    "start": "npm i && node src/app.ts",
+    "start": "node dist/app.js",
     "dev": "node src/app.ts",
-    "build:types": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "engines": {
     "node": ">=24.0.0",

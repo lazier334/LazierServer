@@ -5,12 +5,12 @@ import defConfig from './configDef.ts';
 type ConfigType = typeof defConfig;
 const __dirname = import.meta.dirname;
 /**
- * 设定外部配置数据位置，主要控制 banner.txt 和 conf.ts 两个文件  
- * 在 conf.ts 中可以继续配置这个路径属性 "ldDirName" ，配置后，
+ * 设定外部配置数据位置，主要控制 banner.txt 和 conf.js 两个文件  
+ * 在 conf.js 中可以继续配置这个路径属性 "ldDirName" ，配置后，
  * 在后续的调用中将会把数据写入配置的位置。
  * 但是默认的配置和banner固定为默认路径 "./ld/"
  */
-defConfig.ldConfigPath = path.join(__dirname, '../../ld/conf.ts');
+defConfig.ldConfigPath = path.join(__dirname, '../../ld/conf.js');
 const dataPath = path.dirname(defConfig.ldConfigPath);
 if (!fs.existsSync(dataPath)) {
     fs.mkdirSync(dataPath);
@@ -25,7 +25,7 @@ const getConfig = async (filepath: string): Promise<Partial<ConfigType> | undefi
         return (await import(pathToFileURL(filepath).href)).default as Partial<ConfigType>;
     } catch { }
 }
-const cwdConfigPath = path.join(process.cwd(), 'conf.ts');
+const cwdConfigPath = path.join(process.cwd(), 'conf.js');
 let conf = await getConfig(cwdConfigPath);
 if (!conf) {
     conf = await getConfig(defConfig.ldConfigPath);

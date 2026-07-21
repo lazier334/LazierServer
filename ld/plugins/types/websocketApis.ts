@@ -6,7 +6,7 @@ import type { PluginResult } from './plugins.ts';
 /**
  * websocketApis 插件函数
  */
-type WebsocketApisFunction = (msg: string | Buffer, message: Buffer, ws: WebSocket, req: IncomingMessage) => PluginResult;
+export type WebsocketApisFunction = (msg: string | Buffer, message: Buffer, ws: WebSocket, req: IncomingMessage) => PluginResult;
 
 /**
  * 创建 websocketApis 插件的类型提示函数

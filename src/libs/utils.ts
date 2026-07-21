@@ -1,6 +1,6 @@
 import https from 'https';
 import Router from '@koa/router';
-import Downloader from 'nodejs-file-downloader';
+import { Downloader } from 'nodejs-file-downloader';
 import { fs, path, config, getNowFileStorage } from './config.ts';
 import { plugins, getAllPlugin, getPlguinUpdateTime } from './plugins.ts';
 import type Application from 'koa';
