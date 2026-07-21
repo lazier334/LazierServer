@@ -30,52 +30,57 @@ export default createWebsocketApis(async function websocketApisDemo(msg, message
  */
 function 配套的注入脚本() {
     // 要检测的关键词数组（根据需要修改）
-    (function (wsurl) {
+    (function (wsurl, logName) {
         // ---------- 创建ws工具,用于传输日志 ----------
-        const SOC = (function (url) {
-            const soc = {
-                url: url,
-                ws: null,
-                reconnectTimer: null,
-                timeout: 3000,
-                send(msg) {
-                    try {
-                        this.ws.send(msg);
-                        return true;
-                    } catch { }
-                    return false;
-                },
-                connect() {
-                    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
-                        return;
+        const soc = {
+            url: wsurl,
+            ws: null,
+            reconnectTimer: null,
+            timeout: 3000,
+            send(msg) {
+                try {
+                    // 纯字符串时将其作为数据内容
+                    if (typeof msg == 'string') msg = { data: msg };
+                    // 是对象时补全 name、time 字段
+                    if (typeof msg == 'object') {
+                        if (msg.name == undefined) msg.name = logName ?? 'log';
+                        if (msg.name == undefined) msg.time = new Date().toLocaleString('zh - CN');
                     }
-                    if (this.reconnectTimer) {
-                        clearTimeout(this.reconnectTimer);
-                        this.reconnectTimer = null;
-                    }
-
-                    this.ws = new WebSocket(this.url);
-                    this.ws.onerror = err => {
-                        console.error(err);
-                        alert('发生错误' + err);
-                    };
-                    this.ws.onclose = () => {
-                        this.reconnectTimer = setTimeout(() => {
-                            this.ws = null;
-                            this.connect();
-                        }, this.timeout);
-                    };
+                    this.ws.send(typeof msg == 'string' ? msg : JSON.stringify(msg));
+                    return true;
+                } catch (err) {
+                    console.error('日志发送失败', err);
                 }
-            }
-            soc.connect();
-            return soc;
-        })(wsurl);
+                return false;
+            },
+            connect() {
+                if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+                    return;
+                }
+                if (this.reconnectTimer) {
+                    clearTimeout(this.reconnectTimer);
+                    this.reconnectTimer = null;
+                }
 
-        // ---------- 自定义使用 ----------
-        SOC.send(JSON.stringify({
+                this.ws = new WebSocket(this.url);
+                this.ws.onerror = err => {
+                    console.error('连接失败', err);
+                    alert('连接失败:' + err);
+                };
+                this.ws.onclose = () => {
+                    this.reconnectTimer = setTimeout(() => {
+                        this.ws = null;
+                        this.connect();
+                    }, this.timeout);
+                };
+            }
+        }
+        soc.connect();
+        // ---------- 使用 ----------
+        soc.send(JSON.stringify({
             data: '连接成功',
             time: new Date().toLocaleString('zh-CN')
         }));
-        return SOC;
-    })('wss://localhost:3001');
+        return soc;
+    })('wss://localhost:3001', 'temp');
 }
