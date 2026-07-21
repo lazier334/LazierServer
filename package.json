@@ -1,6 +1,6 @@
 {
   "name": "lazierserver",
-  "version": "1.3.3-26072101",
+  "version": "1.3.3-26072102",
   "description": "+ 发布到npm\n+ 增加ws日志接收\n+ 增加web文件列表扫描\n= 修复重复调用next问题\n= 系统优化",
   "homepage": "https://github.com/lazier334/LazierServer#readme",
   "bugs": {
