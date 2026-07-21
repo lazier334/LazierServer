@@ -96,6 +96,7 @@ async function sendEntries(ctx, entries, next) {
     }
     ctx.entry = entry;
     ctx.entryResponse = entryResponse;
+    ctx.notCompleteFile = true;
     let re = await next();
     // 如果还没有被响应，那么就使用 ctx.entryResponse 的数据进行响应，其他路由可以修改 ctx.entryResponse 
     if (ctx.body === undefined && !ctx.res.headersSent) {

@@ -32,7 +32,8 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
     });
 
     // 接口: 自动补全编辑页的文件匹配 /edit/vs/*
-    router.all('接口: 自动补全编辑页的文件匹配', /^\/edit\/vs\/.*$/, async (ctx) => {
+    router.all('接口: 自动补全编辑页的文件匹配', /^\/edit\/vs\/.*$/, async (ctx, next) => {
+        if (ctx.notCompleteFile) return await next();
         const filepath = path.join(config.tempDownDir, ctx.url);
         const url = 'https://unpkg.com/monaco-editor@0.33.0/min/vs' + ctx.url.substring(ctx.url.indexOf('/vs') + '/vs'.length);
         const fp = await downloadFileToPath(url, filepath);

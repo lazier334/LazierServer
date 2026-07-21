@@ -234,6 +234,7 @@ async function sendFile(ctx, filepath, opts, next) {
     try {
         ctx.sendFileFromPath = sendFileFromPath;
         ctx.sendOptions = sendOptions;
+        ctx.notCompleteFile = true;
         if (typeof next == 'function') await next();
         else await sendOptions.sendBefore();
         result = await sendOptions.send();

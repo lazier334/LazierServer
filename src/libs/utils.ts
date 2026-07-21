@@ -115,9 +115,12 @@ function allowLocalOnly(ctx: Application): boolean {
 }
 
 
-/** 补全文件的koa插件，会使用 domains 里面的域名逐个尝试下载文件 */
+/** 
+ * 补全文件的koa插件，会使用 domains 里面的域名逐个尝试下载文件。  
+ * 设置标记 `ctx.notCompleteFile = true` 可以关闭补全功能
+ */
 async function completeFile(ctx: any, next: Function): Promise<void | string> {
-    if (config.switch.autoComplete) {
+    if (!ctx.notCompleteFile && config.switch.autoComplete) {
         let downloadedFile: string | undefined | null = null;
         const api = ctx.path;
         const url = new URL(ctx.request.href);
