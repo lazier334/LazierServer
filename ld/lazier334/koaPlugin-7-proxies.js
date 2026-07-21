@@ -1,6 +1,6 @@
 import url from 'url';
 import koaProxies from 'koa-proxies';
-import { createKoaPlugin } from './types/index.ts';
+import { createKoaPlugin } from './types/index.js';
 
 /**
  * koa中间件 koa请求代理插件 插件

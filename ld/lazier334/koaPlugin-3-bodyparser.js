@@ -1,5 +1,5 @@
 import bodyParser from 'koa-bodyparser'
-import { createKoaPlugin } from './types/index.ts';
+import { createKoaPlugin } from './types/index.js';
 
 const bodyParserMiddleware = bodyParser()
 

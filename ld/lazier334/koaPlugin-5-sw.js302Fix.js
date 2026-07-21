@@ -1,4 +1,4 @@
-import { createKoaPlugin } from './types/index.ts';
+import { createKoaPlugin } from './types/index.js';
 
 /**
  * koa中间件 sw.js工作服务产生重定向时的处理 插件

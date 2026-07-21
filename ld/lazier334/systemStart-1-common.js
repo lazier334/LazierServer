@@ -1,6 +1,6 @@
 import chokidar from 'chokidar';
 import { pathToFileURL } from 'url';
-import { createSystemStart } from './types/index.ts';
+import { createSystemStart } from './types/index.js';
 import { restartSystem } from './libs/sys-restart.js';
 
 /**

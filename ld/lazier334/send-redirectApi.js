@@ -1,4 +1,4 @@
-import { createSend } from './types/index.ts';
+import { createSend } from './types/index.js';
 import { fs, path } from './libs/baseImport.js';
 
 const lc = {

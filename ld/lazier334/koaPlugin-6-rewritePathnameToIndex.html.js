@@ -1,4 +1,4 @@
-import { createKoaPlugin } from './types/index.ts';
+import { createKoaPlugin } from './types/index.js';
 
 /**
  * koa中间件 默认index.html路径补全 插件

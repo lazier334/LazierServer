@@ -24,4 +24,5 @@ export function createSend(fun: SendFunction): SendFunction {
     return fun;
 }
 
+export type createSendType = typeof createSend;
 export default createSend;

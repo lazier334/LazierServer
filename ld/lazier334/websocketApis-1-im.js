@@ -1,5 +1,5 @@
 import utilsIM from './utils/utils-im.js';
-import { createWebsocketApis } from './types/index.ts';
+import { createWebsocketApis } from './types/index.js';
 
 // 不能直接在上面解构，有可能会报错
 const { db, msgBodyType, Config } = utilsIM;

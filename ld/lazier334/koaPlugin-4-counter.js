@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import { createKoaPlugin } from './types/index.ts';
+import { createKoaPlugin } from './types/index.js';
 
 /** @type {import('../../src/libs/config')} */
 const { config } = process.G;

@@ -1,4 +1,4 @@
-import { createKoaRouter } from './types/index.ts';
+import { createKoaRouter } from './types/index.js';
 import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseImport.js';
 
 const lc = {

@@ -1,5 +1,5 @@
 import { config } from './libs/baseImport.js';
-import { createKoaPlugin } from './types/index.ts';
+import { createKoaPlugin } from './types/index.js';
 
 const corsMiddleware = cors();
 

@@ -1,7 +1,7 @@
 import send from 'koa-send';
 import { runCmd } from './utils/util-cmd.js';
 import sysproxy from '@mihomo-party/sysproxy';
-import { createKoaRouter } from './types/index.ts';
+import { createKoaRouter } from './types/index.js';
 import { restartSystem } from './libs/sys-restart.js';
 import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseImport.js';
 

@@ -1,5 +1,5 @@
 import winston from 'winston';
-import { createSystemStart } from './types/index.ts';
+import { createSystemStart } from './types/index.js';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
 /**

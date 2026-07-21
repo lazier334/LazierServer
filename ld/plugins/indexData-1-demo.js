@@ -1,4 +1,4 @@
-import { createIndexData } from './types/index.ts';
+import { createIndexData } from './types/index.js';
 // 全局安装后请使用这种方式引入提示信息
 // import { createIndexData } from 'lazierserver/types';
 

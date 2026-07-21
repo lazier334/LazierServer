@@ -1,5 +1,5 @@
 import send from 'koa-send';
-import { createKoaRouter } from './types/index.ts';
+import { createKoaRouter } from './types/index.js';
 import { handlerHtmlBodyData, isHandlerHtmlBodyData } from './utils/util-router.js';
 import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
 

@@ -1,4 +1,4 @@
-import { createKoaRouter } from './types/index.ts';
+import { createKoaRouter } from './types/index.js';
 
 /**
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external

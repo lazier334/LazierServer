@@ -1,4 +1,4 @@
-import { createSelectFileByDomains } from './types/index.ts';
+import { createSelectFileByDomains } from './types/index.js';
 // 全局安装后请使用这种方式引入提示信息
 // import { createSelectFileByDomains } from 'lazierserver/types';
 

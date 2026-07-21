@@ -1,4 +1,4 @@
-import { createSystemStart } from './types/index.ts';
+import { createSystemStart } from './types/index.js';
 
 /**
  * 添加栈追踪

@@ -1,4 +1,4 @@
-import { createWebsocketApis } from './types/index.ts';
+import { createWebsocketApis } from './types/index.js';
 import { fs, path, config } from './libs/baseImport.js'
 
 const lc = {

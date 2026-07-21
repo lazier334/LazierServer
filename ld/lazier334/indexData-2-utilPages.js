@@ -1,4 +1,4 @@
-import { createIndexData } from './types/index.ts';
+import { createIndexData } from './types/index.js';
 import { fs, path, config } from './libs/baseImport.js';
 
 const lc = {

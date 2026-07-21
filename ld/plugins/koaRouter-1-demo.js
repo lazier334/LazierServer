@@ -1,4 +1,4 @@
-import { createKoaRouter } from './types/index.ts';
+import { createKoaRouter } from './types/index.js';
 // 全局安装后请使用这种方式引入提示信息
 // import { createKoaRouter } from 'lazierserver/types';
 
