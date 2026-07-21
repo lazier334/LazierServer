@@ -1,4 +1,6 @@
 import { createKoaPlugin } from './types/index.ts';
+// 全局安装后请使用这种方式引入提示信息
+// import { createKoaPlugin } from 'lazierserver/types';
 
 /**
  * koa 中间件插件的demo

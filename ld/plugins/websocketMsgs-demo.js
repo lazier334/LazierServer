@@ -1,4 +1,6 @@
 import { createWebsocketMsgs } from './types/index.ts';
+// 全局安装后请使用这种方式引入提示信息
+// import { createWebsocketMsgs } from 'lazierserver/types';
 
 /**
  * ws自动响应的数据示例

@@ -1,4 +1,6 @@
 import { createWebsocketApis } from './types/index.ts';
+// 全局安装后请使用这种方式引入提示信息
+// import { createWebsocketApis } from 'lazierserver/types';
 
 /** 
  * 使用时需要传递客户端的消息进来，进行路由识别与操作

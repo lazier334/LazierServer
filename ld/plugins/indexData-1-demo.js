@@ -1,4 +1,6 @@
 import { createIndexData } from './types/index.ts';
+// 全局安装后请使用这种方式引入提示信息
+// import { createIndexData } from 'lazierserver/types';
 
 /**
  * 列表插件的demo

@@ -47,17 +47,18 @@ LazierServer/
 ├─ ld/                      // ⭐项目数据插件
 │  ├─ banner.txt            // banner图
 │  ├─ conf.ts               // 本地配置
-│  ├─ logs/                 // .日志文件夹
-│  ├─ plugins/              // 主插件列表，以及插件的相关代码
-│  │  ├─ temporary/         // .插件的临时上传、下载、解压文件夹
-│  │  └─ *.js               // 插件文件
 │  ├─ lazier334/            // 插件与静态资源共用的文件夹，预设插件与站点，由 [lazier334](https://github.com/lazier334) 提供
 │  │  ├─ classes/           // 插件用到的类
 │  │  ├─ externals/         // 第三方插件的主代码
 │  │  ├─ libs/              // 插件用到的库
 │  │  ├─ utils/             // 插件用到的工具
 │  │  ├─ web.index/         // 主站点
-│  │  └─ web.utils/         // 工具站点
+│  │  ├─ web.utils/         // 工具站点
+│  │  └─ *.js               // 插件文件
+│  ├─ logs/                 // .日志文件夹
+│  ├─ plugins/              // 主插件列表，以及插件的相关代码
+│  │  ├─ temporary/         // .插件的临时上传、下载、解压文件夹
+│  │  └─ *.js               // 插件文件
 │  └─ web/                  // 主项目资源站
 │     ├─ example/           // 文件夹 站点，示例站点
 │     ├─ plugin/            // 文件夹 站点，插件示例站点

@@ -1,4 +1,6 @@
 import { createSelectFileByDomains } from './types/index.ts';
+// 全局安装后请使用这种方式引入提示信息
+// import { createSelectFileByDomains } from 'lazierserver/types';
 
 /**
  * 多路径存在同一api时的选择算法插件的demo

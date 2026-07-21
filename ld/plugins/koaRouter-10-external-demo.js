@@ -1,6 +1,8 @@
 import { execSync } from 'child_process';
 import { createKoaRouter } from './types/index.ts';
 import { exportFunction } from './externals/demo.js';
+// 全局安装后请使用这种方式引入提示信息
+// import { createKoaRouter } from 'lazierserver/types';
 
 /**
  * koa 路由插件的demo  
