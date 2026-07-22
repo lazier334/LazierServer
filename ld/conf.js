@@ -54,6 +54,12 @@ export default {
             fun: "this.openPage('/system/openCwd')"
         },
         {
+            avatarText: "/ld",
+            text: "打开数据目录",
+            tooltip: "尝试使用文件管理器打开数据目录（主要用于windows系统）",
+            fun: `this.openPage('/system/openCwd?filepath=${import.meta.dirname.replaceAll("\\", "/")}')`
+        },
+        {
             avatarText: 'tus',
             text: '文件上传',
             tooltip: '上传文件到服务器',

@@ -90,16 +90,19 @@ async function runCmd(cmd = 'echo hello world!', options) {
         primaryEncoding = isWin ? 'gbk' : 'utf8',
         windowsHide = true
     } = (typeof options == 'object' && options != null ? options : {});
-    const winCmd = isWin ? `chcp 65001 >nul & ${cmd}` : cmd;
+    const winCmd = isWin ? `chcp 65001 >nul & ${cmd.replace(/"/g, '""')}` : cmd;
     const args = isWin ? ['/c', winCmd] : ['-c', cmd];
     const shell = isWin ? 'cmd.exe' : '/bin/sh';
 
     return new Promise((resolve, reject) => {
-        const child = spawn(shell, args, {
+        const opts = {
             encoding: 'buffer',         // 关键：返回原始二进制数据
             windowsHide: windowsHide,   // 禁止Windows弹出额外窗口
             maxBuffer: 1024 * 1024 * 10 // 解决大输出时的缓冲区限制
-        });
+        };
+        // 解决 Windows 下参数二次转义问题
+        if (isWin) opts.windowsVerbatimArguments = true;
+        const child = spawn(shell, args, opts);
 
         let stdout = '';
         let stderr = '';

@@ -4,9 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '版本号（如 1.3.3-26072102 或 1.3.4）'
-        required: true
-        default: '1.3.3-26072102'
+        description: '版本号（如 1.3.3-26072102 或 1.3.4 ）不写则不修改版本号'
+        default: ''
         type: string
   push:
     tags:
@@ -33,8 +32,15 @@ jobs:
         run: npm ci
 
       - name: Update version from input
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
         run: |
-          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          INPUT_VERSION="${{ github.event.inputs.version }}"
+          if [ "$INPUT_VERSION" != "$CURRENT_VERSION" ]; then
+            npm version "$INPUT_VERSION" --no-git-tag-version
+          else
+            echo "Version unchanged, skipping npm version"
+          fi
 
       - name: Publish to npm
         run: |
