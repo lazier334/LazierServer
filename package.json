@@ -1,7 +1,7 @@
 {
   "name": "lazierserver",
-  "version": "1.3.4-26072201",
-  "description": "= 日志存放变更到项目根目录\n= 修复cmd工具导致在windows里无法打开正确的文件夹",
+  "version": "1.3.4-26072202",
+  "description": "= 修复类型导出的默认选择文件类型\n= 日志存放变更到项目根目录\n= 修复cmd工具导致在windows里无法打开正确的文件夹",
   "homepage": "https://github.com/lazier334/LazierServer#readme",
   "bugs": {
     "url": "https://github.com/lazier334/LazierServer/issues"
@@ -16,7 +16,7 @@
   "exports": {
     "./types": {
       "types": "./ld/lazier334/types/index.d.ts",
-      "default": "./ld/lazier334/types/index.ts"
+      "default": "./ld/lazier334/types/index.js"
     }
   },
   "files": [

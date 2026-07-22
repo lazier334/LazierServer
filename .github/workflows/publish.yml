@@ -42,7 +42,21 @@ jobs:
             echo "Version unchanged, skipping npm version"
           fi
 
+      - name: Check if version exists on npm
+        id: check_version
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "${PACKAGE_NAME}@${VERSION}" version > /dev/null 2>&1; then
+            echo "Version ${VERSION} already exists on npm, will skip publish."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version ${VERSION} is new, will publish."
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish to npm
+        if: steps.check_version.outputs.exists != 'true'
         run: |
           VERSION=$(node -p "require('./package.json').version")
           if [[ $VERSION == *-* ]]; then
