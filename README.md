@@ -4,20 +4,20 @@
 ## 核心技术栈
 **`JS/TS` + `Koa`**
 
-## 全局安装与启动
-* **1. 下载项目** 使用git命令克隆main分支 `git clone https://github.com/lazier334/LazierServer.git`
-* **2. 安装项目** 使用命令 `npm i -g .`
-* **3. 启动项目** 使用命令 `ls334`
-* **4. 停止项目** 使用命令 `ls334 stop`
+## 文档
+LazierServer文档: https://lazier334.github.io/res/lazierserver/
 
-### 快速开发（类型提示不完善，请以原始项目为准）
-> **类型提示不完善，请以原始项目为准**
+## 快速启动
+
+* **1. 下载项目** 使用全局安装命令: `npm i -g lazierserver`
+* **2. 启动项目** 在项目文件夹运行命令启动: `ls334`
+* **3. 查看帮助** 命令: `ls334 help`
+
+### 快速开发
 
 1. 完成上述全局安装
-2. 创建一个空文件夹，并从文件夹里使用命令启动服务器，**该文件夹不能位于当前项目LazierServer的文件夹内** 
-3. 直接把当前文件夹作为web与plugins的共用文件夹使用
-4. 先使用 `npm init` 初始化
-5. 然后使用 `npm link lazierserver` 关联项目
+2. 从从文件夹里使用 `ls334` 命令启动服务器（**该文件夹不能位于当前项目LazierServer的文件夹内**），会把当前文件夹作为web与plugins的共用文件夹使用
+4. 然后先使用 `npm i lazierserver` 安装提示模块
 6. 创建一个插件 **可以通过导入 `lazierserver/types` 来获得提示信息**
     ```js
     import { createKoaRouter } from 'lazierserver/types';
@@ -30,11 +30,6 @@
     })
     ```
 7. 创建一个静态资源文件夹 `a.b` 并把静态资源放进文件夹内，例如: `a.b/index.html` ，可通过 `switch.scanWebOnlyDoamin` 进行配置是否使用`.`作为筛选，**默认情况下文件夹必须至少含有一个 `.` 才能被识别为web资源**
-
-## 普通快速启动
-
-* **1. 下载项目** 使用git命令克隆main分支 `git clone https://github.com/lazier334/LazierServer.git`
-* **2. 启动项目** 使用命令 `npm start`
 
 ## docker
 * 可以直接[前往docker镜像页](https://github.com/lazier334/LazierServer/pkgs/container/lazierserver)复制对应镜像的命令进行下载使用

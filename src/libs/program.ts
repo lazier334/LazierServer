@@ -146,7 +146,6 @@ export default createKoaRouter(function koaRouter(router, T) {
         "dev":"ls334"
     },
     "dependencies": {
-        "lazierserver": "file:${path.join(import.meta.dirname, '../../').replaceAll('\\', '/')}"
     }
 }
 `,
@@ -167,7 +166,7 @@ program.command('create').aliases(['c', 'template'])
             console.info(directory, '项目已创建');
             console.log('正在安装依赖中...');
             const { spawnSync } = await import('child_process');
-            spawnSync('npm', ['i'], {
+            spawnSync('npm', ['i', 'lazierserver'], {
                 cwd: targetPath,
                 stdio: 'inherit',
                 shell: process.platform === 'win32'
