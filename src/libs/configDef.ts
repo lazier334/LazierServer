@@ -439,7 +439,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         dailyRotateFileList: [
             // info 及以上级别（info, warn、error）写入 ${config.dataPath}/logs/info-%DATE%.log
             {
-                filename: path.join(ldDirName, 'logs', 'info-%DATE%.log'),
+                filename: path.join(import.meta.dirname, '../../logs', 'info-%DATE%.log'),
                 datePattern: 'YYYY-MM-DD', // 按天切割
                 level: 'info',             // 只处理 info 及以上级别
                 maxSize: '100m',           // 单文件最大 100MB
@@ -448,7 +448,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             },
             // debug 及以上级别（debug、verbose、info、warn、error）写入 ${config.dataPath}/logs/debug-%DATE%.log
             {
-                filename: path.join(ldDirName, 'logs', 'debug-%DATE%.log'),
+                filename: path.join(import.meta.dirname, '../../logs', 'debug-%DATE%.log'),
                 datePattern: 'YYYY-MM-DD',
                 level: 'debug',            // 只处理 debug 及以上级别
                 maxSize: '300m',
