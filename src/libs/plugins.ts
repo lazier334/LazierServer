@@ -40,20 +40,21 @@ class Stage {
 
     /** 
      * 使用函数，当返回 `{end:true, result:any}` 时停止后续执行并返回 `result` 数据
-     * @returns {any} 默认返回第一个参数
+     * @returns {any} 默认返回插件的返回值
      */
     async use(...args: any[]): Promise<any> {
+        let re;
         if (this.data.length < 1) {
             console.warn(this.stage + ' 阶段的插件列表为空');
         } else {
             for (const handle of this.data) {
-                const re = await handle(...args);
+                re = await handle(...args);
                 if (re?.end) {
                     return re.result;
                 }
             }
         }
-        return args[0];
+        return re;
     }
 }
 /**
