@@ -415,7 +415,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         /** 公司名字 */
         companyName: 'LazierServer',
         /** 版权人名称 */
-        copyright: 'LazierServer',
+        copyright: 'lazier334',
         /** 联系方式 */
         contact: 'lazier334@lazier334.com',
         /** 隐私政策 */

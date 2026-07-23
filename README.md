@@ -33,7 +33,6 @@ LazierServer文档: https://lazier334.github.io/res/lazierserver/
 
 ## docker
 * 可以直接[前往docker镜像页](https://github.com/lazier334/LazierServer/pkgs/container/lazierserver)复制对应镜像的命令进行下载使用
-* 可以拉取后使用命令 `docker-compose up -d` 进行构建并启动镜像
 
 ## 文件夹说明
 ```c
