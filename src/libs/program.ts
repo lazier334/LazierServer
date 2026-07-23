@@ -31,7 +31,7 @@ const getStartCallback = (options: any) => {
 
 program.name('lazierserver')
     .description('LaizerServer 服务器')
-    .version(Object.keys(defConfig.version).shift() || '-');
+    .version(Object.keys(defConfig.version).shift() || '-', '-v, -V, --version');
 
 program.command('start', { isDefault: true })
     .option('-p, --port <number>', '指定端口号(https默认使用该端口+1作为配置)', '0')
