@@ -864,34 +864,6 @@
                             h('p', { innerHTML: versionText.value }),
                             h('div', { style: 'display: flex; gap: 8px; margin-top: 16px; justify-content: center;' }, [
                                 h(ElButton, {
-                                    type: 'primary',
-                                    disabled: checking.value,
-                                    onClick: () => {
-                                        ElMessageBox.close();
-                                        ElMessageBox.confirm('是否更新版本到next版本?', '警告', {
-                                            confirmButtonText: '更新',
-                                            cancelButtonText: '取消',
-                                            type: 'warning',
-                                        }).then(() => {
-                                            this.updateVersion('update=true&tag=next');
-                                        }).catch(() => { });
-                                    }
-                                }, () => '更新next'),
-                                h(ElButton, {
-                                    type: 'primary',
-                                    disabled: checking.value,
-                                    onClick: () => {
-                                        ElMessageBox.close();
-                                        ElMessageBox.confirm('是否更新版本到latest版本?', '警告', {
-                                            confirmButtonText: '更新',
-                                            cancelButtonText: '取消',
-                                            type: 'warning',
-                                        }).then(() => {
-                                            this.updateVersion('update=true');
-                                        }).catch(() => { });
-                                    }
-                                }, () => '更新latest'),
-                                h(ElButton, {
                                     disabled: checking.value,
                                     onClick: async () => {
                                         // 检查版本：动态修改显示内容，不关闭弹窗

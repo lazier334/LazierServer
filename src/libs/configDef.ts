@@ -2,6 +2,7 @@ import path from 'path';
 import version from './version.ts';
 import { fileURLToPath, pathToFileURL } from 'url';
 
+// #region 类型定义
 type NullObject = { [key: string]: any; };
 type NullConfig = NullObject;
 declare global {
@@ -35,6 +36,8 @@ type ConfigUtilsType = {
 };
 
 
+// #endregion 
+// #region 系统配置与工具
 // 挂载全局对象
 if (!process.G) process.G = { getNowFileStorage };
 
@@ -60,6 +63,8 @@ const system = {
         systemId: Date.now()
     },
 }
+// #endregion 
+// #region Obfuscator混淆配置
 /** Obfuscator混淆配置 */
 const ObfuscatorOptions = {
     /** 预设配置（default/medium/high/low/custom） */
@@ -170,6 +175,8 @@ const ObfuscatorOptions = {
     /** 是否打印混淆过程日志 */
     log: false,
 };
+// #endregion 
+// #region config配置
 const config = {
     /**
      * 更新本地数据文件夹路径
@@ -544,9 +551,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         avatarText: 'ver',
         text: 'v.' + ver.version,
         tooltip: '当前版本:' + ver.version,
-        fun: `ElMessageBox.alert(\`当前版本: ${ver.version
-            }<br>${ver.detail.replaceAll('\n', '<br>')}\`, 'Version ${ver.version
-            }', {dangerouslyUseHTMLString: true,confirmButtonText: '确定'})`
+        fun: `this.showVersion(${JSON.stringify(ver)})`
     } as ButDataItem);
 }
 
@@ -554,6 +559,8 @@ export default config;
 // 导出类型提示信息
 export type Config = typeof config;
 
+// #endregion 
+// #region 辅助函数
 /**
  * 读取版本, 默认读取最新版本
  * @param num
@@ -720,3 +727,4 @@ function getNowFileStorage(filepath: string = import.meta.filename): NullObject 
     }
     return process.G[fn];
 }
+// #endregion 

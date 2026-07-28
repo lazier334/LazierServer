@@ -1,10 +1,11 @@
+import type Application from 'koa';
 import https from 'https';
+import send from 'koa-send';
 import Router from '@koa/router';
+import { spawn } from 'child_process';
 import { Downloader } from 'nodejs-file-downloader';
 import { fs, path, config, getNowFileStorage } from './config.ts';
 import { plugins, getAllPlugin, getPlguinUpdateTime } from './plugins.ts';
-import type Application from 'koa';
-import send from 'koa-send';
 
 interface User {
     /** 用户id */
@@ -87,6 +88,8 @@ export {
     completeFile,
     readKoaRouters,
     downloadFileToPath,
+    checkVersion,
+    runCmdAsync
 };
 
 /**
@@ -229,4 +232,45 @@ async function downloadFileToPath(url: string, filepath: string, orgUrl?: string
         }
         console.debug(error.stack);
     }
+}
+
+/**
+ * 异步运行命令
+ * @param command 命令
+ * @param args 参数
+ * @param spawnCallback 子进程启动后1秒触发这里
+ * @param closeCallback code==0则为正常运行结束，结束1秒后才运行这个回调
+ */
+function runCmdAsync(command: string, args: string[], spawnCallback = () => { }, closeCallback = (code: any) => { }) {
+    console.log('运行命令:', command, args);
+    const child = spawn(command, args, {
+        stdio: 'inherit',   // 将输出重定向到当前控制台
+        // shell: true,        // 使用 shell 执行命令
+    });
+    // clsoe事件需要等待启动的程序运行结束，所以一般不会走这里面的代码
+    child.on('close', (code: any) => setTimeout(() => closeCallback(code), 1000));
+    // 确保子进程启动后再退出当前进程，不能立刻退出
+    child.on('spawn', () => setTimeout(spawnCallback, 1000));
+}
+type Version = { next: string, latest: string, now: string, update: boolean };
+/**
+ * 检查最新版本并检测 latest 版本是否有更新
+ */
+async function checkVersion(): Promise<Version | undefined> {
+    let re = { update: false } as Version;
+    try {
+        const packageJSON = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, '../../package.json'), 'utf8'));
+        const version = packageJSON.version;
+        re.now = version;
+        const res = await fetch('https://registry.npmjs.org/-/package/lazierserver/dist-tags');
+        const verData = await res.json() as { "next": "1.3.6-26072700", "latest": "1.3.5" };
+        console.info('当前版本:', version, '最新版本:', verData);
+        re.next = verData.next;
+        re.latest = verData.latest;
+        // 检测 latest 是否需要更新版本
+        re.update = Number(re.now.split('-').shift()?.replaceAll('.', '')) < Number(re.latest.split('-').shift()?.replaceAll('.', ''));
+    } catch (err) {
+        console.error('检查版本时出现异常:', err)
+    }
+    return re;
 }

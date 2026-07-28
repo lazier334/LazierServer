@@ -77,7 +77,7 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
          */
         function restart(restartFlag) {
             if (restartFlag) {
-                restartSystem()
+                restartSystem();
             } else {
                 throw new Error('配置未发生变更，故不重启');
             }

@@ -175,6 +175,29 @@ program.command('create').aliases(['c', 'template'])
         process.exit(0);
     });
 
+program.command('update')
+    .description('更新 LazierServer 版本')
+    .action(async () => {
+        // 检查版本，然后运行更新脚本
+        const { checkVersion, runCmdAsync } = await import('./utils.ts');
+        const ver = await checkVersion();
+        if (ver) {
+            // 运行 update.js 脚本
+            const scriptFile = path.join(defConfig.dataPath, 'scripts/update.js');
+            runCmdAsync('node', [scriptFile], () => process.exit(0));
+        } else {
+            console.info('当前已经是最新版本!');
+        }
+    });
+
+program.command('uninstall')
+    .description('卸载 LazierServer')
+    .action(async () => {
+        // 运行 uninstall.js 脚本
+        const scriptFile = path.join(defConfig.dataPath, 'scripts/uninstall.js');
+        (await import('./utils.ts')).runCmdAsync('node', [scriptFile], () => process.exit(0));
+    });
+
 program.parse(process.argv);
 
 export {

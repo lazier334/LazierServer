@@ -7,7 +7,7 @@ import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseI
 
 const { plugins, getAllPlugin } = await getPluginsModule();
 const utilsModule = await getUtilsModule();
-const { authUser, downloadFileToPath, readKoaRouters } = utilsModule;
+const { authUser, downloadFileToPath, readKoaRouters, checkVersion, runCmdAsync } = utilsModule;
 const lc = {
     cacheData: {
         /** 更新的文件内容 */
@@ -21,6 +21,20 @@ const lc = {
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  */
 export default createKoaRouter(function koaRouterSystem(router, T) {
+
+    // #region 系统接口
+
+    router.all('接口: 如果是访问首页则检测权限并返回对应的版本', '/index.html', async (ctx, next) => {
+        /** @type {ctx & T} */
+        const ectx = ctx;
+        if (ectx.sendOptions.opts.root.replaceAll('\\', '/').endsWith('web/web.index')) {
+            if (!authUser(ctx)?.superAdmin) {
+                ectx.sendOptions.filename = ectx.sendOptions.filename.replace('.html', '.user.html');
+                console.log(ectx.sendOptions.filename)
+            }
+        }
+    });
+
     // 接口: 根目录重定向
     router.all('接口: 根目录重定向', '/', ctx => {
         const idnexPath = path.join(config.dataPath, 'web/index');
@@ -47,19 +61,39 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
 
     // 接口: 重启服务器
     router.all('系统路由 - 重启服务器', '/system/restart', async (ctx, next) => {
-        if (!authUser(ctx).superAdmin) return next();
+        if (!authUser(ctx)?.superAdmin) return next();
         restartSystem();
         ctx.body = result('重启中...');
     });
 
     // 接口: 关闭服务器
     router.all('系统路由 - 关闭服务器', '/system/shutdown', async (ctx, next) => {
-        if (!authUser(ctx).superAdmin) return next();
+        if (!authUser(ctx)?.superAdmin) return next();
 
         ctx.body = result('关机中...');
         setTimeout(() => process.exit(1), 1000);
     });
 
+    // 接口: 获取全部路由
+    router.all('系统路由 - 获取全部路由', '/system/getAllRouter', async (ctx) => {
+        // 动态路由
+        const routers = await readKoaRouters();
+        // 读取所有的路由规则
+        let re = readRouterLayers(routers.stack, '动态路由');
+        Object.entries(config.additionalRouter).forEach(([k, v]) => {
+            re = re.concat(readRouterLayers(v.stack, '额外路由 - ' + k))
+        });
+        return ctx.body = result(re);
+    });
+    // 接口: 获取路由插件的顺序
+    router.all('系统路由 - 获取路由插件的顺序', '/system/getRouterSort', async (ctx) => {
+        // 读取所有的路由插件的顺序
+        let re = await getAllPlugin('koaRouter');
+        return ctx.body = result(re);
+    });
+
+    // #endregion 
+    // #region 配置相关
 
     // 接口: 首页按钮数据
     router.all('系统路由 - 首页按钮数据', '/system/indexData', async ctx => {
@@ -170,22 +204,37 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
         ctx.body = result(readUpdateFile(fp, (data) => JSON.parse(data)));
     });
 
-    // 接口: 获取全部路由
-    router.all('系统路由 - 获取全部路由', '/system/getAllRouter', async (ctx) => {
-        // 动态路由
-        const routers = await readKoaRouters();
-        // 读取所有的路由规则
-        let re = readRouterLayers(routers.stack, '动态路由');
-        Object.entries(config.additionalRouter).forEach(([k, v]) => {
-            re = re.concat(readRouterLayers(v.stack, '额外路由 - ' + k))
-        });
-        return ctx.body = result(re);
-    });
-    // 接口: 获取路由插件的顺序
-    router.all('系统路由 - 获取路由插件的顺序', '/system/getRouterSort', async (ctx) => {
-        // 读取所有的路由插件的顺序
-        let re = await getAllPlugin('koaRouter');
-        return ctx.body = result(re);
+    // #endregion 
+    // #region 系统操作
+
+    router.all('系统路由 - 更新版本', '/system/update', async (ctx, next) => {
+        /** @type {ctx & T} */
+        const ectx = ctx;
+        const { tag, update } = ectx.query;
+        // 检查版本，然后运行更新脚本
+        const ver = await checkVersion();
+        let verTag = 'latest';
+        if (tag == 'next') {
+            ver.update = Number(ver.now.replace(/[-.]/g, '')) < Number(ver.next.replace(/[-.]/g, ''));
+            verTag = 'next';
+        }
+        ver.update = true;
+        if (update && authUser(ctx)?.superAdmin) {
+            if (ver.update) {
+                // 运行 update.js 脚本
+                const scriptFile = path.join(config.dataPath, 'scripts/update.js1');
+                if (fs.existsSync(scriptFile)) {
+                    ctx.body = result(ver, `正在尝试更新系统版本到 ${verTag} 版本! 更新成功后将重启系统`);
+                    setTimeout(() => {
+                        runCmdAsync('node', [scriptFile, '--tag=' + verTag], () => process.exit(0));
+                    }, 2000);
+                } else {
+                    ctx.body = result(ver, '更新脚本不存在!');
+                }
+            } else {
+                ctx.body = result(ver, '当前已经是最新版本!');
+            }
+        } else ctx.body = result(ver, '版本信息');
     });
 
     // 接口：读取搜索快捷关键词按钮数据
@@ -257,6 +306,9 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
         }
     });
 
+    // #endregion 
+    // #region 版权相关接口
+
     router.all('系统路由 - 版权主页面文件处理', '/system/copyright', async (ctx, next) => {
         /** @type {ctx & T} */
         const ectx = ctx;
@@ -287,6 +339,8 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
         if (!ectx.sendFileFromPath) return;
         ctx.body = fs.readFileSync(ectx.sendFileFromPath, 'utf8').replaceAll('使用条款', config.copyright.terms)
     });
+
+    // #endregion 
 
     return router
 })
