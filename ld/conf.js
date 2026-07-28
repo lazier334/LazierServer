@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import configDef from '../dist/libs/configDef.js';
 
 // 服务器资源目录，plugins 和 web 共同所在的目录
 var serverDir = [];
@@ -11,8 +10,15 @@ try {
 } catch { };
 
 /**
- * @type {configDef}
- * 用户自定义配置  
+ * 这里用于查询配置项，可以在此处查询原配置项内容。
+ * 不把 type 放到下面的导出是因为那样会导致自定义的配置无法正常提示信息。
+ * @type {import('../dist/libs/configDef.js').Config}  
+ */
+const testType = {
+};
+
+/**
+ * 用户自定义配置，可以额外增加自定义配置项  
  * 只有这里的配置信息会被导出  
  * 上面是便捷查询、测试使用，实际变量未使用
  */

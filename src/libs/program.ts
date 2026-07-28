@@ -3,10 +3,9 @@ import path from 'path';
 import { Command } from 'commander';
 import defConfig from './configDef.ts';
 
-const __dirname = import.meta.dirname;
 const nowDir = process.cwd();
-const lsDir = path.join(__dirname, '../');
-const runfile = path.join(__dirname, 'start.log');
+const lsDir = path.join(import.meta.dirname, '../../');
+const runfile = path.join(import.meta.dirname, 'start.log');
 const program = new Command();
 /** 在主程序中运行的函数，此时已经初始化config完成 */
 var callback = (main: () => Promise<void>, config: typeof defConfig) => { };

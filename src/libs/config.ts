@@ -22,8 +22,13 @@ var config: ConfigType = {};
 // 1. 读取 ld 的配置文件进行合并，配置选择优先级 运行路径的配置文件 > 项目的配置文件 > 默认配置
 const getConfig = async (filepath: string): Promise<Partial<ConfigType> | undefined> => {
     try {
-        return (await import(pathToFileURL(filepath).href)).default as Partial<ConfigType>;
-    } catch { }
+        if (fs.existsSync(filepath)) {
+            return (await import(pathToFileURL(filepath).href)).default as Partial<ConfigType>;
+        }
+    } catch (err) {
+        console.log('导入该配置时发生错误:', filepath);
+        console.error(err);
+    }
 }
 const cwdConfigPath = path.join(process.cwd(), 'conf.js');
 let conf = await getConfig(cwdConfigPath);

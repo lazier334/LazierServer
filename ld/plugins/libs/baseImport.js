@@ -3,12 +3,14 @@ import app from 'koa';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
+// 合并类型提示，用户配置不能使用 Config 作为提示信息除非额外增加自定义的提示，否则自定义的提示信息会失效
 /** @type {import('../../../src/libs/config.ts')} */
 const defConfigType = {};
 /** @type {import('../../conf.js')} */
 const userConfigType = {};
 /** @type {typeof defConfigType.config & typeof userConfigType.default} */
 var config = {};
+
 /** 当前模块的配置数据 */
 const lc = {
     dirs: ['dist', 'src'],

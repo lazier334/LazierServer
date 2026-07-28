@@ -170,7 +170,7 @@ const ObfuscatorOptions = {
     /** 是否打印混淆过程日志 */
     log: false,
 };
-export const config = {
+const config = {
     /**
      * 更新本地数据文件夹路径
      * @param newLdDirName 本地数据文件夹路径
@@ -551,6 +551,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
 }
 
 export default config;
+// 导出类型提示信息
+export type Config = typeof config;
 
 /**
  * 读取版本, 默认读取最新版本

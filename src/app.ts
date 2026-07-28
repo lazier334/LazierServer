@@ -21,7 +21,10 @@ async function main(): Promise<void> {
     startServers();
 
     // 检查文件用于做删除文件时退出
-    fs.writeFileSync(runfile, new Date().toLocaleString());
+    fs.writeFileSync(runfile, JSON.stringify({
+        cmd: process.argv,
+        time: new Date().toLocaleString()
+    }, null, 2));
     chokidar.watch(runfile).on('unlink', async () => {
         console.warn('由于状态文件被删除, 正在退出服务器');
         process.exit(0);
