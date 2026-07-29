@@ -41,7 +41,16 @@ function GenSubmitCmd(pkg) {
     let cmdPath = path.resolve(cmdTempFile.replace('.log', `-v.${version}.log`));
     let cmds = [];
     const ver = pkg.version.split('(').shift().split('-').shift();
-    const tagDescription = pkg.description.split('\n').map(s => s.startsWith('* ') ? s : ('* ' + s)).join('\n');
+    const tagDescription = pkg.description.split('\n').map(s => {
+        if (s.startsWith('= ')) {
+            s = s.replace('= ', '=');
+        } else if (s.startsWith('+ ')) {
+            s = s.replace('+ ', '+');
+        } else if (s.startsWith('- ')) {
+            s = s.replace('- ', '-');
+        }
+        return s.startsWith('* ') ? s : ('* ' + s);
+    }).join('\n');
     cmds.push('# 需要手动运行命令进行创建并提交tag标签, 如果有换行等特殊符号, 需要手动处理');
     cmds.push(`# 创建tag标签\ngit tag -a 'v${ver}' -m '\nv${pkg.version + '\n' + tagDescription}'`);
     cmds.push(`# 推送tag标签\ngit push origin 'v${ver}'`);
