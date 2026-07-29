@@ -42,7 +42,6 @@ async function main() {
         await new Promise(r => setTimeout(r, 3000));
     }
 
-
     // 2. 卸载全局包（同步等待完成）
     console.log('正在卸载全局包 lazierserver ...');
     try {
@@ -92,5 +91,5 @@ async function main() {
         console.error('可能原因：权限不足、文件被占用或路径不正确');
     }
 
-    console.log('脚本执行完毕');
+    console.log('卸载脚本执行完毕');
 }

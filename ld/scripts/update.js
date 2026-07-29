@@ -20,15 +20,27 @@ const foldersToClean = [projectDir];
 const lc = {
     updateLogPath: path.join(import.meta.dirname, 'update.log'),
 };
-var verTag = getVerTag();
+var verTag = 'latest';
+var runcode;
+anyArgs();
 
-function getVerTag() {
-    let reTag = 'latest';
+function anyArgs() {
     const tagChar = '--tag=';
+    const runChar = '--run=';
     const args = process.argv.slice(2);
-    const tag = args.find(param => param.startsWith(tagChar))?.replace(tagChar, '');
-    if (tag && tag.trim() == 'next') reTag = 'next';
-    return reTag;
+    args.forEach(param => {
+        if (param.startsWith(tagChar)) {
+            if (param.replace(tagChar, '').trim() == 'next') {
+                verTag = 'next';
+            }
+        } else if (param.startsWith(runChar)) {
+            param = param.replace(runChar, '').trim();
+            runcode = {
+                cmd: JSON.parse(Buffer.from(param, 'base64').toString('utf8')),
+                time: new Date().toLocaleString()
+            };
+        }
+    });
 }
 
 // 启动
@@ -37,7 +49,7 @@ main();
 // 主流程
 async function main() {
 
-    console.log('=== 开始执行清理脚本 ===');
+    console.log('=== 开始更新脚本 ===');
     // 1. 检测是否存在运行状态文件，如果存在则删除并等待3秒
     /** @type {{cmd: string[], time: number}} */
     let status = null;
@@ -55,9 +67,13 @@ async function main() {
         console.log('等待正在运行的程序停止中...');
         await new Promise(r => setTimeout(r, 3000));
     }
+    // 如果外部传递了参数，那么优先使用外部传递的参数进行启动
+    if (runcode) {
+        status = runcode;
+    }
 
     // 2. 更新全局包（同步等待完成）
-    console.log('正在安装全局包 lazierserver ...');
+    console.log('正在全局安装包 lazierserver ...');
     try {
         // 执行安装，输出打印到控制台
         const log = execSync('npm install -g lazierserver@' + verTag, { stdio: 'inherit' });
@@ -68,10 +84,11 @@ async function main() {
 
     if (status?.cmd) {
         // 使用新的独立进程启动命令
+        console.log('=== 正在重启系统 ===');
         runCmd(status.cmd[0], status.cmd.slice(1));
     }
 
-    console.log('脚本执行完毕\n\n');
+    console.log('更新脚本执行完毕\n\n');
 }
 
 /**

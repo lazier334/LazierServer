@@ -226,7 +226,12 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
                 if (fs.existsSync(scriptFile)) {
                     ctx.body = result(ver, `正在尝试更新系统版本到 ${verTag} 版本! 更新成功后将重启系统`);
                     setTimeout(() => {
-                        runCmdAsync('node', [scriptFile, '--tag=' + verTag], () => process.exit(0));
+                        runCmdAsync('node', [
+                            scriptFile,
+                            '--tag=' + verTag,
+                            // 将当前的启动命令转成base64带过去
+                            '--run=' + Buffer.from(JSON.stringify(process.argv), 'utf8').toString('base64')
+                        ]).then(() => process.exit(0));
                     }, 2000);
                 } else {
                     ctx.body = result(ver, '更新脚本不存在!');

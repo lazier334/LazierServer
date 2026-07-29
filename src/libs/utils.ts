@@ -235,22 +235,24 @@ async function downloadFileToPath(url: string, filepath: string, orgUrl?: string
 }
 
 /**
- * 异步运行命令
+ * 异步开启子线程运行命令
  * @param command 命令
  * @param args 参数
- * @param spawnCallback 子进程启动后1秒触发这里
- * @param closeCallback code==0则为正常运行结束，结束1秒后才运行这个回调
+ * @param no1sResolve 不进行1秒 resolve
+ * @param resolve 默认情况下运行1秒后会执行该回调，code==0则为正常运行结束，结束1秒后才运行这个回调
  */
-function runCmdAsync(command: string, args: string[], spawnCallback = () => { }, closeCallback = (code: any) => { }) {
-    console.log('运行命令:', command, args);
-    const child = spawn(command, args, {
-        stdio: 'inherit',   // 将输出重定向到当前控制台
-        // shell: true,        // 使用 shell 执行命令
+function runCmdAsync(command: string, args: string[], no1sResolve: boolean = false) {
+    return new Promise((resolve, reject) => {
+        console.log('运行命令:', command, args);
+        const child = spawn(command, args, {
+            stdio: 'inherit',   // 将输出重定向到当前控制台
+            shell: true,        // windows需要使用 shell 执行命令
+        });
+        // clsoe事件需要等待启动的程序运行结束，所以一般不会走这里面的代码
+        child.on('close', (code: any) => setTimeout(() => resolve(code), 1000));
+        // 确保子进程启动后再退出当前进程，不能立刻退出
+        if (!no1sResolve) child.on('spawn', () => setTimeout(resolve, 1000));
     });
-    // clsoe事件需要等待启动的程序运行结束，所以一般不会走这里面的代码
-    child.on('close', (code: any) => setTimeout(() => closeCallback(code), 1000));
-    // 确保子进程启动后再退出当前进程，不能立刻退出
-    child.on('spawn', () => setTimeout(spawnCallback, 1000));
 }
 type Version = { next: string, latest: string, now: string, update: boolean };
 /**

@@ -184,7 +184,7 @@ program.command('update')
         if (ver) {
             // 运行 update.js 脚本
             const scriptFile = path.join(defConfig.dataPath, 'scripts/update.js');
-            runCmdAsync('node', [scriptFile], () => process.exit(0));
+            runCmdAsync('node', [scriptFile]).then(() => process.exit(0));
         } else {
             console.info('当前已经是最新版本!');
         }
@@ -195,7 +195,7 @@ program.command('uninstall')
     .action(async () => {
         // 运行 uninstall.js 脚本
         const scriptFile = path.join(defConfig.dataPath, 'scripts/uninstall.js');
-        (await import('./utils.ts')).runCmdAsync('node', [scriptFile], () => process.exit(0));
+        (await import('./utils.ts')).runCmdAsync('node', [scriptFile]).then(() => process.exit(0));
     });
 
 program.parse(process.argv);
