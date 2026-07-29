@@ -754,25 +754,29 @@
             async getSystemId(notShowError) {
                 return await this.warpAxios(axios.get('/system/systemId').then((response) => response.data.data), '获取服务器系统id', true, notShowError);
             },
-            waitSystemRestart(lastSystemId, waitTime = 60 * 1000) {
+            waitSystemRestart(lastSystemId, waitTime = 60 * 1000, stepTime = 1000) {
                 const endTime = Date.now() + waitTime;
-                let i = 0;
+                let req = null;
                 const inteId = setInterval(() => {
-                    if (endTime < Date.now()) {
+                    let remainingTime = endTime - Date.now();
+                    if (remainingTime < 0) {
                         ElMessage.error('服务器重启超时');
                         clearInterval(inteId);
                         return;
                     }
-                    if (0 == i++ % 3) ElMessage.info({ message: '等待服务器重启中...', duration: 1000 });
-                    this.getSystemId(true).then(systemId => {
-                        if (systemId && systemId != lastSystemId) {
-                            ElMessage.success('服务器重启完成');
-                            clearInterval(inteId);
-                        } else {
-                            throw new Error('服务器重启中...');
-                        }
-                    }).catch((err) => { });
-                }, 1000);
+                    ElMessage.info({ message: `等待服务器重启中...${parseInt(remainingTime / 1000)}s`, duration: 1000 });
+                    if (req != true) {
+                        req = true;
+                        this.getSystemId(true).then(systemId => {
+                            if (systemId && systemId != lastSystemId) {
+                                ElMessage.success('服务器重启完成');
+                                clearInterval(inteId);
+                            } else {
+                                throw new Error('服务器重启中...');
+                            }
+                        }).catch((err) => { }).finally(() => req = false);
+                    }
+                }, stepTime);
             },
             systemRestart() {
                 let that = this;
@@ -891,14 +895,15 @@
                                         disabled: checking.value,
                                         onClick: () => {
                                             ElMessageBox.close();
-                                            ElMessageBox.confirm('是否更新版本到next版本?', '警告', {
+                                            ElMessageBox.confirm('是否更新版本到next版本?<br>如果版本没有更新则会重新安装到该版本', '警告', {
+                                                dangerouslyUseHTMLString: true,
                                                 confirmButtonText: '更新',
                                                 cancelButtonText: '取消',
                                                 type: 'warning',
                                             }).then(async () => {
                                                 const lastSystemId = await this.getSystemId();
                                                 this.updateVersion('update=true&tag=next');
-                                                this.waitSystemRestart(lastSystemId, 3 * 60 * 1000);
+                                                this.waitSystemRestart(lastSystemId, 3 * 60 * 1000, 5 * 1000);
                                             }).catch(() => { });
                                         }
                                     }, () => '更新next'),
@@ -907,14 +912,15 @@
                                         disabled: checking.value,
                                         onClick: () => {
                                             ElMessageBox.close();
-                                            ElMessageBox.confirm('是否更新版本到latest版本?', '警告', {
+                                            ElMessageBox.confirm('是否更新版本到latest版本?<br>如果没有更新则会重新安装到该版本', '警告', {
+                                                dangerouslyUseHTMLString: true,
                                                 confirmButtonText: '更新',
                                                 cancelButtonText: '取消',
                                                 type: 'warning',
                                             }).then(async () => {
                                                 const lastSystemId = await this.getSystemId();
                                                 this.updateVersion('update=true');
-                                                this.waitSystemRestart(lastSystemId, 3 * 60 * 1000);
+                                                this.waitSystemRestart(lastSystemId, 3 * 60 * 1000, 5 * 1000);
                                             }).catch(() => { });
                                         }
                                     }, () => '更新latest'),] : []),
