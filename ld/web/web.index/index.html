@@ -87,6 +87,7 @@
                 </div>
             </el-tooltip>
 
+            <!-- 动态按钮 -->
             <el-tooltip v-for="(item, index) in butsData" :key="index" :content="item.tooltip || '无描述'" effect="dark"
                 placement="bottom">
                 <div class="but-s-item operate" @click="clickBut(item)">
@@ -580,9 +581,10 @@
                     if (typeof callback == 'function') callback();
                 })
             },
-            clickBut(item) {
+            clickBut(...args) {
+                const item = args[0];
                 try {
-                    item.fun.apply(this);
+                    item.fun.apply(this, args);
                 } catch (error) {
                     ElMessage.error('执行动态按钮时异常!按钮名:' + item.text);
                     console.error(error);

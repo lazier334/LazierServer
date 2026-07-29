@@ -29,15 +29,10 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
         const ectx = ctx;
         if (ectx.sendOptions.opts.root.replaceAll('\\', '/').endsWith('web/web.index')) {
             if (!authUser(ctx)?.superAdmin) {
-                // 检查用户版首页文件 index.user.html 是否存在，如果不存在则创建
-                const adminIndexFile = path.join(ectx.sendOptions.opts.root, ectx.sendOptions.filename);
-                ectx.sendOptions.filename = ectx.sendOptions.filename.replace('.html', '.user.html');
-                const userIndexFile = path.join(ectx.sendOptions.opts.root, ectx.sendOptions.filename);
-                if (!fs.existsSync(userIndexFile)) {
-                    // 用户版为把 'isAdmin: true,' 改成 'isAdmin: false,' 
-                    let html = fs.readFileSync(adminIndexFile, 'utf8');
-                    fs.writeFileSync(userIndexFile, html.replaceAll('isAdmin: true,', 'isAdmin: false,'));
-                }
+                // 用户版为把 'isAdmin: true,' 改成 'isAdmin: false,' 
+                let html = fs.readFileSync(path.join(ectx.sendOptions.opts.root, ectx.sendOptions.filename), 'utf8');
+                ctx.type = 'text/html; charset=utf-8';
+                ctx.body = html.replaceAll('isAdmin: true,', 'isAdmin: false,');
             }
         }
     });

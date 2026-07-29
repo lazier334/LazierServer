@@ -551,7 +551,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         avatarText: 'ver',
         text: 'v.' + ver.version,
         tooltip: '当前版本:' + ver.version,
-        fun: `this.showVersion(${JSON.stringify(ver)})`
+        fun: `arguments?.[0]?.dot?arguments[0].dot=false:'',this.showVersion(${JSON.stringify(ver)})`
     } as ButDataItem);
 }
 
