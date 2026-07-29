@@ -61,10 +61,25 @@ jobs:
           # 手动触发：获取最新的提交信息
           COMMIT_MSG=$(git log -1 --pretty=%B)
         else
-          # 自动触发：获取标签对应的提交信息
+          # 自动触发：获取标签对应的提交信息，并前置链接
           TAG_NAME=${GITHUB_REF#refs/tags/}
           COMMIT_HASH=$(git rev-list -n 1 $TAG_NAME 2>/dev/null || git rev-parse HEAD)
-          COMMIT_MSG=$(git log -1 $COMMIT_HASH --pretty=%B)
+          # 获取完整的提交消息
+          FULL_COMMIT_MSG=$(git log -1 $COMMIT_HASH --pretty=%B)
+          # 提取第一行
+          FIRST_LINE=$(echo "$FULL_COMMIT_MSG" | head -n1)
+          # 生成链接
+          REPO_URL="https://github.com/${{ github.repository }}"
+          COMMIT_URL="${REPO_URL}/commit/${COMMIT_HASH}"
+          COMMIT_LINK="[${FIRST_LINE}](${COMMIT_URL})"
+          # 拉取附注标签对象
+          git fetch --tags --force
+          # 获取 tag 注释（完整内容），若不存在则得到空字符串
+          TAG_MSG=$(git for-each-ref refs/tags/$TAG_NAME --format='%(contents)' 2>/dev/null || true)
+          # 拼接：链接 + 两个换行 + tag注释
+          COMMIT_MSG="${COMMIT_LINK}
+
+          ${TAG_MSG}"
         fi
         
         # 对多行文本进行处理，替换换行符为\n

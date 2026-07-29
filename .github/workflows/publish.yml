@@ -42,8 +42,21 @@ jobs:
             echo "Version unchanged, skipping npm version"
           fi
 
+      - name: Check version for push tags
+        id: version_check
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          if [ "$MAJOR" -lt 1 ]; then
+            echo "Push tag with version $VERSION (<1.0.0) - skipping publish."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Check if version exists on npm
         id: check_version
+        if: steps.version_check.outputs.skip != 'true'
         run: |
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           VERSION=$(node -p "require('./package.json').version")
@@ -56,7 +69,7 @@ jobs:
           fi
 
       - name: Publish to npm
-        if: steps.check_version.outputs.exists != 'true'
+        if: steps.check_version.outputs.exists != 'true' && steps.version_check.outputs.skip != 'true'
         run: |
           VERSION=$(node -p "require('./package.json').version")
           if [[ $VERSION == *-* ]]; then
