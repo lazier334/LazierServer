@@ -41,8 +41,9 @@ function GenSubmitCmd(pkg) {
     let cmdPath = path.resolve(cmdTempFile.replace('.log', `-v.${version}.log`));
     let cmds = [];
     const ver = pkg.version.split('(').shift().split('-').shift();
+    const tagDescription = pkg.description.split('\n').map(s => s.startsWith('* ') ? s : ('* ' + s)).join('\n');
     cmds.push('# 需要手动运行命令进行创建并提交tag标签, 如果有换行等特殊符号, 需要手动处理');
-    cmds.push(`# 创建tag标签\ngit tag -a 'v${ver}' -m '\nv${pkg.version + '\n' + pkg.description}'`);
+    cmds.push(`# 创建tag标签\ngit tag -a 'v${ver}' -m '\nv${pkg.version + '\n' + tagDescription}'`);
     cmds.push(`# 推送tag标签\ngit push origin 'v${ver}'`);
     cmds.push(`# 删除本地tag标签\ngit tag -d 'v${ver}'\n# 删除远程tag标签\ngit push origin --delete 'v${ver}'`);
     // 通过 packageJson 生成指令列表并写到一个临时文件中

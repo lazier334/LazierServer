@@ -1,5 +1,6 @@
 export default Object.fromEntries(Object.entries({
-    "1.3.7-26072900": `= 修复在windows上无法正常运行命令
+    "1.3.7-26072901": `= 优化actions脚本
+= 修复在windows上无法正常运行命令
 = 由于自动化脚本以前面的版本号为tag，固不大的更新将使用相同的前缀作为版本号
 + 增加更新和卸载命令
 = 优化系统
