@@ -222,7 +222,7 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
         if (update && authUser(ctx)?.superAdmin) {
             if (ver.update) {
                 // 运行 update.js 脚本
-                const scriptFile = path.join(config.dataPath, 'scripts/update.js1');
+                const scriptFile = path.join(config.dataPath, 'scripts/update.js');
                 if (fs.existsSync(scriptFile)) {
                     ctx.body = result(ver, `正在尝试更新系统版本到 ${verTag} 版本! 更新成功后将重启系统`);
                     setTimeout(() => {
