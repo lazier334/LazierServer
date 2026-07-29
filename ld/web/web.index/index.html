@@ -754,6 +754,26 @@
             async getSystemId(notShowError) {
                 return await this.warpAxios(axios.get('/system/systemId').then((response) => response.data.data), '获取服务器系统id', true, notShowError);
             },
+            waitSystemRestart(lastSystemId, waitTime = 60 * 1000) {
+                const endTime = Date.now() + waitTime;
+                let i = 0;
+                const inteId = setInterval(() => {
+                    if (endTime < Date.now()) {
+                        ElMessage.error('服务器重启超时');
+                        clearInterval(inteId);
+                        return;
+                    }
+                    if (0 == i++ % 3) ElMessage.info({ message: '等待服务器重启中...', duration: 1000 });
+                    this.getSystemId(true).then(systemId => {
+                        if (systemId && systemId != lastSystemId) {
+                            ElMessage.success('服务器重启完成');
+                            clearInterval(inteId);
+                        } else {
+                            throw new Error('服务器重启中...');
+                        }
+                    }).catch((err) => { });
+                }, 1000);
+            },
             systemRestart() {
                 let that = this;
                 ElMessageBox.confirm('确定要重启服务器吗？', '重启服务器', {
@@ -765,24 +785,7 @@
                     const lastSystemId = await this.getSystemId();
                     that.warpAxios(axios.get('/system/restart').then((response) => {
                         ElMessage.warning(response.data?.data || response.data);
-
-                        const endTime = Date.now() + 60 * 1000;
-                        const inteId = setInterval(() => {
-                            if (endTime < Date.now()) {
-                                ElMessage.error('服务器重启超时');
-                                clearInterval(inteId);
-                                return;
-                            }
-
-                            this.getSystemId(true).then(systemId => {
-                                if (systemId && systemId != lastSystemId) {
-                                    ElMessage.success('服务器重启完成');
-                                    clearInterval(inteId);
-                                } else {
-                                    throw new Error('服务器重启中...');
-                                }
-                            }).catch((err) => { });
-                        }, 1000);
+                        this.waitSystemRestart(lastSystemId);
                     }), '重启服务器', true);
                 }).catch(() => {
                     // 用户取消操作，不执行任何操作
@@ -892,8 +895,10 @@
                                                 confirmButtonText: '更新',
                                                 cancelButtonText: '取消',
                                                 type: 'warning',
-                                            }).then(() => {
+                                            }).then(async () => {
+                                                const lastSystemId = await this.getSystemId();
                                                 this.updateVersion('update=true&tag=next');
+                                                this.waitSystemRestart(lastSystemId, 3 * 60 * 1000);
                                             }).catch(() => { });
                                         }
                                     }, () => '更新next'),
@@ -906,8 +911,10 @@
                                                 confirmButtonText: '更新',
                                                 cancelButtonText: '取消',
                                                 type: 'warning',
-                                            }).then(() => {
+                                            }).then(async () => {
+                                                const lastSystemId = await this.getSystemId();
                                                 this.updateVersion('update=true');
+                                                this.waitSystemRestart(lastSystemId, 3 * 60 * 1000);
                                             }).catch(() => { });
                                         }
                                     }, () => '更新latest'),] : []),
