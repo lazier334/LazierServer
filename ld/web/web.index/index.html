@@ -51,6 +51,7 @@
 
 <body>
     <div id="app">
+        <!-- 顶部提示框 -->
         <el-row v-if="title">
             <el-col :span="24" class="text-center">
                 <el-input v-if="title!=''" v-model="title" placeholder="显示数据用的框">
@@ -63,6 +64,7 @@
             </el-col>
         </el-row>
 
+        <!-- 按钮列表 -->
         <div class="but-s-container">
             <el-tooltip effect="dark" :content="`刷新数据、搜索、关闭侧窗`" placement="bottom">
                 <div class="but-s-item operate" @click="resetPage">
@@ -88,13 +90,24 @@
             <el-tooltip v-for="(item, index) in butsData" :key="index" :content="item.tooltip || '无描述'" effect="dark"
                 placement="bottom">
                 <div class="but-s-item operate" @click="clickBut(item)">
-                    <el-avatar class="but-s-item-avatar" :style="{ backgroundColor: item.color }">{{
-                        item.avatarText || '' }}</el-avatar>
-                    <el-text class="but-s-item-text" type="primary" size="large">
-                        {{ item.text || ('按钮' + index) }}</el-text>
+                    <el-badge v-if="item.dot" :is-dot="true">
+                        <el-avatar class="but-s-item-avatar" :style="{ backgroundColor: item.color }">{{
+                            item.avatarText || '' }}</el-avatar>
+                        <el-text class="but-s-item-text" type="primary" size="large">
+                            {{ item.text || ('按钮' + index) }}</el-text>
+                    </el-badge>
+                    <template v-else>
+                        <el-avatar class="but-s-item-avatar" :style="{ backgroundColor: item.color }">{{
+                            item.avatarText || '' }}</el-avatar>
+                        <el-text class="but-s-item-text" type="primary" size="large">
+                            {{ item.text || ('按钮' + index) }}</el-text>
+                    </template>
                 </div>
             </el-tooltip>
         </div>
+
+
+        <!-- 操作栏 -->
         <el-row class="but-s-container">
             <el-col :span="7">
                 <el-input v-model="store.searchKeyword" @input="debouncedHandleData" placeholder="项目/备注包含的文字">
@@ -132,6 +145,7 @@
             </div>
         </div>
 
+        <!-- 数据列表 -->
         <div class="data-container">
             <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
                 :current-page="currentPage" :page-sizes="pageSizes" :page-size="pageSize"
@@ -165,6 +179,7 @@
                 </el-table-column>
             </el-table>
         </div>
+
 
         <!-- 版权栏 -->
         <div class="copyright">
@@ -418,6 +433,8 @@
             }));
 
         return {
+            // 管理员权限，未授权时自动更改
+            isAdmin: true,
             urlModOptions: urlModOptions,
             urlMods: urlMods,
             reUrlMods: reUrlMods,
@@ -530,7 +547,7 @@
         mounted() {
             this.resetPage();
             window.addEventListener('scroll', this.handleScroll);
-            ElMessage.info('Tip: 使用系统打开的url可以通过uri参数 openApi访问接口, openInIframe页内打开, openInNowWindow当前页打开');
+            ElMessage.info({ message: 'Tip: 使用系统打开的url可以通过uri参数 openApi访问接口, openInIframe页内打开, openInNowWindow当前页打开', duration: 2000 });
         },
         beforeUnmount() {
             window.removeEventListener('scroll', this.handleScroll);
@@ -863,34 +880,35 @@
                         return h('div', [
                             h('p', { innerHTML: versionText.value }),
                             h('div', { style: 'display: flex; gap: 8px; margin-top: 16px; justify-content: center;' }, [
-                                h(ElButton, {
-                                    type: 'primary',
-                                    disabled: checking.value,
-                                    onClick: () => {
-                                        ElMessageBox.close();
-                                        ElMessageBox.confirm('是否更新版本到next版本?', '警告', {
-                                            confirmButtonText: '更新',
-                                            cancelButtonText: '取消',
-                                            type: 'warning',
-                                        }).then(() => {
-                                            this.updateVersion('update=true&tag=next');
-                                        }).catch(() => { });
-                                    }
-                                }, () => '更新next'),
-                                h(ElButton, {
-                                    type: 'primary',
-                                    disabled: checking.value,
-                                    onClick: () => {
-                                        ElMessageBox.close();
-                                        ElMessageBox.confirm('是否更新版本到latest版本?', '警告', {
-                                            confirmButtonText: '更新',
-                                            cancelButtonText: '取消',
-                                            type: 'warning',
-                                        }).then(() => {
-                                            this.updateVersion('update=true');
-                                        }).catch(() => { });
-                                    }
-                                }, () => '更新latest'),
+                                ...(this.isAdmin ? [
+                                    h(ElButton, {
+                                        type: 'primary',
+                                        disabled: checking.value,
+                                        onClick: () => {
+                                            ElMessageBox.close();
+                                            ElMessageBox.confirm('是否更新版本到next版本?', '警告', {
+                                                confirmButtonText: '更新',
+                                                cancelButtonText: '取消',
+                                                type: 'warning',
+                                            }).then(() => {
+                                                this.updateVersion('update=true&tag=next');
+                                            }).catch(() => { });
+                                        }
+                                    }, () => '更新next'),
+                                    h(ElButton, {
+                                        type: 'primary',
+                                        disabled: checking.value,
+                                        onClick: () => {
+                                            ElMessageBox.close();
+                                            ElMessageBox.confirm('是否更新版本到latest版本?', '警告', {
+                                                confirmButtonText: '更新',
+                                                cancelButtonText: '取消',
+                                                type: 'warning',
+                                            }).then(() => {
+                                                this.updateVersion('update=true');
+                                            }).catch(() => { });
+                                        }
+                                    }, () => '更新latest'),] : []),
                                 h(ElButton, {
                                     disabled: checking.value,
                                     onClick: async () => {

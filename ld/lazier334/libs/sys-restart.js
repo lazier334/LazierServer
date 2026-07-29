@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 
-export { runCmd, restartSystem }
+export { runCmdAsync, restartSystem }
 
 /**
  * 重新启动系统
