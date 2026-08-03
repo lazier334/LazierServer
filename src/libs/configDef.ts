@@ -8,22 +8,25 @@ type NullConfig = NullObject;
 declare global {
     namespace NodeJS {
         interface Process {
-            G: {
+            LSStorage: {
                 getNowFileStorage: typeof getNowFileStorage;
                 [key: string]: any; // 兼容其他动态添加的属性
             };
+            // 将默认配置类型提示信息挂载到全局
+            LSConfigDef: Config
         }
     }
-    // 新增：按钮数据的基础类型（最小化定义, 兼容原有结构）
-    interface ButDataItem {
-        avatarText: string;
-        color?: string;
-        text: string;
-        tooltip: string;
-        debugMode?: boolean;
-        fun: string;
-        update?: (self: ButDataItem, config: NullConfig) => void;
-    }
+}
+
+// 按钮数据的基础类型（最小化定义, 兼容原有结构）
+interface ButDataItem {
+    avatarText: string;
+    color?: string;
+    text: string;
+    tooltip: string;
+    debugMode?: boolean;
+    fun: string;
+    update?: (self: ButDataItem, config: NullConfig) => void;
 }
 type ConfigUtilsType = {
     readObj: typeof readObj;
@@ -39,7 +42,7 @@ type ConfigUtilsType = {
 // #endregion 
 // #region 系统配置与工具
 // 挂载全局对象
-if (!process.G) process.G = { getNowFileStorage };
+if (!process.LSStorage) process.LSStorage = { getNowFileStorage };
 
 /** 配置工具 */
 const ConfigUtils: ConfigUtilsType = {
@@ -712,7 +715,7 @@ function isMainModule(currentFileUrl?: string, proc: NodeJS.Process = process): 
 /**
  * 获取当前文件的储存空间  
  * 
- * 可以通过 process.G.getNowFileStorage 使用  
+ * 可以通过 process.LSStorage.getNowFileStorage 使用  
  * 参数传递  
  *  - getNowFileStorage - 会获得当前函数  
  *  - config - 会获得配置对象  
@@ -723,8 +726,8 @@ function getNowFileStorage(filepath: string = import.meta.filename): NullObject 
     // 直接使用文件路径作为 key
     let fn = filepath;
     if (!['getNowFileStorage', 'config'].includes(fn)) {
-        if (typeof process.G[fn] != 'object' || process.G[fn] == null) process.G[fn] = {};
+        if (typeof process.LSStorage[fn] != 'object' || process.LSStorage[fn] == null) process.LSStorage[fn] = {};
     }
-    return process.G[fn];
+    return process.LSStorage[fn];
 }
 // #endregion 

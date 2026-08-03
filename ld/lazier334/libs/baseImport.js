@@ -1,1 +1,1 @@
-export * from '../../plugins/libs/baseImport.js';
+export * from '../../plugins/libs/baseImport.ts';

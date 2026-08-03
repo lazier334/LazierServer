@@ -3,13 +3,21 @@ import app from 'koa';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
-// 合并类型提示，用户配置不能使用 Config 作为提示信息除非额外增加自定义的提示，否则自定义的提示信息会失效
-/** @type {import('../../../src/libs/config.ts')} */
-const defConfigType = {};
-/** @type {import('../../conf.js')} */
-const userConfigType = {};
-/** @type {typeof defConfigType.config & typeof userConfigType.default} */
-var config = {};
+/** 用于做类型提示 */
+import userCofnig from '../../conf';
+/** LazierServer合并默认配置与用户配置后的完整配置信息 */
+export type LSConfig = typeof process.LSConfigDef & typeof userCofnig;
+/** 全局配置 */
+var config = {} as LSConfig;
+
+/** 把完整的配置类型导出，并在下方核对 process.LSConfig 对象 */
+declare global {
+    namespace NodeJS {
+        interface Process {
+            LSConfig: LSConfig
+        }
+    }
+}
 
 /** 当前模块的配置数据 */
 const lc = {
@@ -18,10 +26,12 @@ const lc = {
     replaceValue: '{placeholder}'
 }
 
-if (process?.G?.config) config = process.G.config;
+if (process?.LSConfig) config = process.LSConfig;
 else {
     // 单独启动脚本的时候没有基础环境，所以需要单独导入
     config = (await importSysModule('config.js', path.join(import.meta.dirname, '../../../src/libs/'))).config;
+    // 将配置挂载到全局对象中
+    process.LSConfig = config;
 }
 
 export {
@@ -37,23 +47,26 @@ export {
 
 /**
  * 从最后往前找第一个匹配的位置替换其字符
- * @param {string} str 
- * @param {string} searchValue 
- * @param {string} replaceValue 
- * @returns {[string, string | undefined]} 存在时，数组存在第二个，如果没有匹配上 char 则数组的第二个数据为 undefined
+ * @param str 
+ * @param searchValue 
+ * @param replaceValue 
+ * @returns 
  */
-function lastReplace(str, searchValue, replaceValue) {
+function lastReplace(str: string, searchValue: string, replaceValue: string): string {
     let re = str.split(searchValue);
     let reEnd = re.pop();
-    return 0 < re.length ? (re.join(searchValue) + replaceValue + reEnd) : reEnd;
+    return 0 < re.length ? (re.join(searchValue) + replaceValue + reEnd) : (reEnd || str);
 }
+
+/** 系统模块文件名称，完整列表请查看 {@link ../../../src/libs/ 系统模块目录} */
+type MODList = 'plugins.ts' | 'config.ts' | 'utils.ts' | 'config.js';
 /**
  * 导入系统模块（获取系统模块）  
  * 优先从 dist 导入，如果没有则尝试从源码 src 导入
- * @param {'plugins.ts' | 'config.ts' | 'utils.ts'} mod 系统模块文件名称，完整列表请查看 {@link ../../../src/libs/ 系统模块目录}
+ * @param mod 系统模块文件名称，完整列表请查看 {@link ../../../src/libs/ 系统模块目录}
  * @returns 
  */
-async function importSysModule(mod, dirpath) {
+async function importSysModule(mod: MODList, dirpath?: string) {
     dirpath = dirpath || config.configDirPath;
     const dirpaths = [];
     dirpath = lastReplace(dirpath, 'src', lc.replaceValue);
@@ -64,20 +77,21 @@ async function importSysModule(mod, dirpath) {
         dirpaths.push(dirpath);
     }
 
-    const mods = [mod];
+    const mods: string[] = [mod];
     if (mod.endsWith('.js')) {
         mods.push(mod.substring(0, mod.length - 3) + '.ts')
     } else if (mod.endsWith('.ts')) {
         mods.unshift(mod.substring(0, mod.length - 3) + '.js')
     }
 
-    const filepaths = [];
+    const filepaths: string[] = [];
     dirpaths.forEach(dir => {
         mods.forEach(m => filepaths.push(path.join(dir, m)))
     });
     // 找到第一个存在文件的模块
     let filepath = filepaths.find(f => fs.existsSync(f) && fs.statSync(f).isFile());
-    return await import(pathToFileURL(filepath));
+    if (typeof filepath != 'string') throw new Error('不能导入该类型的模块路径! 需要string类型的模块路径! 当前类型为: ' + typeof filepath);
+    return await import(pathToFileURL(filepath).href);
 }
 
 /**

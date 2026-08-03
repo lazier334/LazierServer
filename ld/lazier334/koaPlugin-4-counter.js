@@ -1,8 +1,7 @@
 import Router from '@koa/router';
 import { createKoaPlugin } from './types/index.js';
 
-/** @type {import('../../src/libs/config')} */
-const { config } = process.G;
+const config = process.LSConfig;
 var cacheErrorApis = {};
 
 /** 额外的路由 */

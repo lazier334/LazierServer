@@ -1,5 +1,6 @@
 import type Koa from 'koa';
 import type { PluginResult } from './plugins.ts';
+import { LSConfig } from '../libs/baseImport.ts';
 
 /**
  * 参数
@@ -7,7 +8,7 @@ import type { PluginResult } from './plugins.ts';
 type SystemOptions = {
     fs: typeof import('fs'),
     path: typeof import('path'),
-    config: typeof import('../libs/baseImport.js').config,
+    config: LSConfig,
     app: Koa<Koa.DefaultState, Koa.DefaultContext>
 }
 

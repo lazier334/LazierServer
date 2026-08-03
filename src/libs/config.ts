@@ -55,7 +55,7 @@ config = defConfig.useConfig(config, defConfig);
 config.updateLdDirName(dataPath, true);
 
 /**
- * 获取当前文件的储存空间，可以通过 process.G.getNowFileStorage 使用  
+ * 获取当前文件的储存空间，可以通过 process.LSStorage.getNowFileStorage 使用  
  * 参数传递  
  *  - getNowFileStorage - 会获得当前函数  
  *  - config - 会获得配置对象  
@@ -68,7 +68,7 @@ const getNowFileStorage = config.getNowFileStorage;
  * 添加config到全局
  * @type {config}
  */
-process.G.config = config;
+process.LSStorage.config = config;
 
 export {
     fs,
