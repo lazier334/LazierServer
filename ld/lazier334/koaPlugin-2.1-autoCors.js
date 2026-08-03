@@ -1,4 +1,3 @@
-import { config } from './libs/baseImport.js';
 import { createKoaPlugin } from './types/index.js';
 
 const corsMiddleware = cors();
@@ -8,7 +7,7 @@ const corsMiddleware = cors();
  */
 export default createKoaPlugin(async function koaPluginAutoCors(ctx, next) {
     // 该插件仅用于测试环境，正式环境请使用 koaPlugin-2-cors.js 插件
-    return config.switch.autoCors ? await corsMiddleware(ctx, next) : await next();
+    return await corsMiddleware(ctx, next);
 })
 
 /**

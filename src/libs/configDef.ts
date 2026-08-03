@@ -13,7 +13,7 @@ declare global {
                 [key: string]: any; // 兼容其他动态添加的属性
             };
             // 将默认配置类型提示信息挂载到全局
-            LSConfigDef: Config
+            LSConfigDefType: Config
         }
     }
 }
@@ -469,7 +469,12 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     },
     /** 插件的各个阶段 */
     pluginStages: {} as Record<string, any>,
-    /** 排除的插件列表 */
+    /** 排除的插件列表, 筛选方式为存在局部字符串
+     * ```js
+     * let posixpath = pluginpath.replaceAll('\\', '/');
+     * return !config.excludePlugins.find(exclude => posixpath.includes(exclude));
+     * ```
+     */
     excludePlugins: [] as string[],
     /** 时间（间隔）相关 */
     times: {

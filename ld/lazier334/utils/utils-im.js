@@ -286,13 +286,11 @@ export const all = {
 export default all;
 
 /**
- * 初始化 im系统的 db对象，如果配置 Config.switch.closeIM 为真，
+ * 初始化 im系统的 db对象
  * 即已配置要关闭im系统时，不会进行初始化操作
  * @returns 
  */
 function initIMDB() {
-    if (Config.switch.closeIM) return {};
-
     const db = initDB();
     // 初始化数据库
     db.readDB();

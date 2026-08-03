@@ -1,0 +1,34 @@
+import { createSystemStart } from 'lazierserver/types';
+import { getUtilsModule } from './libs/baseImport.js';
+
+/**
+ * 用于系统启动阶段进行操作
+ */
+export default createSystemStart(async function systemStartDemo({ fs, path, config, app }) {
+    // 控制 im 系统
+    if (config.switch.closeIM) {
+        // 添加排除插件的配置
+        config.excludePlugins.push('lazier334/koaRouter-6-im.js');
+        config.excludePlugins.push('lazier334/websocketApis-1-im.js');
+    } else {
+        // 添加按钮
+        config.butsData.push({
+            avatarText: "im",
+            text: "管理连接",
+            tooltip: "给指定的连接发送消息",
+            fun: "this.openPage('/im/index.html')"
+        });
+    }
+
+    // 控制 upload 系统
+    if (config.switch.closeUploads) {
+        config.excludePlugins.push('lazier334/koaRouter-5-uploads.js');
+    } else {
+        config.butsData.push({
+            avatarText: 'tus',
+            text: '文件上传',
+            tooltip: '上传文件到服务器',
+            fun: `this.openPage('/uploads/index.html')`
+        });
+    }
+})

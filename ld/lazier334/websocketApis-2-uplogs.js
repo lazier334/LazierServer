@@ -22,7 +22,6 @@ export default createWebsocketApis(async function websocketApisDemo(msg, message
         }
         return { end: true }
     }
-    return { end: false }
 })
 
 /**

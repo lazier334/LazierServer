@@ -151,8 +151,9 @@ async function completeFile(ctx: any, next: Function): Promise<void | string> {
  */
 async function readKoaRouters(): Promise<Router> {
     if (!config.switch.dynamicOperation && ls.routersCache) return ls.routersCache;
-    let apList = await getAllPlugin('koaRouter');
+    let allPlugin = await getAllPlugin('koaRouter');
 
+    let apList = allPlugin.map(plugininfo => plugininfo.filepath);
     // 检测路由插件是否有新增或删除
     let refresh = apList.length != ls.apListCache.length;
 

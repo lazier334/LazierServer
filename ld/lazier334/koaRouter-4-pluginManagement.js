@@ -45,11 +45,11 @@ export default createKoaRouter(function koaRouterPluginManagement(router) {
         let code = 200;
         let re = { filepath: fp };
         if (fp) {
-            fp = getAbsolutePaths(fp);
+            fp = getAbsolutePaths(fp).replaceAll('\\', '/');
             re.filepath = fp;
             if (fs.existsSync(fp)) {
                 re = fs.statSync(fp);
-                re.exclude = config.excludePlugins.includes(fp);
+                re.exclude = plugins.isExcludePlugin(fp);
                 re.body = fs.readFileSync(fp, 'utf8');
             } else {
                 code = 400;
@@ -64,8 +64,8 @@ export default createKoaRouter(function koaRouterPluginManagement(router) {
 
     router.all('管理路由 - 获取全部插件', '/plugin-mgmt/api/pluginList', async (ctx, next) => {
         let stages = Object.keys(config.pluginStages);
-        let pluginPath = [...config.excludePlugins, ...(await plugins.getAllPlugin())];
-        ctx.body = result({ stages, pluginPath, excludePlugins: config.excludePlugins });
+        let plugininfos = await plugins.getAllPlugin();
+        ctx.body = result({ stages, plugininfos, excludePlugins: config.excludePlugins });
     });
 
     // 改
@@ -73,9 +73,10 @@ export default createKoaRouter(function koaRouterPluginManagement(router) {
         let fpList = ctx.request.body.filepathList;
         if (Array.isArray(fpList) && 0 < fpList.length) {
             fpList.forEach(fp => {
-                fp = getAbsolutePaths(fp);
-                let index = config.excludePlugins.indexOf(fp);
-                if (-1 < index) {
+                fp = getAbsolutePaths(fp).replaceAll('\\', '/');
+                let excludeKey = config.excludePlugins.find(exclude => posixpath.includes(exclude));
+                if (excludeKey) {
+                    const index = config.excludePlugins.indexOf(excludeKey);
                     config.excludePlugins.splice(index, 1);
                 } else {
                     config.excludePlugins.push(fp);

@@ -186,16 +186,6 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
             }
         }
 
-        // 关闭 im 系统
-        if (config.switch.closeIM) {
-            butsData = butsData.filter(but => !but.text.includes('管理连接'));
-        }
-
-        // 关闭 upload 系统
-        if (config.switch.closeUploads) {
-            butsData = butsData.filter(but => !but.text.includes('文件上传'));
-        }
-
         ctx.body = result(butsData);
     });
 
@@ -220,7 +210,7 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
             ver.update = Number(ver.now.replace(/[-.]/g, '')) < Number(ver.next.replace(/[-.]/g, ''));
             verTag = 'next';
         }
-        ver.update = true;
+
         if (update && authUser(ctx)?.superAdmin) {
             if (ver.update) {
                 // 运行 update.js 脚本
@@ -241,7 +231,9 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
             } else {
                 ctx.body = result(ver, '当前已经是最新版本!');
             }
-        } else ctx.body = result(ver, '版本信息');
+        } else {
+            ctx.body = result(ver, ver.update ? '存在新版本!' : '当前已经是最新版本!');
+        }
     });
 
     // 接口：读取搜索快捷关键词按钮数据

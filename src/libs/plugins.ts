@@ -91,7 +91,8 @@ export {
     Stage,
     pathDeduplication,
     getAllPlugin,
-    getPlguinUpdateTime
+    getPlguinUpdateTime,
+    isExcludePlugin
 };
 
 /**
@@ -168,7 +169,7 @@ async function scanPlugin(stage: string): Promise<Stage> {
     let importList = await getAllPlugin(stage);
     for (const filepath of importList) {
         // 使用默认导入
-        await defScan(filepath, newStage.data);
+        if (!filepath.exclude) await defScan(filepath.filepath, newStage.data);
     }
 
     // 默认排序
@@ -184,12 +185,17 @@ async function scanPlugin(stage: string): Promise<Stage> {
     return newStage;
 }
 
+type plugininfoType = {
+    filepath: string,
+    exclude: boolean,
+    stage: string
+};
 /**
  * 获取所有的插件，可以指定阶段名称
  * @param stage 阶段名称
  * @returns 所有插件文件路径
  */
-async function getAllPlugin(stage: string): Promise<string[]> {
+async function getAllPlugin(stage: string): Promise<plugininfoType[]> {
     let fileList: string[] = [];
     getPluginDirs().filter(dir => {
         return fs.existsSync(dir) && fs.statSync(dir).isDirectory()
@@ -199,7 +205,20 @@ async function getAllPlugin(stage: string): Promise<string[]> {
             fileList.push(filepath);
         });
     });
-    return fileList.sort().filter(filepath => !config.excludePlugins.includes(filepath));
+    return fileList.sort().map(pluginpath => ({ filepath: pluginpath } as plugininfoType)).map(plugininfo => {
+        plugininfo.exclude = isExcludePlugin(plugininfo.filepath);
+        return plugininfo;
+    });
+}
+
+/**
+ * 检测是否是被排除的插件
+ * @param filepath 插件路径
+ * @returns 
+ */
+function isExcludePlugin(filepath: string): boolean {
+    let posixpath = filepath.replaceAll('\\', '/');
+    return !!config.excludePlugins.find(exclude => posixpath.includes(exclude));
 }
 
 /**

@@ -15,7 +15,6 @@ try {
  * @type {import('./plugins/libs/baseImport.ts').LSConfig}  
  */
 const testType = {
-
 };
 
 
@@ -24,7 +23,7 @@ const testType = {
  * 只有这里的配置信息会被导出  
  * 上面是便捷查询、测试使用，实际变量未使用
  */
-export default {
+export const userConfig = {
     portHttp: 3000,
     portHttps: 3001,
     portWS: 3010,
@@ -33,6 +32,13 @@ export default {
         pluginStagesUpdateStep: 10000
     },
     proxy: "",
+    excludePlugins: [
+        /** 关闭 跨域、自动跨域 */
+        'lazier334/koaPlugin-2-cors.js',
+        'lazier334/koaPlugin-2.1-autoCors.js',
+        /** 关闭简易的 rpc */
+        'lazier334/koaRouter-7-rpc.js',
+    ],
     switch: {
         debugMode: true,
         cryptoDataEnable: false,
@@ -41,20 +47,11 @@ export default {
         closeIM: true,
         /** 是否关闭 upload系统 */
         closeUploads: true,
-        /** 是否开启自动跨域 */
-        autoCors: false,
-        cors: false,
         autoComplete: false,
         /** 扫描web的时候仅扫描域名文件夹 */
         scanWebOnlyDoamin: true
     },
     appendButsData: [
-        {
-            avatarText: "im",
-            text: "管理连接",
-            tooltip: "给指定的连接发送消息",
-            fun: "this.openPage('/im/index.html')"
-        },
         {
             avatarText: "/web",
             text: "打开运行目录",
@@ -66,12 +63,6 @@ export default {
             text: "打开数据目录",
             tooltip: "尝试使用文件管理器打开数据目录（主要用于windows系统）",
             fun: `this.openPage('/system/openCwd?filepath=${import.meta.dirname.replaceAll("\\", "/")}')`
-        },
-        {
-            avatarText: 'tus',
-            text: '文件上传',
-            tooltip: '上传文件到服务器',
-            fun: `this.openPage('/uploads/index.html')`
         },
         {
             avatarText: 'stack',
@@ -188,6 +179,33 @@ export default createSend(async function sendRedirectApi(sendOptions) {
     }
     return sendOptions;
 })
+`, 'systemStart-auth.js': `
+import { createSystemStart } from 'lazierserver/types';
+import { getUtilsModule } from './libs/baseImport.js';
+
+/**
+ * 修改权限验证函数  
+ * 用于系统启动阶段进行操作
+ */
+export default createSystemStart(async function systemStartDemo({ fs, path, config, app }) {
+    const utils = await getUtilsModule();
+    utils.authorization.verify = () => ({
+        "userId": 0,
+        "status": "在线",
+        "username": "admin",
+        "password": "-",
+        "lastUpdateTime": 1745751359079,
+        "deadline": 4102358400000,
+        "isAdmin": true,
+        "superAdmin": true
+    })
+})
 `
     },
+};
+
+if (false) {
+
 }
+
+export default userConfig;
