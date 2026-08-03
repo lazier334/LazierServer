@@ -12,10 +12,12 @@ try {
 /**
  * 这里用于查询配置项，可以在此处查询原配置项内容。
  * 不把 type 放到下面的导出是因为那样会导致自定义的配置无法正常提示信息。
- * @type {import('../dist/libs/configDef.js').Config}  
+ * @type {import('./plugins/libs/baseImport.ts').LSConfig}  
  */
 const testType = {
+
 };
+
 
 /**
  * 用户自定义配置，可以额外增加自定义配置项  
@@ -108,5 +110,84 @@ export default {
         removeResponseHeaderList: [
             "content-encoding"
         ]
+    },
+    template: {
+        /** 网页模版 */
+        'template.html': `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vue3 + NaiveUI 模板</title>
+<link rel="stylesheet" href="./res/lazierserver-default.css">
+
+<div id="app">
+    <n-button type="primary">{{ message }}</n-button>
+</div>
+
+<script type="importmap">
+{"imports": {"vue": "./res/vue.prod@3.5.32.mjs","naive": "./res/naiveui.prod@2.44.1.mjs"} }
+</script>
+<script type="module">
+    import * as vue from 'vue';
+    import * as naive from 'naive';
+    const { createApp, ref } = vue;
+
+    createApp({
+        setup() {
+            const message = ref('Hello Vue3 + NaiveUI');
+
+            return { message }
+        }
+    }).use(naive).mount('#app');
+</script>
+`, 'koaRouter-2-editWebDemo.js': `
+import { createKoaRouter } from 'lazierserver/types';
+
+/**
+ * koa 路由插件的demo
+ */
+export default createKoaRouter(function koaRouterDemo(router, T) {
+    if (false) {
+        // 以下将读取 demo.txt 文件改成读取 _demo.txt 文件。这样就能提前处理原始的 demo.txt 文件了
+        // 如果是需要自定义响应内容，直接修改 ctx.body 不为 undefined 即可
+        router.all('/demo.txt', async (ctx, next) => {
+            /** @type {ctx & T} */
+            const ectx = ctx;
+            ectx.sendOptions.filename = '_' + ectx.sendOptions.filename;
+            console.log(ectx.sendOptions.filename)
+        });
+    }
+    return router
+})
+`, 'selectFileByDomains-1-demo.js': `
+import { createSelectFileByDomains } from 'lazierserver/types';
+
+/**
+ * 多路径存在同一api时的选择算法插件的demo
+ */
+export default createSelectFileByDomains(function selectFileByDomainsDemo(domains, domainsMap, ctx) {
+    // return { end: true, result: domains[0] }
+})
+`, 'send-demo.js': `
+import { createSend } from 'lazierserver/types';
+
+/**
+ * 重定向api插件  
+ * 选择具体的api  
+ * 返回true则表示当前函数已响应数据
+ */
+export default createSend(async function sendRedirectApi(sendOptions) {
+    const { ctx, filename, opts } = sendOptions;
+    // 可以自定义处理 koaRouter-1.1-scanWeb.js 扫描到文件后统一在 send 前的处理
+    // 和 editWebDemo 的区别是这个是全部都会走的，那个是针对性api处理
+    // 当前，两种方式都可以写成对方的形式，或许以后会取消 send 插件
+    if (false) {
+        ctx.body = 'demo';
+        return true;
+    }
+    return sendOptions;
+})
+`
     },
 }

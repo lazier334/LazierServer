@@ -552,7 +552,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
      */
     template: {
         'indexData-1-demo.js': `
-import { createIndexData } from './types/index.js';
+import { createIndexData } from 'lazierserver/types';
 
 /**
  * 列表插件的demo
@@ -574,7 +574,7 @@ export default createIndexData(async function indexDataDemo(arr) {
     return arr;
 })
 `, 'koaPlugin-1-demo.js': `
-import { createKoaPlugin } from './types/index.js';
+import { createKoaPlugin } from 'lazierserver/types';
 
 /**
  * koa 中间件插件的demo
@@ -584,7 +584,7 @@ export default createKoaPlugin(async function koaPluginDemo(ctx, next) {
     return await next();
 })
 `, 'koaRouter-1-demo.js': `
-import { createKoaRouter } from './types/index.js';
+import { createKoaRouter } from 'lazierserver/types';
 
 /**
  * koa 路由插件的demo
@@ -607,7 +607,7 @@ export default createKoaRouter(function koaRouterDemo(router, T) {
 })
 `, 'koaRouter-10-external-demo.js': `
 import { execSync } from 'child_process';
-import { createKoaRouter } from './types/index.js';
+import { createKoaRouter } from 'lazierserver/types';
 import { exportFunction } from './externals/demo.js';
 
 /**
@@ -629,7 +629,7 @@ export default createKoaRouter(function koaRouterExternalDemo(router) {
     return router
 })
 `, 'systemStart-demo.js': `
-import { createSystemStart } from './types/index.js';
+import { createSystemStart } from 'lazierserver/types';
 
 /**
  * 用于系统启动阶段进行操作
@@ -637,7 +637,7 @@ import { createSystemStart } from './types/index.js';
 export default createSystemStart(async function systemStartDemo({ fs, path, config, app }) {
 })
 `, 'websocketApis-demo.js': `
-import { createWebsocketApis } from './types/index.js';
+import { createWebsocketApis } from 'lazierserver/types';
 
 /** 
  * 使用时需要传递客户端的消息进来，进行路由识别与操作
@@ -650,7 +650,7 @@ export default createWebsocketApis(async function websocketApisDemo(msg, message
     return { end: false }
 })
 `, 'websocketMsgs-demo.js': `
-import { createWebsocketMsgs } from './types/index.js';
+import { createWebsocketMsgs } from 'lazierserver/types';
 
 /**
  * ws自动响应的数据示例

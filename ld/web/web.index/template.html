@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模板列表</title>
+    <link rel="stylesheet" href="./res/lazierserver-default.css">
+    <style>
+        .control {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div style="text-align: center;">
+            <h1>模板列表</h1>
+        </div>
+        <div class="control">
+            <n-button type="warning">
+                Warning
+            </n-button>
+        </div>
+        <n-data-table :columns="columns" :data="data" :pagination="pagination" :bordered="false"></n-data-table>
+    </div>
+</body>
+
+</html>
+<script type="importmap">
+{"imports": {"vue": "./res/vue.prod@3.5.32.mjs","naive": "./res/naiveui.prod@2.44.1.mjs"} }
+</script>
+<script type="module">
+    import * as vue from 'vue';
+    import * as naive from 'naive';
+    const { createApp, ref, h, reactive, onMounted } = vue;
+    const { NButton, createDiscreteApi } = naive;
+    const { dialog: nvDialog, message: nvMessage } = createDiscreteApi(['dialog', 'message']);
+    createApp({
+        setup() {
+            const message = ref('Hello Vue3 + NaiveUI');
+            const data = reactive([]);
+
+            onMounted(getTemplateAll);
+            function getTemplateAll() {
+                fetch('/system/template').then(res => res.json()).then(json => {
+                    data.splice(0, data.length, ...json.data.map(name => ({ name })));
+                    nvMessage.success('模板列表加载成功');
+                }).catch(err => nvMessage.error(`获取模板列表失败!`));
+            }
+
+
+            const showTemplate = function (obj, readCache) {
+                if (readCache || obj.cache) {
+                    // 读取缓存
+                    const content = obj.cache || '无内容';
+                    nvDialog.success({
+                        title: "模板: " + obj.name,
+                        content: () => h('pre', {
+                            style: {
+                                'white-space': 'pre-wrap',
+                                'word-break': 'break-all',
+                                'margin': '0',
+                                'font-family': 'inherit',
+                                'font-size': '14px',
+                                'line-height': '1.6',
+                                'max-height': '400px',
+                                'overflow-y': 'auto',
+                                'background': '#f5f5f5',
+                                'padding': '12px',
+                                'border-radius': '4px'
+                            }
+                        }, content),
+                        positiveText: "复制",
+                        negativeText: "关闭",
+                        draggable: true,
+                        onPositiveClick: async () => {
+                            if (copyToClipboard(content)) nvMessage.success("复制成功!");
+                            else nvMessage.error("复制失败!");
+                        },
+                    });
+                } else {
+                    nvMessage.success("正在获取模板: " + obj.name);
+                    fetch('/system/template?name=' + obj.name).then(res => res.text()).then(js => {
+                        obj.cache = js;
+                        showTemplate(obj, true);
+                    }).catch(err => nvMessage.error(`获取模板失败! 模板: ` + obj.name));
+                }
+            }
+
+            function createColumns() {
+                return [
+                    {
+                        title: "模版名称",
+                        key: "name"
+                    },
+                    {
+                        title: "本地缓存",
+                        key: "cache",
+                        render(row) {
+                            return row.cache ? '√' : '';
+                        }
+                    },
+                    {
+                        title: "Action",
+                        key: "actions",
+                        render(row) {
+                            return h(
+                                NButton,
+                                {
+                                    strong: true,
+                                    tertiary: true,
+                                    size: "small",
+                                    onClick: () => showTemplate(row)
+                                },
+                                { default: () => "查看模版" }
+                            );
+                        }
+                    }
+                ];
+            }
+
+            /**
+             * 复制文本到剪贴板
+             * @param {string} text - 要复制的文本
+             * @returns {Promise<boolean>} - 复制成功返回 true，失败返回 false
+             */
+            async function copyToClipboard(text) {
+                try {
+                    // 优先使用 Clipboard API（需要安全上下文 HTTPS 或 localhost）
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(text);
+                        return true;
+                    }
+
+                    // 降级方案：使用 document.execCommand('copy')
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    // 防止滚动
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-9999px';
+                    textArea.style.top = '-9999px';
+                    textArea.style.width = '1px';
+                    textArea.style.height = '1px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+
+                    if (!successful) {
+                        throw new Error('execCommand 复制失败');
+                    }
+                    return true;
+                } catch (error) {
+                    console.error('复制失败:', error);
+                    return false;
+                }
+            }
+
+            return {
+                message, data, pagination: false, columns: createColumns()
+            }
+        }
+    }).use(naive).mount('#app');
+</script>
