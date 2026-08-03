@@ -4,7 +4,7 @@ import path from 'path';
 import { pathToFileURL } from 'url';
 
 /** 用于做类型提示 */
-import userCofnig from '../../conf';
+import userCofnig from '../../conf.js';
 /** LazierServer合并默认配置与用户配置后的完整配置信息 */
 export type LSConfig = typeof process.LSConfigDef & typeof userCofnig;
 /** 全局配置 */

@@ -546,6 +546,168 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         /** 加密秘钥 */
         keys: ['lazier-server_secret_key']
     },
+    /** 
+     * 插件模版 
+     * 如果要添加自定义的模版，可以在用户配置 conf.js 继续添加即可，也可以覆盖模版
+     */
+    template: {
+        'indexData-1-demo.js': `
+import { createIndexData } from './types/index.js';
+
+/**
+ * 列表插件的demo
+ */
+export default createIndexData(async function indexDataDemo(arr) {
+    if (false) arr.push(...[
+        {
+            icon: "",
+            name: "项目名称",
+            mark: "备注信息",
+            urls: [
+                {
+                    text: "按钮1",
+                    url: "/index#跳转地址"
+                }
+            ],
+        },
+    ]);
+    return arr;
+})
+`, 'koaPlugin-1-demo.js': `
+import { createKoaPlugin } from './types/index.js';
+
+/**
+ * koa 中间件插件的demo
+ */
+export default createKoaPlugin(async function koaPluginDemo(ctx, next) {
+    if (false) ctx.body = 'hello world! -- by demo';
+    return await next();
+})
+`, 'koaRouter-1-demo.js': `
+import { createKoaRouter } from './types/index.js';
+
+/**
+ * koa 路由插件的demo
+ */
+export default createKoaRouter(function koaRouterDemo(router, T) {
+    if (false) {
+        // 测试接口
+        router.all('/demo', async (ctx, next) => {
+            ctx.body = 'hello demo';
+            /** @type {ctx & T} */
+            const ectx = ctx;
+            return next();
+        });
+        router.all(/^\/demo.*$/, async (ctx, next) => {
+            ctx.body = (ctx.body ?? '') + ' hello demo2';
+            return next();
+        });
+    }
+    return router
+})
+`, 'koaRouter-10-external-demo.js': `
+import { execSync } from 'child_process';
+import { createKoaRouter } from './types/index.js';
+import { exportFunction } from './externals/demo.js';
+
+/**
+ * koa 路由插件的demo  
+ * 调用外部插件的路由接口
+ */
+export default createKoaRouter(function koaRouterExternalDemo(router) {
+    if (true) {
+        router.all('外部插件-使用cmd命令运行js脚本 ./ld/plugins/externals/demo.js', '/external/demoByCmd', async (ctx, next) => {
+            const re = execSync(\`cd "\${import.meta.dirname}/externals" && node demo.js\`);
+            ctx.body = String(re);
+        });
+        router.all('外部插件-使用导入的模块函数运行', '/external/demoByExportFunction', async (ctx, next) => {
+            const re = await exportFunction(ctx.request.query.msg || '默认的消息');
+            ctx.body = re;
+        });
+    }
+    // 还可以通过其他自定义的方案实现互联
+    return router
+})
+`, 'systemStart-demo.js': `
+import { createSystemStart } from './types/index.js';
+
+/**
+ * 用于系统启动阶段进行操作
+ */
+export default createSystemStart(async function systemStartDemo({ fs, path, config, app }) {
+})
+`, 'websocketApis-demo.js': `
+import { createWebsocketApis } from './types/index.js';
+
+/** 
+ * 使用时需要传递客户端的消息进来，进行路由识别与操作
+ */
+export default createWebsocketApis(async function websocketApisDemo(msg, message, ws, req) {
+    // 可以使用 req.url 来做api路由识别
+    if (false && '/demo' == req.url.split('?').shift()) {
+        console.log('收到来自客户端的消息', msg)
+    }
+    return { end: false }
+})
+`, 'websocketMsgs-demo.js': `
+import { createWebsocketMsgs } from './types/index.js';
+
+/**
+ * ws自动响应的数据示例
+ */
+export default createWebsocketMsgs(async function websocketMsgsDemo(arr) {
+    // 普通数据
+    if (false) arr.push(...[
+        {
+            "type": "receive",
+            "time": 1740470623630,
+            "opcode": 2,
+            "data": "1",
+            "step": 0
+        },
+        {
+            "type": "receive",
+            "time": 1740470624666,
+            "opcode": 2,
+            "data": "2",
+            "step": 1036
+        },
+        {
+            "type": "receive",
+            "time": 1740470624667,
+            "opcode": 2,
+            "data": "3",
+            "step": 1
+        },
+        {
+            "type": "receive",
+            "time": 1740470624859,
+            "opcode": 2,
+            "data": "4",
+            "step": 192
+        },
+        {
+            "type": "receive",
+            "time": 1740470624861,
+            "opcode": 2,
+            "data": "5",
+            "step": 2
+        }
+    ]);
+
+    // 二进制数据
+    if (false) arr.push(...createWebsocketMsgs.utils.parseBinaryWSMsgs([{
+        type: 'receive',
+        time: 1740981222799,
+        opcode: 2,
+        data: 'gAA4EgADAAFwEgACAAFwEgACAARjb2RlBAAAAMgAAXgHP/pmZmZmZmYAAWMIAAF4AAFhAwANAAFjAgE=',
+        step: 100
+    }]));
+
+    return arr;
+})
+`
+    }
 };
 
 {   // 添加版本号按钮

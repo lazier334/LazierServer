@@ -6,8 +6,6 @@ import { config } from './config.ts';
 import { completeFile, readKoaRouters } from './utils.ts';
 import { plugins } from './plugins.ts';
 
-// 拿到 config 的类定义
-type ConfigType = typeof config;
 // 定义WebSocket消息接口
 interface WebSocketMessage {
     type: string;
