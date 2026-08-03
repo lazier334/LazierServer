@@ -1,5 +1,5 @@
 export default Object.fromEntries(Object.entries({
-    "1.3.8-26080302": `+ 优化模版与提示信息
+    "1.3.8-26080303": `+ 优化模版与提示信息
 = 优化系统
 `,
     "1.3.7-26072905": `= 优化actions脚本
