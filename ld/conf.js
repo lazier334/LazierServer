@@ -12,7 +12,7 @@ try {
 /**
  * 这里用于查询配置项，可以在此处查询原配置项内容。
  * 不把 type 放到下面的导出是因为那样会导致自定义的配置无法正常提示信息。
- * @type {import('./plugins/libs/baseImport.ts').LSConfig}  
+ * @type {import('./plugins/libs/baseImport').LSConfig}  
  */
 const testType = {
 };
@@ -52,18 +52,6 @@ export const userConfig = {
         scanWebOnlyDoamin: true
     },
     appendButsData: [
-        {
-            avatarText: "/web",
-            text: "打开运行目录",
-            tooltip: "尝试使用文件管理器打开运行目录（主要用于windows系统）",
-            fun: "this.openPage('/system/openCwd')"
-        },
-        {
-            avatarText: "/ld",
-            text: "打开数据目录",
-            tooltip: "尝试使用文件管理器打开数据目录（主要用于windows系统）",
-            fun: `this.openPage('/system/openCwd?filepath=${import.meta.dirname.replaceAll("\\", "/")}')`
-        },
         {
             avatarText: 'stack',
             text: '接口分析',

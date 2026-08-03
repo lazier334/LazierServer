@@ -1,10 +1,25 @@
 import { createSystemStart } from 'lazierserver/types';
-import { getUtilsModule } from './libs/baseImport.js';
 
 /**
  * 用于系统启动阶段进行操作
  */
 export default createSystemStart(async function systemStartDemo({ fs, path, config, app }) {
+    // 只在windows平台显示打开文件管理器按钮
+    if (process.platform == 'win32') {
+        config.butsData.push({
+            avatarText: "/web",
+            text: "打开运行目录",
+            tooltip: "尝试使用文件管理器打开运行目录（主要用于windows系统）",
+            fun: "this.openPage('/system/openCwd')"
+        })
+        config.butsData.push({
+            avatarText: "/ld",
+            text: "打开数据目录",
+            tooltip: "尝试使用文件管理器打开数据目录（主要用于windows系统）",
+            fun: `this.openPage('/system/openCwd?filepath=${import.meta.dirname.replaceAll("\\", "/")}')`
+        })
+    }
+
     // 控制 im 系统
     if (config.switch.closeIM) {
         // 添加排除插件的配置
