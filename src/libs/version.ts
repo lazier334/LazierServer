@@ -1,4 +1,6 @@
 export default Object.fromEntries(Object.entries({
+    "1.3.9-26080300": `= 修复已知bug
+`,
     "1.3.8-26080303": `+ 优化模版与提示信息
 = 优化系统
 `,
