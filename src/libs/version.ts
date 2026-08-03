@@ -1,4 +1,7 @@
 export default Object.fromEntries(Object.entries({
+    "1.3.8-26080300": `+ 优化模版与提示信息
+= 优化系统
+`,
     "1.3.7-26072905": `= 优化actions脚本
 = 修复在windows上无法正常运行命令
 = 由于自动化脚本以前面的版本号为tag，固不大的更新将使用相同的前缀作为版本号
