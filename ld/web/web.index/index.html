@@ -876,6 +876,7 @@
                 return toNumberVer(oldVer) < toNumberVer(newVer)
             },
             showVersion(ver) {
+                const self = this;
                 // 响应式数据，驱动内容动态更新
                 const versionText = ref(`当前版本: ${ver.version}<br>${ver.detail.replaceAll('\n', '<br>')}`)
                 const checking = ref(false)
@@ -897,18 +898,18 @@
                         return h('div', [
                             h('p', { innerHTML: versionText.value }),
                             h('div', { style: 'display: flex; gap: 8px; margin-top: 16px; justify-content: center;' }, [
-                                ...(this.isAdmin ? [
+                                ...(self.isAdmin ? [
                                     h(ElButton, {
                                         type: 'primary',
                                         disabled: checking.value,
                                         onClick: () => {
                                             ElMessageBox.close();
                                             let title = '警告: 是否重新安装到next版本?';
-                                            let content = `重新安装到该版本: ${this.versions.next}<br>手动重新安装: npm i -g lazierserver@next`;
+                                            let content = `重新安装到该版本: ${self.versions.next}<br>手动重新安装: npm i -g lazierserver@next`;
                                             let confirmButtonText = '重新安装';
-                                            if (isNewVersion(this.versions.now, this.versions.next)) {
+                                            if (isNewVersion(self.versions.now, self.versions.next)) {
                                                 title = '是否更新版本到最新next版本?';
-                                                content = `更新到该版本: ${this.versions.next}<br>手动更新: npm i -g lazierserver@next`;
+                                                content = `更新到该版本: ${self.versions.next}<br>手动更新: npm i -g lazierserver@next`;
                                                 confirmButtonText = '更新';
                                             }
                                             ElMessageBox.confirm(content, title, {
@@ -917,9 +918,9 @@
                                                 cancelButtonText: '取消',
                                                 type: 'warning',
                                             }).then(async () => {
-                                                const lastSystemId = await this.getSystemId();
-                                                this.updateVersion('update=true&tag=next');
-                                                this.waitSystemRestart(lastSystemId, 3 * 60 * 1000, 5 * 1000);
+                                                const lastSystemId = await self.getSystemId();
+                                                self.updateVersion('update=true&tag=next');
+                                                self.waitSystemRestart(lastSystemId, 3 * 60 * 1000, 5 * 1000);
                                             }).catch(() => { });
                                         }
                                     }, () => '更新next'),
@@ -929,11 +930,11 @@
                                         onClick: () => {
                                             ElMessageBox.close();
                                             let title = '警告: 是否重新安装到latest版本?';
-                                            let content = `重新安装到该版本: ${this.versions.latest}<br>手动重新安装: npm i -g lazierserver@latest`;
+                                            let content = `重新安装到该版本: ${self.versions.latest}<br>手动重新安装: npm i -g lazierserver@latest`;
                                             let confirmButtonText = '重新安装';
-                                            if (isNewVersion(this.versions.now, this.versions.latest)) {
+                                            if (isNewVersion(self.versions.now, self.versions.latest)) {
                                                 title = '是否更新版本到最新latest版本?';
-                                                content = `更新到该版本: ${this.versions.latest}<br>手动更新: npm i -g lazierserver@latest`;
+                                                content = `更新到该版本: ${self.versions.latest}<br>手动更新: npm i -g lazierserver@latest`;
                                                 confirmButtonText = '更新';
                                             }
                                             ElMessageBox.confirm(content, title, {
@@ -942,9 +943,9 @@
                                                 cancelButtonText: '取消',
                                                 type: 'warning',
                                             }).then(async () => {
-                                                const lastSystemId = await this.getSystemId();
-                                                this.updateVersion('update=true');
-                                                this.waitSystemRestart(lastSystemId, 3 * 60 * 1000, 5 * 1000);
+                                                const lastSystemId = await self.getSystemId();
+                                                self.updateVersion('update=true');
+                                                self.waitSystemRestart(lastSystemId, 3 * 60 * 1000, 5 * 1000);
                                             }).catch(() => { });
                                         }
                                     }, () => '更新latest'),] : []),
@@ -955,7 +956,7 @@
                                         checking.value = true
                                         versionText.value = '正在检查版本...'
                                         try {
-                                            await this.updateVersion();
+                                            await self.updateVersion();
                                             updateVersionText();
                                         } catch {
                                             versionText.value = '检查失败，请重试'
