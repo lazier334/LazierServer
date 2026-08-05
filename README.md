@@ -17,8 +17,8 @@ LazierServer文档: https://lazier334.github.io/res/lazierserver/
 
 1. 完成上述全局安装
 2. 从从文件夹里使用 `ls334` 命令启动服务器（**该文件夹不能位于当前项目LazierServer的文件夹内**），会把当前文件夹作为web与plugins的共用文件夹使用
-4. 然后先使用 `npm i lazierserver` 安装提示模块
-6. 创建一个插件 **可以通过导入 `lazierserver/types` 来获得提示信息**
+4. 然后先使用 `npm i lazierserver` 安装提示模块（非必须，但没有提示会很难写，已针对'lazierserver/types'模块进行兼容，未安装模块也可以运行）
+6. 创建一个插件 **可以通过导入 `lazierserver/types` 来获得提示信息**。现在可以在部署后直接从`模版列表页面 /template.html`里直接复制模版
     ```js
     import { createKoaRouter } from 'lazierserver/types';
 
