@@ -867,6 +867,14 @@
                     ElMessage.success('执行命令结果: ' + response.data);
                 }), "运行命令失败", true)
             },
+            isNewVersion(oldVer, newVer) {
+                const toNumberVer = (str) => {
+                    const v = Number(str.replaceAll('-', '').replaceAll('.', ''));
+                    if (isNaN(v)) throw new Error('版本号转换失败!');
+                    return v;
+                }
+                return toNumberVer(oldVer) < toNumberVer(newVer)
+            },
             showVersion(ver) {
                 // 响应式数据，驱动内容动态更新
                 const versionText = ref(`当前版本: ${ver.version}<br>${ver.detail.replaceAll('\n', '<br>')}`)
@@ -895,9 +903,17 @@
                                         disabled: checking.value,
                                         onClick: () => {
                                             ElMessageBox.close();
-                                            ElMessageBox.confirm('是否更新版本到next版本?<br>如果版本没有更新则会重新安装到该版本', '警告', {
+                                            let title = '警告: 是否重新安装到next版本?';
+                                            let content = `重新安装到该版本: ${this.versions.next}<br>手动重新安装: npm i -g lazierserver@next`;
+                                            let confirmButtonText = '重新安装';
+                                            if (isNewVersion(this.versions.now, this.versions.next)) {
+                                                title = '是否更新版本到最新next版本?';
+                                                content = `更新到该版本: ${this.versions.next}<br>手动更新: npm i -g lazierserver@next`;
+                                                confirmButtonText = '更新';
+                                            }
+                                            ElMessageBox.confirm(content, title, {
                                                 dangerouslyUseHTMLString: true,
-                                                confirmButtonText: '更新',
+                                                confirmButtonText: confirmButtonText,
                                                 cancelButtonText: '取消',
                                                 type: 'warning',
                                             }).then(async () => {
@@ -912,9 +928,17 @@
                                         disabled: checking.value,
                                         onClick: () => {
                                             ElMessageBox.close();
-                                            ElMessageBox.confirm('是否更新版本到latest版本?<br>如果没有更新则会重新安装到该版本', '警告', {
+                                            let title = '警告: 是否重新安装到latest版本?';
+                                            let content = `重新安装到该版本: ${this.versions.latest}<br>手动重新安装: npm i -g lazierserver@latest`;
+                                            let confirmButtonText = '重新安装';
+                                            if (isNewVersion(this.versions.now, this.versions.latest)) {
+                                                title = '是否更新版本到最新latest版本?';
+                                                content = `更新到该版本: ${this.versions.latest}<br>手动更新: npm i -g lazierserver@latest`;
+                                                confirmButtonText = '更新';
+                                            }
+                                            ElMessageBox.confirm(content, title, {
                                                 dangerouslyUseHTMLString: true,
-                                                confirmButtonText: '更新',
+                                                confirmButtonText: confirmButtonText,
                                                 cancelButtonText: '取消',
                                                 type: 'warning',
                                             }).then(async () => {
@@ -966,7 +990,7 @@
             },
             async updateVersion(querys) {
                 // {"code":200,"msg":"当前已经是最新版本!","data":{"update":false,"now":"1.3.6-26072700","next":"1.3.6-26072700","latest":"1.3.5"}}
-                const response = await this.warpAxios(axios.get('/system/update?' + querys), "运行命令失败", true);
+                const response = await this.warpAxios(axios.get('/system/update?' + (querys || '')), "运行命令失败", true);
                 this.versions = response.data.data;
                 ElMessage.success('版本信息: ' + response.data.msg);
             },

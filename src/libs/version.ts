@@ -1,5 +1,6 @@
 export default Object.fromEntries(Object.entries({
-    "1.3.10-26080500": `+ 去除那可恶的提示 "selectFileByDomains 阶段的插件列表为空"
+    "1.3.10-26080501": `= 优化更新版本的流程
++ 去除那可恶的提示 "selectFileByDomains 阶段的插件列表为空"
 + 兼容在未安装lazierserver模块时也可以运行导入模块 "lazierserver/types" `,
     "1.3.9-26080301": `= 使用原生模块重写代理 proxies 插件
 = 修复已知bug

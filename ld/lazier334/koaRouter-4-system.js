@@ -212,7 +212,8 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
         }
 
         if (update && authUser(ctx)?.superAdmin) {
-            if (ver.update) {
+            // 通过接口更新时强制更新，因为有重装的需求，版本检测已在前端制作
+            if (true || ver.update) {
                 // 运行 update.js 脚本
                 const scriptFile = path.join(config.dataPath, 'scripts/update.js');
                 if (fs.existsSync(scriptFile)) {
