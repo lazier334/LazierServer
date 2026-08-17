@@ -57,7 +57,9 @@ function lastReplace(str, searchValue, replaceValue) {
 async function importSysModule(mod, dirpath) {
     dirpath = dirpath || config.configDirPath;
     let filepath = path.join(dirpath, mod);
+    // 因为可能会尝试导入 ts 结尾的模块，所以使用两种尝试
     filepath = fs.existsSync(filepath) ? filepath : lastReplace(filepath, '.js', '.ts');
+    filepath = fs.existsSync(filepath) ? filepath : lastReplace(filepath, '.ts', '.js');
     return await import(pathToFileURL(filepath).href);
 }
 
