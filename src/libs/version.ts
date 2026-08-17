@@ -1,4 +1,6 @@
 export default Object.fromEntries(Object.entries({
+    "1.3.11-26081700": `= 系统优化
+`,
     "1.3.10-26080503": `= 优化更新版本的流程
 + 去除那可恶的提示 "selectFileByDomains 阶段的插件列表为空"
 + 兼容在未安装lazierserver模块时也可以运行导入模块 "lazierserver/types" `,
