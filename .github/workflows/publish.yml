@@ -3,10 +3,14 @@ name: Publish to npm
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: '版本号（如 1.3.3-26072102 或 1.3.4 ）不写则不修改版本号'
-        default: ''
-        type: string
+      action:
+        description: '选择操作 (publish: 推送next版本 promote: 标记latest版本)'
+        required: true
+        default: 'promote'
+        type: choice
+        options:
+          - promote
+          - publish
   push:
     tags:
       - 'v*'
@@ -28,22 +32,32 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org/'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Update version from input
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
+      # ---- promote：将 latest 指向当前 next 的版本 ----
+      - name: Promote latest to next
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'promote'
         run: |
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          INPUT_VERSION="${{ github.event.inputs.version }}"
-          if [ "$INPUT_VERSION" != "$CURRENT_VERSION" ]; then
-            npm version "$INPUT_VERSION" --no-git-tag-version
-          else
-            echo "Version unchanged, skipping npm version"
+          PACKAGE_NAME="lazierserver"
+          NEXT_VERSION=$(npm view "$PACKAGE_NAME" dist-tags.next)
+
+          if [ -z "$NEXT_VERSION" ]; then
+            echo "Error: next tag not found for $PACKAGE_NAME"
+            exit 1
           fi
+
+          echo "Next version: $NEXT_VERSION"
+          npm dist-tag add "$PACKAGE_NAME@$NEXT_VERSION" latest
+          echo "Done: latest now points to $NEXT_VERSION"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # ---- publish：发布新版本 ----
+      - name: Install dependencies
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'publish'
+        run: npm ci
 
       - name: Check version for push tags
         id: version_check
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'publish'
         run: |
           VERSION=$(node -p "require('./package.json').version")
           MAJOR=$(echo "$VERSION" | cut -d. -f1)
@@ -56,7 +70,7 @@ jobs:
 
       - name: Check if version exists on npm
         id: check_version
-        if: steps.version_check.outputs.skip != 'true'
+        if: (github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'publish') && steps.version_check.outputs.skip != 'true'
         run: |
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           VERSION=$(node -p "require('./package.json').version")
@@ -69,7 +83,7 @@ jobs:
           fi
 
       - name: Publish to npm
-        if: steps.check_version.outputs.exists != 'true' && steps.version_check.outputs.skip != 'true'
+        if: (github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'publish') && steps.check_version.outputs.exists != 'true' && steps.version_check.outputs.skip != 'true'
         run: |
           VERSION=$(node -p "require('./package.json').version")
           if [[ $VERSION == *-* ]]; then
