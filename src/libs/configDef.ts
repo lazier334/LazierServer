@@ -10,10 +10,9 @@ declare global {
         interface Process {
             LSStorage: {
                 getNowFileStorage: typeof getNowFileStorage;
+                config?: ConfigType;
                 [key: string]: any; // 兼容其他动态添加的属性
             };
-            // 将默认配置类型提示信息挂载到全局
-            LSConfigDefType: Config
         }
     }
 }
@@ -727,7 +726,7 @@ export default createWebsocketMsgs(async function websocketMsgsDemo(arr) {
 
 export default config;
 // 导出类型提示信息
-export type Config = typeof config;
+export type ConfigType = typeof config;
 
 // #endregion 
 // #region 辅助函数

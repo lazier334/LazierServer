@@ -5,7 +5,7 @@ import defConfig from './configDef.ts';
 type ConfigType = typeof defConfig;
 const __dirname = import.meta.dirname;
 
-var config: ConfigType = process?.LSStorage?.config;
+var config: ConfigType = process?.LSStorage?.config as ConfigType;
 // 避免重复导入
 if (!config) {
     config = {} as ConfigType;
