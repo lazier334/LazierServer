@@ -7,4 +7,3 @@ import { createPlugin } from '../../plugins/types/index.js';
 // 快捷常量都指向同一个 createPlugin
 export const createSelectFileByDomains = createPlugin;
 export const createSend = createPlugin;
-export const createKoaRouterLazier = createPlugin;

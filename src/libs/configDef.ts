@@ -589,6 +589,8 @@ export default createKoaPlugin(async function koaPluginDemo(ctx, next) {
 })
 `, 'koaRouter-1-demo.js': `
 import { createKoaRouter } from 'lazierserver/types';
+// 可以自己选择提示类型，或者直接使用 all
+import { warpKoaCtxAll, warpKoaCtxByWeb, warpKoaCtxByHar } from 'lazierserver';
 
 /**
  * koa 路由插件的demo
@@ -596,27 +598,9 @@ import { createKoaRouter } from 'lazierserver/types';
 export default createKoaRouter(function koaRouterDemo(router) {
     // 测试接口
     router.all('/demo', async (ctx, next) => {
+        // 可以用于读取流转 har 与 web 后的提示信息
+        const ectx = warpKoaCtxAll(ctx);
         ctx.body = 'hello demo';
-        return next();
-    });
-    router.all(/^\/demo.*$/, async (ctx, next) => {
-        ctx.body = (ctx.body ?? '') + ' hello demo2';
-        return next();
-    });
-    return router
-})
-`, 'koaRouter-1-lazierDemo.js': `
-import { createKoaRouterLazier } from 'lazierserver/types';
-
-/**
- * koa 路由插件的demo
- */
-export default createKoaRouter(function koaRouterDemo(router, T) {
-    // 测试接口
-    router.all('/demo', async (ctx, next) => {
-        ctx.body = 'hello demo';
-        /** @type {ctx & T} */
-        const ectx = ctx;
         return next();
     });
     router.all(/^\/demo.*$/, async (ctx, next) => {
