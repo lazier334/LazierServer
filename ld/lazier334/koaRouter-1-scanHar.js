@@ -78,15 +78,6 @@ async function sendEntries(ctx, entries, next) {
     let entryResponse = content.text;
     let headers = entry.response.headers;
     try {
-        if (entry.filepath) {
-            ctx.set(config.headerNames.fileFrom, encodeURI(entry.filepath))
-        }
-        headers.forEach(header => ctx.set(header.name, header.value))
-        config.scanHar.removeResponseHeaderList.forEach(name => ctx.remove(name));
-    } catch (err) {
-        console.warn('Har设置响应头失败', err)
-    }
-    try {
         if (content.encoding) {
             entryResponse = Buffer.from(entryResponse, content.encoding)
         }
@@ -99,7 +90,17 @@ async function sendEntries(ctx, entries, next) {
     ctx.notCompleteFile = true;
     let re = await next();
     // 如果还没有被响应，那么就使用 ctx.entryResponse 的数据进行响应，其他路由可以修改 ctx.entryResponse 
+    // 如果要改变响应头也可以修改entry里面的响应头
     if (ctx.body === undefined && !ctx.res.headersSent) {
+        try {
+            if (entry.filepath) {
+                ctx.set(config.headerNames.fileFrom, encodeURI(entry.filepath))
+            }
+            headers.forEach(header => ctx.set(header.name, header.value))
+            config.scanHar.removeResponseHeaderList.forEach(name => ctx.remove(name));
+        } catch (err) {
+            console.warn('Har设置响应头失败', err)
+        }
         re = ctx.body = ctx.entryResponse;
     }
     return re;
