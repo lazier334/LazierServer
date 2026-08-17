@@ -1,10 +1,15 @@
 import type Router from '@koa/router';
 import type { PluginResult } from './plugins.ts';
+import type { SendFileType } from '../koaRouter-1.1-scanWeb';
+import type { SendEntryType } from '../koaRouter-1-scanHar';
+
+/** 提供多个类型聚合，用于类型提示 */
+type extendTypes = SendFileType & SendEntryType;
 
 /**
  * koaRouter 插件函数
  */
-export type KoaRouterFunction = (router: Router) => PluginResult;
+export type KoaRouterFunction = (router: Router, types: extendTypes) => PluginResult;
 
 /**
  * 创建 koaRouter 插件的类型提示函数  
@@ -14,8 +19,8 @@ export type KoaRouterFunction = (router: Router) => PluginResult;
  * @param fun 自定义的插件函数
  * @returns 
  */
-export function createKoaRouter(fun: KoaRouterFunction): KoaRouterFunction {
+export function createKoaRouterLazier(fun: KoaRouterFunction): KoaRouterFunction {
     return fun;
 }
 
-export default createKoaRouter;
+export default createKoaRouterLazier;
