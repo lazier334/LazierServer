@@ -7,12 +7,14 @@ import * as auth from './util-auth.js';
 import * as crypto from './util-crypto.js';
 import * as router from './util-router.js';
 import * as tasks from './util-tasks.js';
+import * as ws from './util-ws.js';
 
 export * as cmd from './util-cmd.js';
 export * as auth from './util-auth.js';
 export * as crypto from './util-crypto.js';
 export * as router from './util-router.js';
 export * as tasks from './util-tasks.js';
+export * as ws from './util-ws.js';
 
 // 合并所有工具对象
 const utils = {
@@ -20,13 +22,14 @@ const utils = {
     ...auth,
     ...crypto,
     ...router,
-    ...tasks
+    ...tasks,
+    ...ws,
 };
 // 删除 utils 里面的 default 导出
 delete utils.default;
 
 // 冲突检查（可选，根据需求保留）
-const utilList = [cmd, auth, crypto, router, tasks];
+const utilList = [cmd, auth, crypto, router, tasks, ws];
 utilList.forEach(obj => {
     Object.entries(obj).forEach(([k, v]) => {
         if (k != 'default' && utils[k] && utils[k] !== v) {

@@ -1,5 +1,4 @@
 import fs from 'fs';
-import app from 'koa';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
@@ -30,7 +29,6 @@ else {
 
 export {
     fs,
-    app,
     path,
     config,
     getUtilsModule,
