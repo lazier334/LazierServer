@@ -5,9 +5,6 @@ import type { WebsocketApisFunction } from './websocketApis';
 import type { WebsocketMsgsFunction } from './websocketMsgs';
 import type { SystemStartFunction } from './systemStart';
 
-// 导出类型提示信息
-export type { LSConfig } from '../libs/baseImport';
-
 // createKoaPluginType 是默认导出的函数类型，来自 ./koaPlugin
 // 原文件使用 import createKoaPluginType from './koaPlugin'
 // 我们需要引用其默认导出的类型（如果 koaPlugin 有默认导出）

@@ -4,7 +4,7 @@ export * from '../../plugins/types/index';
 // 导入本地的类型定义
 import type { SelectFileByDomainsFunction } from './selectFileByDomains';
 import type { SendFunction } from './send';
-import type { KoaRouterFunction } from './koaRouter-Lazier.ts';
+import type { KoaRouterFunction } from './koaRouter-lazier.ts';
 
 // 从 plugins/types 导入 createPlugin 的类型（用于类型断言）
 // 由于已经 export * from，可以直接使用 typeof import('../../plugins/types/index').createPlugin

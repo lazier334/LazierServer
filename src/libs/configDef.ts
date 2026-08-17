@@ -562,7 +562,7 @@ import { createIndexData } from 'lazierserver/types';
  * 列表插件的demo
  */
 export default createIndexData(async function indexDataDemo(arr) {
-    if (false) arr.push(...[
+    arr.push(...[
         {
             icon: "",
             name: "项目名称",
@@ -584,7 +584,7 @@ import { createKoaPlugin } from 'lazierserver/types';
  * koa 中间件插件的demo
  */
 export default createKoaPlugin(async function koaPluginDemo(ctx, next) {
-    if (false) ctx.body = 'hello world! -- by demo';
+    ctx.body = 'hello world! -- by demo';
     return await next();
 })
 `, 'koaRouter-1-demo.js': `
@@ -593,20 +593,36 @@ import { createKoaRouter } from 'lazierserver/types';
 /**
  * koa 路由插件的demo
  */
+export default createKoaRouter(function koaRouterDemo(router) {
+    // 测试接口
+    router.all('/demo', async (ctx, next) => {
+        ctx.body = 'hello demo';
+        return next();
+    });
+    router.all(/^\/demo.*$/, async (ctx, next) => {
+        ctx.body = (ctx.body ?? '') + ' hello demo2';
+        return next();
+    });
+    return router
+})
+`, 'koaRouter-1-lazierDemo.js': `
+import { createKoaRouterLazier } from 'lazierserver/types';
+
+/**
+ * koa 路由插件的demo
+ */
 export default createKoaRouter(function koaRouterDemo(router, T) {
-    if (false) {
-        // 测试接口
-        router.all('/demo', async (ctx, next) => {
-            ctx.body = 'hello demo';
-            /** @type {ctx & T} */
-            const ectx = ctx;
-            return next();
-        });
-        router.all(/^\/demo.*$/, async (ctx, next) => {
-            ctx.body = (ctx.body ?? '') + ' hello demo2';
-            return next();
-        });
-    }
+    // 测试接口
+    router.all('/demo', async (ctx, next) => {
+        ctx.body = 'hello demo';
+        /** @type {ctx & T} */
+        const ectx = ctx;
+        return next();
+    });
+    router.all(/^\/demo.*$/, async (ctx, next) => {
+        ctx.body = (ctx.body ?? '') + ' hello demo2';
+        return next();
+    });
     return router
 })
 `, 'koaRouter-10-external-demo.js': `
@@ -619,16 +635,14 @@ import { exportFunction } from './externals/demo.js';
  * 调用外部插件的路由接口
  */
 export default createKoaRouter(function koaRouterExternalDemo(router) {
-    if (true) {
-        router.all('外部插件-使用cmd命令运行js脚本 ./ld/plugins/externals/demo.js', '/external/demoByCmd', async (ctx, next) => {
-            const re = execSync(\`cd "\${import.meta.dirname}/externals" && node demo.js\`);
-            ctx.body = String(re);
-        });
-        router.all('外部插件-使用导入的模块函数运行', '/external/demoByExportFunction', async (ctx, next) => {
-            const re = await exportFunction(ctx.request.query.msg || '默认的消息');
-            ctx.body = re;
-        });
-    }
+    router.all('外部插件-使用cmd命令运行js脚本 ./ld/plugins/externals/demo.js', '/external/demoByCmd', async (ctx, next) => {
+        const re = execSync(\`cd "\${import.meta.dirname}/externals" && node demo.js\`);
+        ctx.body = String(re);
+    });
+    router.all('外部插件-使用导入的模块函数运行', '/external/demoByExportFunction', async (ctx, next) => {
+        const re = await exportFunction(ctx.request.query.msg || '默认的消息');
+        ctx.body = re;
+    });
     // 还可以通过其他自定义的方案实现互联
     return router
 })
@@ -648,7 +662,7 @@ import { createWebsocketApis } from 'lazierserver/types';
  */
 export default createWebsocketApis(async function websocketApisDemo(msg, message, ws, req) {
     // 可以使用 req.url 来做api路由识别
-    if (false && '/demo' == req.url.split('?').shift()) {
+    if ('/demo' == req.url.split('?').shift()) {
         console.log('收到来自客户端的消息', msg)
     }
     return { end: false }
@@ -661,7 +675,7 @@ import { createWebsocketMsgs } from 'lazierserver/types';
  */
 export default createWebsocketMsgs(async function websocketMsgsDemo(arr) {
     // 普通数据
-    if (false) arr.push(...[
+    arr.push(...[
         {
             "type": "receive",
             "time": 1740470623630,
