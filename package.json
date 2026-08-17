@@ -1,7 +1,7 @@
 {
   "name": "lazierserver",
-  "version": "1.3.11-26081700",
-  "description": "= 系统优化",
+  "version": "1.3.11-26081701",
+  "description": "= 优化类型提示\n= 优化系统",
   "homepage": "https://github.com/lazier334/LazierServer#readme",
   "bugs": {
     "url": "https://github.com/lazier334/LazierServer/issues"
@@ -14,6 +14,10 @@
   "author": "lazier334",
   "type": "module",
   "exports": {
+    ".": {
+      "types": "./ld/lazier334/libs/index.d.ts",
+      "default": "./ld/lazier334/libs/index.js"
+    },
     "./types": {
       "types": "./ld/lazier334/types/index.d.ts",
       "default": "./ld/lazier334/types/index.js"

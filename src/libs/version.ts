@@ -1,5 +1,6 @@
 export default Object.fromEntries(Object.entries({
-    "1.3.11-26081700": `= 系统优化
+    "1.3.11-26081701": `= 优化类型提示
+= 优化系统
 `,
     "1.3.10-26080503": `= 优化更新版本的流程
 + 去除那可恶的提示 "selectFileByDomains 阶段的插件列表为空"
