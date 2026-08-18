@@ -1,4 +1,4 @@
-// 不能使用 index.js 这个名字，会导致详细提示丢失
+// 需要把这些文件打开才能看到详细提示信息
 export * as baseUtil from './util-base.js';
 export * as cmdUtil from './util-cmd.js';
 export * as authUtil from './util-auth.js';
