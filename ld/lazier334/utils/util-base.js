@@ -3,7 +3,6 @@ import { fs, path } from '../libs/baseImport.js';
 
 const xxhash = await xxhashWasm();
 
-export * from '../libs/baseImport.js';
 export {
     xxhash,
     getAbsolutePaths,

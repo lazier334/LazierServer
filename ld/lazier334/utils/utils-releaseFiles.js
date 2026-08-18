@@ -1,4 +1,4 @@
-import { fs, path } from './utils-base.js';
+import { fs, path } from '../libs/baseImport.js';
 
 const ls = {
     releaseDirs: [
@@ -13,8 +13,8 @@ const ls = {
     ],
 }
 const releaseDefault = () => {
-    releaseDirs(path.join(__dirname, '..'), process.cwd(), ls.releaseDirs);
-    releaseFiles(path.join(__dirname, '..'), process.cwd(), ls.releaseFiles);
+    releaseDirs(path.join(import.meta.dirname, '..'), process.cwd(), ls.releaseDirs);
+    releaseFiles(path.join(import.meta.dirname, '..'), process.cwd(), ls.releaseFiles);
 }
 
 export { releaseDirs, releaseDefault }

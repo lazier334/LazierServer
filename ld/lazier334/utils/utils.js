@@ -1,41 +1,22 @@
+// 以下类型暂无法提示完整信息
+export * as base from './util-base.js';
+export * as cmd from './util-cmd.js';
+export * as auth from './util-auth.js';
+export * as crypto from './util-crypto.js';
+export * as result from './util-result.js';
+export * as router from './util-router.js';
+export * as tasks from './util-tasks.js';
+export * as ws from './util-ws.js';
+
 /*
     聚合工具对象
     util 为单纯工具函数，utils 为聚合后的完整工具模块
  */
 import * as cmd from './util-cmd.js';
+import * as base from './util-base.js';
 import * as auth from './util-auth.js';
 import * as crypto from './util-crypto.js';
+import * as result from './util-router.js';
 import * as router from './util-router.js';
 import * as tasks from './util-tasks.js';
 import * as ws from './util-ws.js';
-
-export * as cmd from './util-cmd.js';
-export * as auth from './util-auth.js';
-export * as crypto from './util-crypto.js';
-export * as router from './util-router.js';
-export * as tasks from './util-tasks.js';
-export * as ws from './util-ws.js';
-
-// 合并所有工具对象
-const utils = {
-    ...cmd,
-    ...auth,
-    ...crypto,
-    ...router,
-    ...tasks,
-    ...ws,
-};
-// 删除 utils 里面的 default 导出
-delete utils.default;
-
-// 冲突检查（可选，根据需求保留）
-const utilList = [cmd, auth, crypto, router, tasks, ws];
-utilList.forEach(obj => {
-    Object.entries(obj).forEach(([k, v]) => {
-        if (k != 'default' && utils[k] && utils[k] !== v) {
-            throw new Error(`工具函数 ${k} 已存在且定义不同，请手动处理冲突`);
-        }
-    })
-});
-
-export default utils; // ESM 默认导出

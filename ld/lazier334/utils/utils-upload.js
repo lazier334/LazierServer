@@ -5,7 +5,7 @@
     4. 连接im服务（提供拓展服务）
  */
 import * as globalUtils from './utils.js';
-import { fs, path, config } from './utils-base.js';
+import { fs, path, config } from '../libs/baseImport.js';
 
 const userType = globalUtils.auth.userType;
 

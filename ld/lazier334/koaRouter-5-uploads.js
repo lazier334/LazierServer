@@ -2,7 +2,7 @@ import send from 'koa-send';
 import crypto from 'crypto';
 import { FileStore } from '@tus/file-store';
 import { Server, EVENTS } from '@tus/server';
-import { xxhash } from './utils/utils-base.js';
+import { xxhash } from './utils/util-base.js';
 import { lc, db } from './utils/utils-upload.js';
 import { createKoaRouter } from './types/index.js';
 import { fs, path, config } from './libs/baseImport.js';

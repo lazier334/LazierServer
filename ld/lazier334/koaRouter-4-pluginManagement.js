@@ -1,8 +1,8 @@
 import StreamZip from 'node-stream-zip';
-import result from './utils/util-result.js';
+import { result } from './utils/util-result.js';
 import { createKoaRouter } from './types/index.js';
 import uploadPluginMiddleware from './libs/koa-uploadPluginMiddleware.js';
-import { getAbsolutePaths, compareDirectories } from './utils/utils-base.js';
+import { getAbsolutePaths, compareDirectories } from './utils/util-base.js';
 import { fs, path, config, getPluginsModule, importSysModule } from './libs/baseImport.js';
 
 /** @type {import('../../src/libs/utils.ts')} */

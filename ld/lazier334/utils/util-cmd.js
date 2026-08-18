@@ -3,8 +3,12 @@ import readline from 'readline';
 import { spawn, exec } from 'child_process';
 
 let rl;
-export default runCmd;
-export { runCmd, runCmdByExec, waitForInput, runDetachedCmd };
+export {
+    runCmd,
+    runCmdByExec,
+    waitForInput,
+    runDetachedCmd
+};
 
 // 增强解码函数
 function safeDecode(buffer, primaryEncoding = 'utf8') {

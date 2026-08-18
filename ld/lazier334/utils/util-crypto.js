@@ -1,5 +1,6 @@
 import crypto from 'crypto';
-import { config } from './utils-base.js';
+import { config } from '../libs/baseImport.js';
+
 
 /** 加解密对象 */
 class SymmetricEncryptor {

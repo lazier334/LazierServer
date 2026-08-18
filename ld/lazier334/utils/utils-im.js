@@ -1,6 +1,6 @@
 import vm from 'vm';
 import crypto from 'crypto';
-import { fs, path, config as Config, getUtilsModule } from './utils-base.js';
+import { fs, path, config, getUtilsModule } from './libs/baseImport.js';
 import * as globalUtils from './utils.js';
 import { SubscriptionManager } from '../classes/SubscriptionManager.js';
 const systemUtils = await getUtilsModule();
@@ -12,9 +12,9 @@ const deadlineMax = new Date('2099-12-31');
 /** 因为im是作为插件提供，所以不添加进全局配置 */
 const imConfig = {
     /** 数据库加密密码，32个字符 */
-    cryptoKey: Config.cryptoKey.substring(0, 32).padEnd(32, '3'),
+    cryptoKey: config.cryptoKey.substring(0, 32).padEnd(32, '3'),
     BASEAPI: '/im',
-    dbDir: path.join(Config.dataPath, 'imdbs'),
+    dbDir: path.join(config.dataPath, 'imdbs'),
     sessionKey: 'im-session',
     SESSION_MAX_AGE: 3 * 24 * 60 * 60 * 1000, // 设置 Cookie 有效期为 3 天
     intervals: {
@@ -279,7 +279,7 @@ export const all = {
     messageType,
     topicType,
     ...utils,
-    Config,
+    Config: config,
     imConfig,
     db,
 }
@@ -295,7 +295,7 @@ function initIMDB() {
     // 初始化数据库
     db.readDB();
     // 检测如果开启了加密，那么强制保存一次
-    if (Config.cryptoDataEnable) {
+    if (config.cryptoDataEnable) {
         db.saveDB(true)
     }
     // 检测如果一个账号都没有那么设置默认账号
@@ -1154,7 +1154,7 @@ function initAccountDB() {
             return this.addSession(newUser);
         },
         passwordSalt(password) {
-            if (password != null) return crypto.createHash('md5').update(password + Config.serverSeed).digest('hex');
+            if (password != null) return crypto.createHash('md5').update(password + config.serverSeed).digest('hex');
         },
         dePassword(password) {
             return decryptBase64(password)
