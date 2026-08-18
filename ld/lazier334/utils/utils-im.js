@@ -1,7 +1,7 @@
 import vm from 'vm';
 import crypto from 'crypto';
 import { fs, path, config, getUtilsModule } from './libs/baseImport.js';
-import { cryptoUtil } from './index.js';
+import { cryptoUtil } from './u.js';
 import { SubscriptionManager } from '../classes/SubscriptionManager.js';
 const systemUtils = await getUtilsModule();
 

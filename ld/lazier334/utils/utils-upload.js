@@ -4,7 +4,7 @@
     3. 分享
     4. 连接im服务（提供拓展服务）
  */
-import { authUtil, cryptoUtil } from './index.js';
+import { authUtil, cryptoUtil } from './u.js';
 import { fs, path, config } from '../libs/baseImport.js';
 
 const userType = authUtil.userType;

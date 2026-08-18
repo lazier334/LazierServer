@@ -1,4 +1,4 @@
-// 以下类型暂无法提示完整信息
+// 不能使用 index.js 这个名字，会导致详细提示丢失
 export * as baseUtil from './util-base.js';
 export * as cmdUtil from './util-cmd.js';
 export * as authUtil from './util-auth.js';

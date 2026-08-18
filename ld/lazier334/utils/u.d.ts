@@ -1,3 +1,4 @@
+// 不能使用 index.d.js 这个名字，会导致详细提示丢失
 export * as cmdUtil from './util-cmd.js';
 export * as baseUtil from './util-base.js';
 export * as authUtil from './util-auth.js';

@@ -1,5 +1,5 @@
 import all from './utils/utils-im.js';
-import { routerUtil, cryptoUtil } from './utils/index.js';
+import { routerUtil, cryptoUtil } from './utils/u.js';
 import { createKoaRouter } from './types/index.js';
 
 const {
