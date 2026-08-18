@@ -63,7 +63,16 @@ export default createKoaRouter(function koaRouterScanWeb(router) {
             })
         });
 
-        let filepath = await selectFileByDomains(ctx, domainDirs, api);
+        let domains = Object.keys(domainDirs);
+        let filepath = await (await plugins('selectFileByDomains')).use(domains, domainDirs, ctx);
+        // 当存在多个文件夹时进行日志信息高亮，"黄色" 是当前选中的文件夹，"绿色" 是其他文件夹
+        // 如果选中了文件路径，且文件路径不存在于扫描结果中，则全部都是绿色的
+        if (1 < domains.length) {
+            const [dir, file] = Object.entries(domainDirs).find(([k, v]) => v == filepath);
+            console.info(`<=${domains.length}= [有${domains.length}个目录存在文件] ${api} (\x1b[32m{msg}\x1b[0m)`
+                .replace('{msg}', domains.join(", ").replace(dir, `\x1b[33m${dir}\x1b[0m\x1b[32m`))
+            );
+        }
         if (filepath) {
             // 拿到文件夹
             let fileFolder = Object.keys(domainDirs).find(d => filepath.includes(path.basename(d)));
@@ -243,34 +252,6 @@ async function sendFile(ctx, filepath, opts, next) {
         throw err;
     }
     return result;
-}
-
-/**
- * 选择域名文件夹的处理
- * @param {import('koa').Context} ctx koa的上下文
- * @param {{"api.demo.com": "api.demo.com/assets/index.js", "m.demo.com": "m.demo.com/assets/index.js"}} domainsMap 域名映射列表
- * @param {"/assets/index.js"} api 请求的api
- * @returns {"api.demo.com/assets/index.js" | undefined} 选中的文件路径
- */
-async function selectFileByDomains(ctx, domainsMap, api) {
-    // 优先使用参数 ctx.query.dir 的  
-    // 其次使用插件选择的，但是插件里可以删除参数 
-    // 最后默认使用第一个 
-    let domains = Object.keys(domainsMap);
-    let selectFolder = await (await plugins('selectFileByDomains')).use(domains, domainsMap, ctx) || domains[0];
-
-    if (ctx.query.dir) {
-        let priorityDir = domains.find((item) => item.replaceAll('\\', '/').endsWith(ctx.query.dir.replaceAll('\\', '/')));
-        if (priorityDir) selectFolder = priorityDir;
-    }
-
-    // 当存在多个文件夹时进行日志信息高亮，"黄色" 是当前选中的文件夹，"绿色" 是其他文件夹
-    if (1 < domains.length) {
-        console.info(`<=${domains.length}= [有${domains.length}个目录存在文件] ${api} (\x1b[32m{msg}\x1b[0m)`
-            .replace('{msg}', domains.join(", ").replace(selectFolder, `\x1b[33m${selectFolder}\x1b[0m\x1b[32m`))
-        );
-    }
-    return domainsMap[selectFolder];
 }
 
 /** 获取子目录 */
