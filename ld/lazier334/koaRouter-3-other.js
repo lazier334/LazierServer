@@ -1,4 +1,4 @@
-import globalUtils from './utils/utils.js';
+import { routerUtil, cryptoUtil } from './utils/index.js';
 import { createKoaRouter } from './types/index.js';
 
 /**
@@ -17,11 +17,11 @@ export default createKoaRouter(function koaRouterOther(router) {
      *      decode: true
      *  }
      */
-    router.all('其他接口 - 加解密数据', '/other/cryptoData', globalUtils.warpApi((ctx, next, params) => {
-        if (params.decode) ctx.body = globalUtils.encryptor.decrypt(params.data, params.key);
-        else ctx.body = globalUtils.encryptor.encrypt(params.data, params.key);
+    router.all('其他接口 - 加解密数据', '/other/cryptoData', routerUtil.warpApi((ctx, next, params) => {
+        if (params.decode) ctx.body = cryptoUtil.encryptor.decrypt(params.data, params.key);
+        else ctx.body = cryptoUtil.encryptor.encrypt(params.data, params.key);
     }));
-    router.all('其他接口 - 获取session', '/other/getSession', globalUtils.warpApi((ctx, next, params) => {
+    router.all('其他接口 - 获取session', '/other/getSession', routerUtil.warpApi((ctx, next, params) => {
         ctx.session.userId = Date.now();
         ctx.body = '已设置';
     }));

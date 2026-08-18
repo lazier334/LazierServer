@@ -1,7 +1,7 @@
 import vm from 'vm';
 import crypto from 'crypto';
 import { fs, path, config, getUtilsModule } from './libs/baseImport.js';
-import * as globalUtils from './utils.js';
+import { cryptoUtil } from './index.js';
 import { SubscriptionManager } from '../classes/SubscriptionManager.js';
 const systemUtils = await getUtilsModule();
 
@@ -1305,14 +1305,14 @@ function initAccountDB() {
  * @param {string} txt 
  */
 function decodeText(txt) {
-    return globalUtils.crypto.decodeText(txt, imConfig.cryptoKey);
+    return cryptoUtil.decodeText(txt, imConfig.cryptoKey);
 }
 /**
  * 加密
  * @param {string} txt 
  */
 function encodeText(txt) {
-    return globalUtils.crypto.encodeText(txt, imConfig.cryptoKey);
+    return cryptoUtil.encodeText(txt, imConfig.cryptoKey);
 }
 
 /**

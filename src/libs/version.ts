@@ -1,5 +1,5 @@
 export default Object.fromEntries(Object.entries({
-    "1.3.11-26081802": `= 优化类型提示
+    "1.3.11-26081803": `= 优化类型提示
 = 抽取selectFileByDomains插件
 = 优化系统
 `,

@@ -1,5 +1,5 @@
 import all from './utils/utils-im.js';
-import * as globalUtils from './utils/utils.js';
+import { routerUtil, cryptoUtil } from './utils/index.js';
 import { createKoaRouter } from './types/index.js';
 
 const {
@@ -64,8 +64,8 @@ function addRouter(router) {
 
     // 数据库加密数据 与 json格式明文数据互转
     router.all(imConfig.BASEAPI + "/cryptoDB", warpApi((ctx, next, params) => {
-        if (params.decode) ctx.body = globalUtils.crypto.encryptor.decrypt(params.data, params.key);
-        else ctx.body = globalUtils.crypto.encryptor.encrypt(params.data, params.key);
+        if (params.decode) ctx.body = cryptoUtil.encryptor.decrypt(params.data, params.key);
+        else ctx.body = cryptoUtil.encryptor.encrypt(params.data, params.key);
     }));
 
     // 用户在线信息
@@ -98,7 +98,7 @@ function addRouter(router) {
     }, true));
 
     // 用户登录
-    router.all(USERAPI + "/login", globalUtils.router.loginLimiter, warpApi((ctx, next, params) => {
+    router.all(USERAPI + "/login", routerUtil.loginLimiter, warpApi((ctx, next, params) => {
         const session = db.login(params);
         ctx.body = result(session);
         // 设置 session 到 Cookie 中
@@ -110,7 +110,7 @@ function addRouter(router) {
     }, true));
 
     // 密码计算，在修改密码的场景需要使用这个获取最终密码，上传的时候上传最终密码，但是登录则上传另一种加密的密码
-    router.all(USERAPI + "/passwordSalt", globalUtils.router.loginLimiter, warpApi((ctx, next, params) => {
+    router.all(USERAPI + "/passwordSalt", routerUtil.loginLimiter, warpApi((ctx, next, params) => {
         ctx.body = result(db.passwordSalt(params.password));
     }));
 
