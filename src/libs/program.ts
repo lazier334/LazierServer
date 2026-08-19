@@ -96,59 +96,33 @@ program.command('stop').aliases(['kill', 'halt'])
     });
 
 const files: Record<string, string> = {
-    'indexData-1-temp.js': `import { createIndexData } from 'lazierserver/types';
-
-export default createIndexData(async function indexData(arr) {
-    arr.push(...[
-        {
-            icon: "",
-            name: "{directory}",
-            mark: "选项 - {directory}",
-            urls: [
-                {
-                    text: "打开",
-                    url: "/{directory}"
-                }
-            ],
+    'indexData-1-temp.js': defConfig.template['indexData-1-demo.js'].trim()
+        .replace('的demo', '')
+        .replace('indexDataDemo', 'indexData{Directory}')
+        .replace('项目名称', '{directory}')
+        .replace('备注信息', '选项 - {directory}')
+        .replace('#跳转地址', '/{directory}'),
+    'koaRouter-1-temp.js': defConfig.template['koaRouter-1-demo.js'].trim()
+        .replace('的demo', '')
+        .replace('koaRouterDemo', 'koaRouter{Directory}')
+        .replace('/demo', '/{directory}')
+        .replace('测试接口', '示例接口'),
+    'package.json': JSON.stringify({
+        name: "{directory}",
+        version: "1.0.0",
+        description: "通过lazierserver创建的项目: {directory}",
+        license: "ISC",
+        author: "",
+        type: "module",
+        main: "index.js",
+        scripts: {
+            start: "ls334",
+            dev: "ls334"
         },
-    ]);
-    return arr;
-})`,
-    'koaRouter-1-temp.js': `import { createKoaRouter } from 'lazierserver/types';
+        dependencies: {}
+    }, null, 2) + '\n',
+}
 
-export default createKoaRouter(function koaRouter(router, T) {
-    // 接口
-    router.all('/{directory}', async (ctx, next) => {
-        /** @type {ctx & T} 完整的ctx提示信息 */
-        const ectx = ctx;
-        if (ectx.sendOptions?.filename) {
-            // 示例: 在原本将要使用的文件名称前面加上前缀 _ 
-            ectx.sendOptions.filename = '_' + ectx.sendOptions.filename;
-            console.log(ectx.sendOptions.filename);
-        } else {
-            // 示例: 响应文字
-            ctx.body = 'hello {directory}!';
-        }
-    });
-    return router
-})`,
-    'package.json': `{
-    "name": "{directory}",
-    "version": "1.0.0",
-    "description": "通过lazierserver创建的项目: {directory}",
-    "license": "ISC",
-    "author": "",
-    "type": "module",
-    "main": "index.js",
-    "scripts": {
-        "start":"ls334",
-        "dev":"ls334"
-    },
-    "dependencies": {
-    }
-}
-`,
-}
 program.command('create').aliases(['c', 'template'])
     .description('创建项目模版')
     .argument('[directory]', '文件夹名称', 'ls334')
@@ -160,7 +134,8 @@ program.command('create').aliases(['c', 'template'])
             fs.mkdirSync(targetPath);
             const dirname = path.basename(targetPath);
             for (const name in files) {
-                fs.writeFileSync(path.join(targetPath, name), files[name].replaceAll('{directory}', dirname))
+                fs.writeFileSync(path.join(targetPath, name), files[name].replaceAll('{directory}', dirname)
+                    .replaceAll('{Directory}', dirname.charAt(0).toUpperCase() + dirname.slice(1)))
             }
             console.info(directory, '项目已创建');
             console.log('正在安装依赖中...');

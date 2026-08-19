@@ -569,8 +569,8 @@ export default createIndexData(async function indexDataDemo(arr) {
             mark: "备注信息",
             urls: [
                 {
-                    text: "按钮1",
-                    url: "/index#跳转地址"
+                    text: "打开",
+                    url: "#跳转地址"
                 }
             ],
         },
