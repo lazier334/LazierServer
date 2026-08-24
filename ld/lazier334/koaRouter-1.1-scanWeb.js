@@ -64,7 +64,7 @@ export default createKoaRouter(function koaRouterScanWeb(router) {
         });
 
         let domains = Object.keys(domainDirs);
-        let filepath = await (await plugins('selectFileByDomains')).use(domains, domainDirs, ctx);
+        let filepath = await (await plugins('selectFileByDomains')).use(domains, domainDirs, ctx) ?? domains[0];
         // 当存在多个文件夹时进行日志信息高亮，"黄色" 是当前选中的文件夹，"绿色" 是其他文件夹
         // 如果选中了文件路径，且文件路径不存在于扫描结果中，则全部都是绿色的
         if (1 < domains.length) {
