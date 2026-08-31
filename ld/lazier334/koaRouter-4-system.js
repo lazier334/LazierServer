@@ -27,7 +27,7 @@ export default createKoaRouter(function koaRouterSystem(router, T) {
     router.all('接口: 如果是访问首页则检测权限并返回对应的版本', '/index.html', async (ctx, next) => {
         /** @type {ctx & T} */
         const ectx = ctx;
-        if (ectx.sendOptions.opts.root.replaceAll('\\', '/').endsWith('web/web.index')) {
+        if (ectx.sendOptions?.opts.root.replaceAll('\\', '/').endsWith('web/web.index')) {
             if (!authUser(ctx)?.superAdmin) {
                 // 用户版为把 'isAdmin: true,' 改成 'isAdmin: false,' 
                 let html = fs.readFileSync(path.join(ectx.sendOptions.opts.root, ectx.sendOptions.filename), 'utf8');
