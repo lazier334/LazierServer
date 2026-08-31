@@ -1,7 +1,7 @@
 {
   "name": "lazierserver",
-  "version": "1.3.11-26081805",
-  "description": "= 优化类型提示\n= 抽取selectFileByDomains插件\n= 优化系统",
+  "version": "1.3.12-26083100",
+  "description": "= 变更默认端口号为 3344/3345(http/https)\n= 优化系统",
   "homepage": "https://github.com/lazier334/LazierServer#readme",
   "bugs": {
     "url": "https://github.com/lazier334/LazierServer/issues"
