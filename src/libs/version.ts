@@ -1,5 +1,5 @@
 export default Object.fromEntries(Object.entries({
-    "1.3.12-26090100": `= 变更默认端口号为 3344/3345(http/https)
+    "1.3.12-26090101": `= 变更默认端口号为 3344/3345(http/https)
 = 优化系统
 `,
     "1.3.11-26081805": `= 优化类型提示
