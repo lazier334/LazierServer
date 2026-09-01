@@ -163,16 +163,16 @@ function readParamsAndSession(ctx) {
 }
 
 /**
- * 包装api
- * 出现异常的时候自动响应，但是会延迟1秒
+ * 包装api  
+ * 出现异常的时候自动响应，但是会延迟1秒  
  * 会读取登录状态到 loginUser 里面，如果不需要登录就是 undefined 
  * @param {(ctx:import('koa-router').RouterContext, next:()=>void, params: {
  *  session:'im-session',
  *  loginUser:userType|undefined,
  *  [k:string]:any
  *  })=>void } fun 可以是promise
- * @param {boolean} login 是否不需要登录
- * @param {boolean} admin 超级管理员
+ * @param {boolean} login 是否需要登录
+ * @param {boolean} admin 是否需要超级管理员
  * @returns 
  */
 function warpApi(fun, login, admin) {
