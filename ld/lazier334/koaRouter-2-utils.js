@@ -45,7 +45,8 @@ export default types.createKoaRouter(function koaRouterUtils(router) {
             if (['html', 'js', 'css', 'txt'].includes(path.extname(file).replace('.', ''))) {
                 content.text = buff.toString('utf8');
             } else {
-                content.base64 = buff.toString('base64');
+                content.encoding = "base64";
+                content.text = buff.toString('base64');
             }
             entries.push(createEntry("https://lazier334.com/" + file, content));
         });
