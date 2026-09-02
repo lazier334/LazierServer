@@ -116,11 +116,19 @@ async function importWarp(filepath: string, timestamp?: number): Promise<Object 
         } catch (err) {
             console.log('导入模块失败! 模块:', importFilepath);
             if (err instanceof Error && err?.message?.includes("Cannot find package 'lazierserver' imported from")) {
-                const moduleName = 'lazierserver/types';
+                // 默认是全局引入
+                let moduleName = 'lazierserver';
                 const code = fs.readFileSync(filepath, 'utf8');
                 if (code.includes(moduleName)) {
+                    const typesModuleName = 'lazierserver/types';
+                    let modulePath = 'lazier334/libs/index.js';
+                    if (code.includes(typesModuleName)) {
+                        // types 引入
+                        modulePath = 'lazier334/types/index.js';
+                        moduleName = typesModuleName;
+                    }
                     // 动态计算出模块位置并将其包装成url
-                    const typePath = pathToFileURL(path.join(config.dataPath, 'lazier334/types/index.js'));
+                    const typePath = pathToFileURL(path.join(config.dataPath, modulePath));
                     const base64 = Buffer.from(code.replace(moduleName, typePath.href) + `//# sourceURL=${filepath}\n`).toString('base64');
                     const url = `data:text/javascript;base64,${base64}`;
                     pluginModule = await import(url);
