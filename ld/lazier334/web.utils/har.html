@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAR简化工具</title>
+<link rel="stylesheet" href="./res/lazierserver-default.css">
+<style>
+    .control>* {
+        margin: 1rem;
+    }
+
+    .drop-hover {
+        background: rgba(32, 128, 240, 0.08) !important;
+    }
+</style>
+
+<body>
+    <div id="app">
+        <div style="text-align: center;">
+            <h1>HAR简化工具</h1>
+        </div>
+        <div class="control">
+            <n-button type="primary" @click="simplify">
+                简化
+            </n-button>
+            <n-button :disabled="!result" @click="download">
+                下载
+            </n-button>
+            <n-checkbox v-model:checked="saveHeaders">保留 headers</n-checkbox>
+
+            <n-button @click="serverSimplify" :loading="simplifyLoading">
+                在服务器上简化
+            </n-button>
+            <n-button @click="serverCreateHar" :loading="createLoading">
+                在服务器上构建har
+            </n-button>
+            <n-checkbox v-model:checked="autoSimplify">简化</n-checkbox>
+            <n-input v-model:value="value" type="text" style="min-width: 20%" autosize placeholder="服务器操作路径"></n-input>
+        </div>
+        <n-input v-model:value="harInput" type="textarea" placeholder="粘贴 HAR JSON，或拖拽文件到此处" :rows="20"
+            @drop.prevent="handleDrop" @dragover.prevent="dragover = true" @dragleave="dragover = false"
+            :class="{ 'drop-hover': dragover }" />
+    </div>
+</body>
+
+<script type="importmap">
+{"imports": {"vue": "./res/vue.prod@3.5.32.mjs","naive": "./res/naiveui.prod@2.44.1.mjs"} }
+</script>
+<script type="module">
+    import * as vue from 'vue';
+    import * as naive from 'naive';
+    const { createApp, ref } = vue;
+    const { createDiscreteApi } = naive;
+    const { message: nvMessage } = createDiscreteApi(['message']);
+
+    createApp({
+        setup() {
+            const harInput = ref('');
+            const saveHeaders = ref(false);
+            const result = ref('');
+            const dragover = ref(false);
+            const value = ref('');
+            const simplifyLoading = ref(false);
+            const createLoading = ref(false);
+            const autoSimplify = ref(false);
+
+            function handleDrop(e) {
+                dragover.value = false;
+                const file = e.dataTransfer.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    harInput.value = ev.target.result;
+                    nvMessage.success(`已读取：${file.name}`);
+                };
+                reader.readAsText(file);
+            }
+
+            function cleanOtherKeys(obj, saveKeys) {
+                for (let k in obj) {
+                    if (!saveKeys.includes(k)) delete obj[k];
+                }
+            }
+
+            function simplify() {
+                const text = harInput.value.trim();
+                if (!text) {
+                    nvMessage.warning('请输入或拖入 HAR 数据');
+                    return;
+                }
+
+                let har;
+                try {
+                    har = JSON.parse(text);
+                } catch {
+                    nvMessage.error('JSON 格式错误');
+                    return;
+                }
+
+                // 清理无用层级
+                let newHar = { log: { entries: har.log.entries } };
+                // 清理不用字段
+                let saveKeys = saveHeaders.value ? ['headers'] : [];
+                newHar.log.entries.forEach(entry => {
+                    cleanOtherKeys(entry, ['request', 'response']);
+                    cleanOtherKeys(entry.request, ['url', ...saveKeys]);
+                    cleanOtherKeys(entry.response, ['content', ...saveKeys]);
+                });
+
+                result.value = JSON.stringify(newHar, null, 2);
+                harInput.value = result.value;
+                nvMessage.success(`简化完成，共 ${newHar.log.entries.length} 条记录`);
+            }
+
+            function download() {
+                if (!result.value) return;
+                const blob = new Blob([result.value], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'simplified.har.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }
+
+            async function serverSimplify() {
+                const dirpath = value.value.trim();
+                if (!dirpath) {
+                    nvMessage.warning('请输入服务器路径');
+                    return;
+                }
+                simplifyLoading.value = true;
+                try {
+                    const resp = await fetch('/utils/simplifyHars?' + new URLSearchParams({ dirpath }));
+                    const data = await resp.json();
+                    // 显示第一个结果
+                    const keys = Object.keys(data);
+                    if (keys.length > 0) {
+                        const first = data[keys[0]];
+                        if (first.status) {
+                            nvMessage.success(`简化成功: ${keys[0]}, 大小: ${first.size} 字节`);
+                        } else {
+                            nvMessage.error(`简化失败: ${first.error}`);
+                        }
+                    }
+                    harInput.value = JSON.stringify(data, null, 2);
+                } catch (err) {
+                    nvMessage.error('请求失败: ' + err.message);
+                } finally {
+                    simplifyLoading.value = false;
+                }
+            }
+
+            async function serverCreateHar() {
+                const dirpath = value.value.trim();
+                if (!dirpath) {
+                    nvMessage.warning('请输入服务器路径');
+                    return;
+                }
+                createLoading.value = true;
+                try {
+                    const params = { dirpath };
+                    if (autoSimplify.value) params.simplify = 'true';
+                    const resp = await fetch('/utils/createHar?' + new URLSearchParams(params));
+                    const data = await resp.json();
+                    result.value = JSON.stringify(data, null, 2);
+                    harInput.value = result.value;
+                    const count = data.log?.entries?.length || 0;
+                    nvMessage.success(`生成完成，共 ${count} 条记录`);
+                } catch (err) {
+                    nvMessage.error('请求失败: ' + err.message);
+                } finally {
+                    createLoading.value = false;
+                }
+            }
+
+            return { harInput, saveHeaders, result, dragover, value, simplifyLoading, createLoading, autoSimplify, handleDrop, simplify, download, serverSimplify, serverCreateHar };
+        },
+    }).use(naive).mount('#app');
+</script>
