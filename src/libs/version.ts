@@ -1,5 +1,5 @@
 export default Object.fromEntries(Object.entries({
-    "1.3.13-26090100": `+ 增加简化har的接口
+    "1.3.13-26090200": `+ 增加har相关工具
 = 优化系统
 `,
     "1.3.12-26090101": `= 变更默认端口号为 3344/3345(http/https)
