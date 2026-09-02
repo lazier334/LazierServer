@@ -4,8 +4,8 @@ import { fs, path, config } from './libs/baseImport.js';
 const lc = {
     open: true,
     targetPath: [
-        path.join(config.rootDir, 'utils'),
-        path.join(import.meta.dirname, '../web-lazier334/utils')
+        path.join(config.rootDir, 'web.utils'),
+        path.join(import.meta.dirname, 'web.utils')
     ]
 }
 
