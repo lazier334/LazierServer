@@ -217,8 +217,12 @@ function appendRouterToAdditionalRouter(apiMap = lc.apiMap) {
     // 清空路由列表
     additionalRouter.stack.splice(0, additionalRouter.stack.length);
     // 添加空的路由列表
-    Object.keys(apiMap).forEach(api => additionalRouter.all('Har路由', api, nullFunction));
+    Object.keys(apiMap).forEach(api => additionalRouter.all('Har路由', escapeRegExp(api), nullFunction));
     return additionalRouter;
 }
 /** 空函数 */
 function nullFunction() { };
+/** 转义接口路径中的特殊字符，避免触发正则匹配导致错误 */
+function escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
