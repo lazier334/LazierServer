@@ -8,15 +8,16 @@ declare global {
             stagesCache?: Record<string, Stage>;
         }
     }
-    // 扩展内置 Function 类型，添加自定义属性
-    interface Function {
-        pluginInfo?: {
-            filepath: string;
-            filename: string;
-            [key: string]: any;
-        };
-    }
 }
+
+// 扩展 Function 类型，添加自定义属性
+type PluginFunction = ((...args: any[]) => any) & {
+    pluginInfo: {
+        filepath: string;
+        filename: string;
+        [key: string]: any;
+    };
+};
 
 /**
  * 阶段类
@@ -27,7 +28,7 @@ class Stage {
     /** 更新时间 */
     updateTime: number;
     /** 插件列表 */
-    data: any[] = [];
+    data: PluginFunction[] = [];
 
     /**
      * 创建阶段对象
@@ -267,7 +268,7 @@ function getPlguinUpdateTime(filepath: string | URL): number {
  * @param data 类型是 [Object|Function]
  */
 async function defScan(filepath: string, data: any[]): Promise<Object | Function> {
-    const plugin = await importWarp(filepath);
+    const plugin = await importWarp(filepath) as PluginFunction;
     if (typeof plugin == 'function') {
         if (typeof plugin.pluginInfo != 'object') plugin.pluginInfo = { filepath, filename: filepath.split('/').pop()?.split('\\').pop() ?? '' };
         else plugin.pluginInfo.filepath = filepath;
