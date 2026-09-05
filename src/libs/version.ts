@@ -1,5 +1,6 @@
 export default Object.fromEntries(Object.entries({
-    "1.3.14-26090301": `= 修复扫描har时因为api存在正则符号导致触发path-to-regexp模块并报错的问题
+    "1.3.14-26090500": `= 修复扫描har时因为api存在正则符号导致触发path-to-regexp模块并报错的问题
+= 优化系统
 `,
     "1.3.13-26090200": `+ 增加har相关工具
 = 优化系统

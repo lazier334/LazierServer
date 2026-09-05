@@ -4,7 +4,7 @@ import { config } from './libs/baseImport.js';
 /**
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  */
-export default createKoaRouter(function koaRouterSystem(router, T) {
+export default createKoaRouter(function koaRouterSystem(router) {
 
     // #region 系统接口
 

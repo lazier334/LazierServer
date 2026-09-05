@@ -3,7 +3,7 @@ import { runCmd } from './utils/util-cmd.js';
 import sysproxy from '@mihomo-party/sysproxy';
 import { createKoaRouter } from './types/index.js';
 import { restartSystem } from './libs/sys-restart.js';
-import { fs, path, config, getPluginsModule, getUtilsModule } from './libs/baseImport.js';
+import { fs, path, config, getPluginsModule, getUtilsModule, warpKoaCtxByWeb } from './libs/index.js';
 
 const { plugins, getAllPlugin } = await getPluginsModule();
 const utilsModule = await getUtilsModule();
@@ -20,13 +20,12 @@ const lc = {
 /**
  * 动态路由 History 插件，顺序为： 插件API > 文件API > HarAPI > 系统API > vue的历史模式（或类似框架） > external
  */
-export default createKoaRouter(function koaRouterSystem(router, T) {
+export default createKoaRouter(function koaRouterSystem(router) {
 
     // #region 系统接口
 
     router.all('接口: 如果是访问首页则检测权限并返回对应的版本', '/index.html', async (ctx, next) => {
-        /** @type {ctx & T} */
-        const ectx = ctx;
+        const ectx = warpKoaCtxByWeb(ctx);
         if (ectx.sendOptions?.opts.root.replaceAll('\\', '/').endsWith('web/web.index')) {
             if (!authUser(ctx)?.superAdmin) {
                 // 用户版为把 'isAdmin: true,' 改成 'isAdmin: false,' 
