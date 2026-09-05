@@ -20,6 +20,10 @@ if (process?.LSStorage?.config) {
     // 将配置挂载到全局对象中
     process.LSStorage.config = config;
 }
+if (typeof process.LSStorage?.importSysModule != 'function') {
+    // 保存系统导入函数
+    process.LSStorage.importSysModule = importSysModule;
+}
 
 export {
     fs,
@@ -54,6 +58,10 @@ function lastReplace(str, searchValue, replaceValue) {
  * @param {{string} } dirpath 
  */
 async function importSysModule(mod, dirpath) {
+    if (typeof process.LSStorage?.importSysModule == 'function' && process.LSStorage.importSysModule != importSysModule) {
+        // 调用系统级导入函数
+        return await process.LSStorage.importSysModule(mod, dirpath);
+    }
     dirpath = dirpath || config.configDirPath;
     let filepath = path.join(dirpath, mod);
     // 因为可能会尝试导入 ts 结尾的模块，所以使用两种尝试
