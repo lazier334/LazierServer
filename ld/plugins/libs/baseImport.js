@@ -52,7 +52,6 @@ function lastReplace(str, searchValue, replaceValue) {
  * 如果尝试导入时 .js 文件不存在，则尝试导入 .ts 文件
  * @param {MODList} mod 系统模块文件名称，完整列表请查看 {@link ../../../dist/libs/ 系统模块目录}
  * @param {{string} } dirpath 
- * @returns 
  */
 async function importSysModule(mod, dirpath) {
     dirpath = dirpath || config.configDirPath;
@@ -65,7 +64,7 @@ async function importSysModule(mod, dirpath) {
 
 /**
  * 获取 plugins 模块
- * @returns {import('../../../dist/libs/plugins.js')}
+ * @returns {Promise<import('../../../dist/libs/plugins.js')>}
  */
 async function getPluginsModule() {
     return await importSysModule('plugins.js');
@@ -73,7 +72,7 @@ async function getPluginsModule() {
 
 /**
  * 获取 utils 模块
- * @returns {import('../../../dist/libs/utils.js')}
+ * @returns {Promise<import('../../../dist/libs/utils.js')>}
  */
 async function getUtilsModule() {
     return await importSysModule('utils.js');
@@ -81,7 +80,7 @@ async function getUtilsModule() {
 
 /**
  * 获取 config 模块
- * @returns {import('../../../dist/libs/config.js')}
+ * @returns {Promise<import('../../../dist/libs/config.js')>}
  */
 async function getConfigModule() {
     return config;
