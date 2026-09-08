@@ -74,7 +74,7 @@ export default createKoaRouter(function koaRouterPluginManagement(router) {
         if (Array.isArray(fpList) && 0 < fpList.length) {
             fpList.forEach(fp => {
                 fp = getAbsolutePaths(fp).replaceAll('\\', '/');
-                let excludeKey = config.excludePlugins.find(exclude => posixpath.includes(exclude));
+                let excludeKey = config.excludePlugins.find(exclude => fp.includes(exclude));
                 if (excludeKey) {
                     const index = config.excludePlugins.indexOf(excludeKey);
                     config.excludePlugins.splice(index, 1);
