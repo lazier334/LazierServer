@@ -45,7 +45,9 @@ export const userConfig = {
         closeUploads: true,
         autoComplete: false,
         /** 扫描web的时候仅扫描域名文件夹 */
-        scanWebOnlyDoamin: true
+        scanWebOnlyDoamin: true,
+        /** 精简控制台日志 */
+        simpleLog: false,
     },
     appendButsData: [
         {
@@ -59,6 +61,22 @@ export const userConfig = {
             text: '插件仓库',
             tooltip: '在线管理插件列表',
             fun: `this.openPage('/plugin-mgmt/index.html')`
+        },
+        {
+            avatarText: 'true',
+            text: '精简日志',
+            tooltip: '精简控制台日志',
+            fun: `this.warpAxios(axios.post('/system/editNowConfig',{"switch":{"simpleLog":!(arguments[0].avatarText==='false'?false:arguments[0].avatarText)}})
+                .then(res=>{arguments[0].avatarText = !arguments[0].avatarText;}), "更改精简日志配置失败")
+            `
+        },
+        {
+            avatarText: 'true',
+            text: '自动补全',
+            tooltip: '自动补全',
+            fun: `this.warpAxios(axios.post('/system/editNowConfig',{"switch":{"autoComplete":!(arguments[0].avatarText==='false'?false:arguments[0].avatarText)}})
+                .then(res=>{arguments[0].avatarText = !arguments[0].avatarText;}), "更改自动补全配置失败")
+            `
         },
     ],
     otherWebPath: [

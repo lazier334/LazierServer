@@ -23,7 +23,9 @@ export default createSystemStart(async function systemStartLogger({ fs, path, co
             format: winston.format.combine(
                 winston.format.colorize(),
                 winston.format.timestamp({ format: config.logger.globalTimeFormat }),
-                logFormat
+                winston.format.printf(({ level, message, timestamp }) => {
+                    return config.switch?.simpleLog ? message : `[${timestamp}] [${level}] ${message}`;
+                })
             )
         })
     ];
@@ -76,7 +78,7 @@ export default createSystemStart(async function systemStartLogger({ fs, path, co
     console.error = (...args) => { logger.error(readArgs(...args)) };
     console.debug = (...args) => { logger.debug(readArgs(...args)) };
     console.logger = logger;
-    
+
     console.info('工作目录:', process.cwd());
     return true
 })

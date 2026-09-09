@@ -73,13 +73,6 @@
                 </div>
             </el-tooltip>
 
-            <el-tooltip effect="dark" :content="`自动补全`" placement="bottom">
-                <div class="but-s-item operate" @click="setAutoComplete()">
-                    <el-avatar class="but-s-item-avatar">{{autoCompleteStatus}}</el-avatar>
-                    <el-text class="but-s-item-text" type="primary" size="large">自动补全</el-text>
-                </div>
-            </el-tooltip>
-
             <el-tooltip effect="dark" :content="`开启或关闭基于workbox的worker缓存`" placement="bottom">
                 <div class="but-s-item operate" @click="changeWorkboxStatus">
                     <el-avatar class="but-s-item-avatar">{{workboxStatus}}</el-avatar>
@@ -93,13 +86,13 @@
                 <div class="but-s-item operate" @click="clickBut(item)">
                     <el-badge v-if="item.dot" :is-dot="true">
                         <el-avatar class="but-s-item-avatar" :style="{ backgroundColor: item.color }">{{
-                            item.avatarText || '' }}</el-avatar>
+                            String(item.avatarText) || '' }}</el-avatar>
                         <el-text class="but-s-item-text" type="primary" size="large">
                             {{ item.text || ('按钮' + index) }}</el-text>
                     </el-badge>
                     <template v-else>
                         <el-avatar class="but-s-item-avatar" :style="{ backgroundColor: item.color }">{{
-                            item.avatarText || '' }}</el-avatar>
+                            String(item.avatarText) || '' }}</el-avatar>
                         <el-text class="but-s-item-text" type="primary" size="large">
                             {{ item.text || ('按钮' + index) }}</el-text>
                     </template>
@@ -441,7 +434,6 @@
             reUrlMods: reUrlMods,
             urlMod: '',
             workboxStatus: !!openWorkbox,
-            autoCompleteStatus: false,
             currentPage: 1,
             pageSize: parseInt((new URLSearchParams(location.search)).get("pageSize")) || 100,
             pageSizes: [10, 20, 30, 40, 100, 200, 300, 500, 1000, 3000, 5000, 10000],
@@ -743,13 +735,6 @@
                 this.workboxStatus = !this.workboxStatus;
                 localStorage.setItem('workboxStatus', JSON.stringify(this.workboxStatus));
                 ElMessage.success('刷新后生效，全局缓存状态 ' + this.workboxStatus)
-            },
-            setAutoComplete(get) {
-                if (get != true) get = undefined;
-                this.warpAxios(axios.get('/system/autocomplete?' + (get ? 'get=true' : "")).then((response) => {
-                    this.autoCompleteStatus = response.data.data;
-                    ElMessage.success((get ? '获取' : '设置') + '自动补全状态成功 ' + this.autoCompleteStatus)
-                }), (get ? '获取' : '设置') + '自动补全状态失败', true);
             },
             async getSystemId(notShowError) {
                 return await this.warpAxios(axios.get('/system/systemId').then((response) => response.data.data), '获取服务器系统id', true, notShowError);
