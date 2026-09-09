@@ -116,13 +116,20 @@ export default createKoaRouter(function koaRouterSystem(router) {
     // 接口: 获取当前配置数据
     router.all('系统路由 - 获取当前配置数据', '/system/config', async (ctx, next) => {
         if (!authUser(ctx).isAdmin) return next();
-
         ctx.body = result({
             ...config, additionalRouter: {
                 'tip': '此字段仅为显示有哪些插件注册了额外路由，用于统计功能，此字段不可配置',
                 '路由注册列表': Object.keys(config.additionalRouter)
             }
         });
+    });
+
+    // 接口: 修改配置数据（本次运行中有效）
+    router.all('系统路由 - 编辑当前运行中的配置数据，修改在关闭时失效', '/system/editNowConfig', async (ctx, next) => {
+        if (!authUser(ctx).isAdmin) return next();
+        const params = config.appendObj(ctx.request.body || {}, ctx.query, true);
+        config.editObj(params);
+        ctx.body = result('已尝试修改', params);
     });
 
     // 接口: 写入配置文件数据

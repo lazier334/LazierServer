@@ -29,9 +29,10 @@ interface ButDataItem {
 }
 type ConfigUtilsType = {
     readObj: typeof readObj;
+    editObj: typeof editObj;
     appendObj: typeof appendObj;
-    selectConfig: typeof readObj;
     useConfig: typeof appendObj;
+    selectConfig: typeof readObj;
     readVersion: typeof readVersion;
     isMainModule: typeof isMainModule;
     getNowFileStorage: typeof getNowFileStorage;
@@ -46,9 +47,10 @@ if (!process.LSStorage) process.LSStorage = { getNowFileStorage };
 /** 配置工具 */
 const ConfigUtils: ConfigUtilsType = {
     readObj,
+    editObj,
     appendObj,
-    selectConfig: readObj,
     useConfig: appendObj,
+    selectConfig: readObj,
     readVersion,
     isMainModule,
     getNowFileStorage,
@@ -775,7 +777,7 @@ function showVersion(this: typeof config, ver?: { version: string; detail: strin
  */
 function readObj<T>(this: object, t: T, o?: object, result: object = {}, notAddUtilFun?: boolean): T & ConfigUtilsType {
     o = o ?? (this ?? {});
-    let re = readObjCore(o, t, result);
+    const re = readObjCore(o, t, result);
     if (!notAddUtilFun) Object.keys(ConfigUtils).forEach(k => re[k] = ConfigUtils[k as keyof typeof ConfigUtils]);
     return re;
 }
@@ -807,13 +809,12 @@ function readObjCore(org: any, def: any, re: Record<string, any> = {}): any {
  * 递归逐步读取o中t没有的属性并给t, 其中o和t都有的属性优先使用t, 类型不一样则使用o, 默认返回新对象
  * @param t 局部目标对象
  * @param o 完整原始对象
- * @param useOrg 操作于源对象
  * @param notAddUtilFun 不添加工具函数
  * @returns 从完整对象中读取到的目标对象同类型属性后的目标对象
  */
-function appendObj<T>(this: object, t: T, o?: object, result: object = {}, notAddUtilFun?: boolean): T & ConfigUtilsType {
+function appendObj<T>(this: object, t: T, o?: object, notAddUtilFun?: boolean): T & ConfigUtilsType {
     o = o ?? (this ?? {});
-    let re = appendObjCore(t, o, result);
+    const re = appendObjCore(t, o);
     if (!notAddUtilFun) Object.keys(ConfigUtils).forEach(k => re[k] = ConfigUtils[k as keyof typeof ConfigUtils]);
     return re;
 }
@@ -823,7 +824,7 @@ function appendObj<T>(this: object, t: T, o?: object, result: object = {}, notAd
  * @param def 完整原始对象
  * @param re 新对象
  */
-function appendObjCore(org: any, def: any, k?: any): any {
+function appendObjCore(org: any, def: any): any {
     if (typeof org == 'object') {
         // 如果org是null, 那么返回 def
         if (org == null) return def;
@@ -834,12 +835,50 @@ function appendObjCore(org: any, def: any, k?: any): any {
         if (typeof def != 'object' || def == null) return org;
         // 遍历普通对象属性
         Object.entries(org).forEach(([k, v]) => {
-            def[k] = appendObjCore(v, def[k], k);
+            def[k] = appendObjCore(v, def[k]);
         });
         return def;
     }
     // 如果 def 不是 undefined 而且类型不同则使用 def
     return def !== undefined && typeof def != typeof org ? def : org
+}
+
+/**
+ * 编辑对象，会用 t 里面的属性覆盖 o 对象的属性，如果是 o 没有的属性或者两种类型不同则不会覆盖，
+ * 作为对象的方法调用时可以只传递需要修改的内容
+ * @param o 原始对象
+ * @param n 修改对象
+ * @returns 
+ */
+function editObj(this: object, n: Record<string, any>, o?: Record<string, any>, notAddUtilFun?: boolean) {
+    o = o ?? (this ?? {});
+    const re = editObjCore(n, o);
+    if (!notAddUtilFun) Object.keys(ConfigUtils).forEach(k => re[k] = ConfigUtils[k as keyof typeof ConfigUtils]);
+    return re;
+}
+
+/**
+ * 编辑对象，会用 t 里面的属性覆盖 o 对象的属性，如果是 o 没有的属性或者两种类型不同则不会覆盖
+ * @param n 修改对象
+ * @param o 原始对象
+ * @returns 
+ */
+function editObjCore(n: Record<string, any>, o: Record<string, any>) {
+    if (typeof n == 'object' && n != null) {
+        for (const k in n) {
+            const v = n[k];
+            const typeV = typeof v;
+            if (typeV == typeof o[k]) {
+                // 当前配置是对象且不是 数组 或 null
+                if (typeV == 'object' && v != null && !Array.isArray(v)) {
+                    editObjCore(v, o[k]);
+                } else {
+                    o[k] = v;
+                }
+            }
+        }
+    }
+    return o;
 }
 
 /**
