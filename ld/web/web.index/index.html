@@ -80,6 +80,13 @@
                 </div>
             </el-tooltip>
 
+            <el-tooltip effect="dark" :content="`清理worker缓存`" placement="bottom">
+                <div class="but-s-item operate" @click="cleanWorkboxCache">
+                    <el-avatar class="but-s-item-avatar">clean</el-avatar>
+                    <el-text class="but-s-item-text" type="primary" size="large">清理缓存</el-text>
+                </div>
+            </el-tooltip>
+
             <!-- 动态按钮 -->
             <el-tooltip v-for="(item, index) in butsData" :key="index" :content="item.tooltip || '无描述'" effect="dark"
                 placement="bottom">
@@ -735,6 +742,30 @@
                 this.workboxStatus = !this.workboxStatus;
                 localStorage.setItem('workboxStatus', JSON.stringify(this.workboxStatus));
                 ElMessage.success('刷新后生效，全局缓存状态 ' + this.workboxStatus)
+            },
+            async cleanWorkboxCache() {
+                try {
+                    // 1. 取消注册所有 Service Worker
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                        console.log('Service Worker 已取消注册:', registration.scope);
+                    }
+                    // 2. 清理所有缓存
+                    const cacheNames = await caches.keys();
+                    for (const cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        console.log(`已删除缓存: ${cacheName}`);
+                    }
+                    console.log('SW清理成功');
+                    // @ts-ignore 这里调用的是前端ElementPlus的消息框代码
+                    ElMessage.success('SW清理成功');
+                } catch (err) {
+                    console.error('SW清理失败:', err);
+                    // @ts-ignore
+                    ElMessage.error('SW清理失败');
+                    throw err;
+                }
             },
             async getSystemId(notShowError) {
                 return await this.warpAxios(axios.get('/system/systemId').then((response) => response.data.data), '获取服务器系统id', true, notShowError);

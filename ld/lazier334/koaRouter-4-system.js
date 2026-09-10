@@ -164,8 +164,8 @@ export default createKoaRouter(function koaRouterSystem(router) {
 
     // 接口: 读取按钮数据
     router.all('系统路由 - 读取按钮数据', '/system/butsData', async (ctx) => {
-        config.butsData.forEach(e => typeof e.update == 'function' ? e.update(e, config) : '');
         let butsData = config.butsData.concat(config.appendButsData);
+        butsData.forEach(e => typeof e.update == 'function' ? e.update(e, config) : '');
         let user = {};
         try {
             user = authUser(ctx) || {};

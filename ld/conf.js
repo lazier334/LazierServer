@@ -63,7 +63,10 @@ export const userConfig = {
             fun: `this.openPage('/plugin-mgmt/index.html')`
         },
         {
-            avatarText: 'false',
+            update(self, config) {
+                self.avatarText = config.switch.simpleLog
+            },
+            // avatarText: 'false',
             text: '精简日志',
             tooltip: '精简控制台日志',
             fun: `this.warpAxios(axios.post('/system/editNowConfig',{"switch":{"simpleLog":!(arguments[0].avatarText==='false'?false:arguments[0].avatarText)}})
@@ -71,7 +74,10 @@ export const userConfig = {
             `
         },
         {
-            avatarText: 'false',
+            update(self, config) {
+                self.avatarText = config.switch.autoComplete
+            },
+            // avatarText: 'false',
             text: '自动补全',
             tooltip: '自动补全',
             fun: `this.warpAxios(axios.post('/system/editNowConfig',{"switch":{"autoComplete":!(arguments[0].avatarText==='false'?false:arguments[0].avatarText)}})

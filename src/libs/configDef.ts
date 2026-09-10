@@ -336,35 +336,6 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
      */
     butsData: [
         {
-            avatarText: 'clear',
-            text: '清理缓存',
-            tooltip: '清理worker缓存',
-            fun: `(${(async function () {
-                try {
-                    // 1. 取消注册所有 Service Worker
-                    const registrations = await navigator.serviceWorker.getRegistrations();
-                    for (const registration of registrations) {
-                        await registration.unregister();
-                        console.log('Service Worker 已取消注册:', registration.scope);
-                    }
-                    // 2. 清理所有缓存
-                    const cacheNames = await caches.keys();
-                    for (const cacheName of cacheNames) {
-                        await caches.delete(cacheName);
-                        console.log(`已删除缓存: ${cacheName}`);
-                    }
-                    console.log('SW清理成功');
-                    // @ts-ignore 这里调用的是前端ElementPlus的消息框代码
-                    ElMessage.success('SW清理成功');
-                } catch (err) {
-                    console.error('SW清理失败:', err);
-                    // @ts-ignore
-                    ElMessage.error('SW清理失败');
-                    throw err;
-                }
-            }).toString()})()`
-        },
-        {
             avatarText: 'serve',
             color: 'darkorange',
             text: '重启系统',
