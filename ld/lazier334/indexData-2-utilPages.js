@@ -24,6 +24,7 @@ export default createIndexData(async function indexDataDemo(arr) {
             const port = '8899';
             re = re.concat([
                 {
+                    auth: 'admin',
                     icon: "",
                     name: "系统代理",
                     mark: "网络 - 系统代理",
@@ -68,6 +69,7 @@ export default createIndexData(async function indexDataDemo(arr) {
                     ],
                 },
                 {
+                    auth: 'admin',
                     icon: "",
                     name: "Whistle",
                     mark: '网络 - Whistle 选项 "Rules-*" 需搭配开启 "复制链接" 功能使用',
@@ -111,6 +113,7 @@ export default createIndexData(async function indexDataDemo(arr) {
                         .map(p => path.join(targetPath, p))
                         .filter(p => fs.statSync(p).isFile())
                         .map(p => ({
+                            auth: 'user',
                             icon: "",
                             name: path.basename(p),
                             mark: "工具 - " + path.basename(p),

@@ -1,5 +1,7 @@
 import type { PluginResult } from './plugins.ts';
 
+/** 权限标识，应当和默认配置中的字段定义对齐 {@link ../../../src/libs/configDef.ts AuthTag类型} */
+type AuthTag = 'superadmin' | 'admin' | 'user' | undefined;
 /** 按钮选项 */
 type IndexDataUrlItem = {
     /** 按钮文本 */
@@ -16,6 +18,8 @@ type IndexDataItem = {
     name: string;
     /** 备注信息 */
     mark: string;
+    /** 权限 */
+    auth: AuthTag;
     /** 按钮链接数组 */
     urls: IndexDataUrlItem[];
 };

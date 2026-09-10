@@ -54,12 +54,14 @@ export const userConfig = {
             avatarText: 'stack',
             text: '接口分析',
             tooltip: '分析接口的堆栈信息',
+            auth: 'admin',
             fun: `this.openPage('/stack/index.html')`
         },
         {
             avatarText: 'plgs',
             text: '插件仓库',
             tooltip: '在线管理插件列表',
+            auth: 'admin',
             fun: `this.openPage('/plugin-mgmt/index.html')`
         },
         {
@@ -69,6 +71,7 @@ export const userConfig = {
             // avatarText: 'false',
             text: '精简日志',
             tooltip: '精简控制台日志',
+            auth: 'admin',
             fun: `this.warpAxios(axios.post('/system/editNowConfig',{"switch":{"simpleLog":!(arguments[0].avatarText==='false'?false:arguments[0].avatarText)}})
                 .then(res=>{arguments[0].avatarText = !arguments[0].avatarText;}), "更改精简日志配置失败")
             `
@@ -80,6 +83,7 @@ export const userConfig = {
             // avatarText: 'false',
             text: '自动补全',
             tooltip: '自动补全',
+            auth: 'admin',
             fun: `this.warpAxios(axios.post('/system/editNowConfig',{"switch":{"autoComplete":!(arguments[0].avatarText==='false'?false:arguments[0].avatarText)}})
                 .then(res=>{arguments[0].avatarText = !arguments[0].avatarText;}), "更改自动补全配置失败")
             `

@@ -43,6 +43,7 @@ export default createSystemStart(async function systemStartDemo({ fs, path, conf
             avatarText: 'tus',
             text: '文件上传',
             tooltip: '上传文件到服务器',
+            auth: 'user',
             fun: `this.openPage('/uploads/index.html')`
         });
     }

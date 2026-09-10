@@ -8,6 +8,7 @@ export default createIndexData(async function indexDataDemo(arr) {
     arr.push(...[
         {
             icon: "",
+            auth: 'user',
             name: "模版列表",
             mark: "用于查看模版",
             urls: [

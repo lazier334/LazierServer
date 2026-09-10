@@ -547,7 +547,7 @@
         mounted() {
             this.resetPage();
             window.addEventListener('scroll', this.handleScroll);
-            ElMessage.info({ message: 'Tip: 使用系统打开的url可以通过uri参数 openApi访问接口, openInIframe页内打开, openInNowWindow当前页打开', duration: 2000 });
+            ElMessage.info({ message: 'Tip: 使用系统打开的url可以通过uri参数 openApi访问接口, openInIframe页内打开, openInNowWindow当前页打开', duration: 1000 });
         },
         beforeUnmount() {
             window.removeEventListener('scroll', this.handleScroll);
@@ -901,6 +901,7 @@
                 let newVer = this.versions.latest;
                 if (latest != 'latest') {
                     latest = 'next';
+                    newVer = this.versions.next;
                 }
 
                 ElMessageBox.close();

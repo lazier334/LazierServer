@@ -16,15 +16,24 @@ declare global {
         }
     }
 }
-
+type AuthTag = 'superadmin' | 'admin' | 'user' | undefined;
 // 按钮数据的基础类型（最小化定义, 兼容原有结构）
 interface ButDataItem {
+    /** 头像内部的文字 */
     avatarText: string;
+    /** 头像的背景颜色, 默认是绿色 */
     color?: string;
+    /** 按钮文字 */
     text: string;
+    /** 鼠标悬停提示文字 */
     tooltip: string;
+    /** 是否在调试模式下才显示的按钮 */
     debugMode?: boolean;
+    /** 权限，superadmin需要超级管理员，admin需要管理员，user需要登录才能查看 */
+    auth?: AuthTag;
+    /** 按钮点击后执行的代码 */
     fun: string;
+    /** 如果需要动态数据, 则添加这个函数, 在接口处实现内容 */
     update?: (self: ButDataItem, config: NullConfig) => void;
 }
 type ConfigUtilsType = {
@@ -300,40 +309,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
 -----END CERTIFICATE-----
 `,
     },
-    /**
-     * 追加按钮, 该项配置用于方便在外部配置中追加按钮
-     * @type {[{
-     *      avatarText: 'word',         // 头像内部的文字
-     *      color: '',                  // 头像的背景颜色, 默认是绿色
-     *      text: '编辑快捷词',           // 按钮文字 
-     *      tooltip: '编辑快捷词数据文件', // 鼠标悬停提示文字
-     *      debugMode: true,            // 是否在调试模式下才显示的按钮
-     *      fun: `this.openPage()`      // 按钮点击后执行的代码
-     *      update(self, config) {      // 如果需要动态数据, 则添加这个函数, 在接口处实现内容
-     *          self.fun = `this.openPage('/edit/index.html?filepath=${config.ldConfigPath}')`
-     *      },
-     *  }]} 
-     */
+    /** 追加按钮, 该项配置用于方便在外部配置中追加按钮 */
     appendButsData: [] as ButDataItem[],
-    /** 需要超级管理员权限才可以查看的按钮, 里面存放按钮的 text 属性 */
-    superAdminButsData: ['重启系统', '关闭系统', '编辑配置'],
-    /** 需要管理员权限才可以查看的按钮, 里面存放按钮的 text 属性 */
-    adminButsData: ['自动补全', '补齐文件', '编辑快捷词', '接口分析', '插件仓库', '编辑项目列表'],
-    /** 需要一登录用户权限才可以查看的按钮, 里面存放按钮的 text 属性 */
-    loginButsData: ['文件上传'],
-    /**
-     * @type {[{
-     *      avatarText: 'word',         // 头像内部的文字
-     *      color: '',                  // 头像的背景颜色, 默认是绿色
-     *      text: '编辑快捷词',           // 按钮文字 
-     *      tooltip: '编辑快捷词数据文件', // 鼠标悬停提示文字
-     *      debugMode: true,            // 是否在调试模式下才显示的按钮
-     *      fun: `this.openPage()`      // 按钮点击后执行的代码
-     *      update(self, config) {      // 如果需要动态数据, 则添加这个函数, 在接口处实现内容
-     *          self.fun = `this.openPage('/edit/index.html?filepath=${config.ldConfigPath}')`
-     *      },
-     *  }]}
-     */
     butsData: [
         {
             avatarText: 'serve',
@@ -341,6 +318,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             text: '重启系统',
             tooltip: '重新启动服务器',
             debugMode: true,
+            auth: 'superadmin',
             fun: `this.systemRestart()`
         },
         {
@@ -349,6 +327,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             text: '关闭系统',
             tooltip: '关闭服务器',
             debugMode: true,
+            auth: 'superadmin',
             fun: `this.systemShutdown()`
         },
         {
@@ -359,6 +338,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             text: '编辑配置',
             tooltip: '编辑配置文件',
             debugMode: true,
+            auth: 'superadmin',
             fun: `this.openPage('/edit/index.html?filepath=conf.js')`
         },
         {
@@ -369,6 +349,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             text: '编辑快捷词',
             tooltip: '编辑快捷词数据文件',
             debugMode: true,
+            auth: 'admin',
             fun: `this.openPage('/edit/index.html?filepath=searchButsData.json')`
         },
         {
@@ -379,6 +360,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
             text: '编辑项目列表',
             tooltip: '编辑项目列表数据文件',
             debugMode: true,
+            auth: 'admin',
             fun: `this.openPage('/edit/index.html?filepath=indexData-list.json')`
         },
     ] as ButDataItem[],

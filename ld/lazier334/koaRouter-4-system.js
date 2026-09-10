@@ -98,8 +98,10 @@ export default createKoaRouter(function koaRouterSystem(router) {
 
     // 接口: 首页按钮数据
     router.all('系统路由 - 首页按钮数据', '/system/indexData', async ctx => {
-        const data = [];
+        let data = [];
         await (await plugins('indexData')).use(data);
+        // 排除权限限制数据
+        data = excludesAuth(data, ctx);
         return ctx.body = result(data);
     });
 
@@ -166,31 +168,14 @@ export default createKoaRouter(function koaRouterSystem(router) {
     router.all('系统路由 - 读取按钮数据', '/system/butsData', async (ctx) => {
         let butsData = config.butsData.concat(config.appendButsData);
         butsData.forEach(e => typeof e.update == 'function' ? e.update(e, config) : '');
-        let user = {};
-        try {
-            user = authUser(ctx) || {};
-        } catch (err) {
-            // 权限校验失败
-        }
 
         // 关闭 debug 模式时过滤部分功能
         if (!config.switch.debugMode) {
             butsData = butsData.filter(but => !but.debugMode);
         }
 
-        if (!user.superAdmin) {
-            // 超级管理员
-            butsData = butsData.filter(but => !config.superAdminButsData.includes(but.text));
-            if (!user.isAdmin) {
-                // 管理员
-                butsData = butsData.filter(but => !config.adminButsData.includes(but.text));
-
-                if (!user.status) {
-                    // 已登录用户
-                    butsData = butsData.filter(but => !config.loginButsData.includes(but.text));
-                }
-            }
-        }
+        // 排除权限限制数据
+        butsData = excludesAuth(butsData, ctx);
 
         ctx.body = result(butsData);
     });
@@ -400,4 +385,36 @@ function readRouterLayers(layers, remark) {
         methods: layer.methods,
         remark: remark
     }))
+}
+
+/**
+ * 基于权限排除被限制的数据项
+ * @param {[{auth:string|undefined}]} data 
+ * @param {object} data, ctx 
+ * @returns 
+ */
+function excludesAuth(data, ctx) {
+    let user = {};
+    try {
+        user = authUser(ctx) || {};
+    } catch (err) {
+        // 权限校验失败
+    }
+    // 如果是超级管理员，那么直接全部留存
+    if (!user.superAdmin) {
+        // 根据用户身份收集禁止访问的权限级别
+        const forbiddenAuths = ['superadmin'];
+        if (!user.isAdmin) forbiddenAuths.push('admin');
+        if (!user.status) forbiddenAuths.push('user');
+        // 过滤掉所有包含禁止权限的按钮
+        data = data.filter(e => !forbiddenAuths.includes(e.auth));
+    }
+
+    // 隐藏权限信息
+    data = JSON.parse(JSON.stringify(data)).map(e => {
+        // 删除auth字段
+        delete e.auth;
+        return e
+    })
+    return data;
 }
