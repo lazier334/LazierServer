@@ -3,14 +3,15 @@ FROM node:24-alpine
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
-
+RUN npm ci
 COPY . .
+RUN npm install -g .
+
+WORKDIR /ls
+
 ENV NODE_ENV=production
 ENV TZ=Asia/Shanghai
 
-EXPOSE 3000
-EXPOSE 3001
-EXPOSE 3010
-EXPOSE 3011
-CMD ["npm", "run", "start"]
+EXPOSE 3344
+EXPOSE 3345
+ENTRYPOINT ["ls334"]

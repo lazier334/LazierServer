@@ -1,5 +1,5 @@
 # LazierServer
-一个可以快速搭建的服务器
+一个可以快速搭建服务器的项目，适用于调试环境
 
 ## 核心技术栈
 **`JS/TS` + `Koa`**
@@ -32,7 +32,15 @@ LazierServer文档: https://lazier334.github.io/res/lazierserver/
 7. 创建一个静态资源文件夹 `a.b` 并把静态资源放进文件夹内，例如: `a.b/index.html` ，可通过 `switch.scanWebOnlyDoamin` 进行配置是否使用`.`作为筛选，**默认情况下文件夹必须至少含有一个 `.` 才能被识别为web资源**
 
 ## docker
-* 可以直接[前往docker镜像页](https://github.com/lazier334/LazierServer/pkgs/container/lazierserver)复制对应镜像的命令进行下载使用
+
+**方式一: 已编译版本**
+* 可以[前往docker镜像页](https://github.com/lazier334/LazierServer/pkgs/container/lazierserver)复制指定镜像版本的命令进行下载使用，也可以使用 `docker pull ghcr.io/lazier334/lazierserver:latest` 命令拉取最新版本
+
+**方式二: 自行编译**
+1. 拉取仓库 `git clone https://github.com/lazier334/LazierServer.git` 
+2. 安装模块 `npm i`
+3. 构建项目 `npm run build`
+4. 编译镜像 `docker-compose up -d`
 
 ## 文件夹说明
 ```c
@@ -68,9 +76,3 @@ LazierServer/
 ├─ tests/                   // 测试项
 └─ *.*                      // 其他文件用于其他辅助功能，比如docker
 ```
-
-## 其他
-
-### 忽略跟踪测试脚本
-* git 忽略跟踪指定文件 `git update-index --assume-unchanged tests/testApi.js`
-* git 恢复跟踪指定文件 `git update-index --no-assume-unchanged tests/testApi.js`

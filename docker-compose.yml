@@ -4,16 +4,11 @@ services:
     container_name: LazierServer
     restart: unless-stopped
     ports:
-      - "3000:3000"
-      - "3001:3001"
-      - "3010:3010"
-      - "3011:3011"
+      - "3344:3344"
+      - "3345:3345"
     environment:
       - NODE_ENV=production
       - TZ=Asia/Shanghai
     volumes:
       - ./ld/logs:/app/ld/logs
-      - ./ld/plugins:/app/ld/plugins
-      - ./ld/uploads:/app/ld/uploads
-      - ./ld/web:/app/ld/web
-      - ./ld/dist:/app/ld/dist
+      - .:/ls
