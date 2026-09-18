@@ -33,10 +33,13 @@ export default types.createKoaRouter(function koaRouterUtils(router) {
     }));
 
     router.all('工具接口 - 将 dirpath 文件夹中的文件生成har', '/utils/createHar', utils.routerUtil.warpApi((ctx, next, params) => {
+        // 格式化文件夹路径
+        let dir = params.dirpath;
+        if (fs.existsSync(dir) && fs.statSync(dir).isFile()) dir = path.dirname(dir);
+        dir = path.resolve(dir);
         // 先生成名单
-        if (fs.existsSync(params.dirpath) && fs.statSync(params.dirpath).isFile()) params.dirpath = path.dirname(params.dirpath);
-        const files = readFiles(params.dirpath);
-        const outHarPath = params.dirpath + '.har';
+        const files = readFiles(dir);
+        const outHarPath = dir + '.har';
         const entries = [];
         // 再生成文件
         files.forEach(file => {
@@ -48,7 +51,14 @@ export default types.createKoaRouter(function koaRouterUtils(router) {
                 content.encoding = "base64";
                 content.text = buff.toString('base64');
             }
-            entries.push(createEntry("https://lazier334.com/" + file, content));
+            let api = file.replace(dir, '').replaceAll('\\', '/');
+            // 去掉第一层文件夹
+            if (params.web) {
+                api = api.split('/');
+                api.splice(1, 1);
+                api = api.join('/');
+            }
+            entries.push(createEntry("https://lazier334.com" + api, content));
         });
         let har = createHar(entries);
         fs.writeFileSync(outHarPath, JSON.stringify(har, null, 2));

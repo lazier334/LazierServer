@@ -5,8 +5,19 @@
 <title>HAR简化工具</title>
 <link rel="stylesheet" href="./res/lazierserver-default.css">
 <style>
+    .control {
+        border: 1px solid #d9d9d9;
+        border-radius: 3px;
+        margin: 1rem 0;
+    }
+
     .control>* {
         margin: 1rem;
+    }
+
+    .control>.name {
+        font-style: italic;
+        color: #888;
     }
 
     .drop-hover {
@@ -19,23 +30,30 @@
         <div style="text-align: center;">
             <h1>HAR简化工具</h1>
         </div>
-        <div class="control">
-            <n-button type="primary" @click="simplify">
-                简化
-            </n-button>
-            <n-button :disabled="!result" @click="download">
-                下载
-            </n-button>
-            <n-checkbox v-model:checked="saveHeaders">保留 headers</n-checkbox>
-
-            <n-button @click="serverSimplify" :loading="simplifyLoading">
-                在服务器上简化
-            </n-button>
-            <n-button @click="serverCreateHar" :loading="createLoading">
-                在服务器上构建har
-            </n-button>
-            <n-checkbox v-model:checked="autoSimplify">简化</n-checkbox>
-            <n-input v-model:value="value" type="text" style="min-width: 20%" autosize placeholder="服务器操作路径"></n-input>
+        <div>
+            <div class="control">
+                <span class="name">本地计算</span>
+                <n-button type="primary" @click="simplify">
+                    简化
+                </n-button>
+                <n-button :disabled="!result" @click="download">
+                    下载
+                </n-button>
+                <n-checkbox v-model:checked="saveHeaders">保留 headers</n-checkbox>
+            </div>
+            <div class="control">
+                <span class="name">远程控制</span>
+                <n-button @click="serverSimplify" :loading="simplifyLoading">
+                    在服务器上简化
+                </n-button>
+                <n-button @click="serverCreateHar" :loading="createLoading">
+                    在服务器上构建har
+                </n-button>
+                <n-checkbox v-model:checked="autoSimplify">简化</n-checkbox>
+                <n-checkbox v-model:checked="webMode" title="生成的api会清理第一个文件夹">web</n-checkbox>
+                <n-input v-model:value="value" type="text" style="min-width: 20%" autosize
+                    placeholder="服务器操作路径"></n-input>
+            </div>
         </div>
         <n-input v-model:value="harInput" type="textarea" placeholder="粘贴 HAR JSON，或拖拽文件到此处" :rows="20"
             @drop.prevent="handleDrop" @dragover.prevent="dragover = true" @dragleave="dragover = false"
@@ -63,6 +81,7 @@
             const simplifyLoading = ref(false);
             const createLoading = ref(false);
             const autoSimplify = ref(false);
+            const webMode = ref(true);
 
             function handleDrop(e) {
                 dragover.value = false;
@@ -161,6 +180,7 @@
                 try {
                     const params = { dirpath };
                     if (autoSimplify.value) params.simplify = 'true';
+                    if (webMode.value) params.web = 'true';
                     const resp = await fetch('/utils/createHar?' + new URLSearchParams(params));
                     const data = await resp.json();
                     result.value = JSON.stringify(data, null, 2);
@@ -174,7 +194,7 @@
                 }
             }
 
-            return { harInput, saveHeaders, result, dragover, value, simplifyLoading, createLoading, autoSimplify, handleDrop, simplify, download, serverSimplify, serverCreateHar };
+            return { harInput, saveHeaders, result, dragover, value, simplifyLoading, createLoading, autoSimplify, webMode, handleDrop, simplify, download, serverSimplify, serverCreateHar };
         },
     }).use(naive).mount('#app');
 </script>
