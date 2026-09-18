@@ -2,7 +2,7 @@ import chokidar from 'chokidar';
 import { pathToFileURL } from 'url';
 import { createSystemStart } from './types/index.js';
 import { restartSystem } from './libs/sys-restart.js';
-import { getUtilsModule } from './libs/baseImport.js';
+import { serverInstances } from './koaRouter-4-system.js';
 
 /**
  * @param {import('./libs/baseImport.js')}}
@@ -23,8 +23,33 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
         console.warn('该请求发生LS之外的错误', ctx.path, '\n', err)
     });
 
-    // 检测版本更新
-    checkVersionUpdate();
+    // 将自身添加到实例信息里
+    {
+        const info = serverInstances();
+        const url = `https://localhost:${config.portHttps}`;
+        // 初始化实例
+        if (typeof info[url] != 'object' || info[url] == null) {
+            info[url] = {
+                url,
+                statusCode: null,
+                responseBody: '',
+                responseTime: null,
+                lastCheckTime: 0,
+                lastOnlineTime: 0,
+                success: null,
+                remark: ''
+            };
+        }
+        const instance = info[url];
+        instance.statusCode = 200;
+        instance.responseTime = 0;
+        instance.lastOnlineTime = Date.now();
+        instance.success = true;
+        // 添加实例
+        serverInstances(info);
+    }
+
+    // ----- 函数 ----- 
 
     /**
      * 监控配置，当配置发生变更的时候进行重启
@@ -125,19 +150,5 @@ export default createSystemStart(async function systemStartCommon({ fs, path, co
                 keyStr: flatKeys.join('')
             }
         };
-    }
-
-    async function checkVersionUpdate() {
-        const { checkVersion } = await getUtilsModule();
-        const ver = await checkVersion();
-        ver.update;
-        console.log('ver:', ver)
-        // TODO 更改配置中版本的标记
-        config.butsData.find(but => {
-            if (but.avatarText == 'ver') {
-                but.dot = ver.update;
-                return true;
-            }
-        })
     }
 })

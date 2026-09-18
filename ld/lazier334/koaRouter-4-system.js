@@ -14,7 +14,8 @@ const lc = {
         updateFiles: {},
         /** 运行cmd命令的内容 */
         runCmds: {},
-    }
+    },
+    serverInstancesPath: path.join(import.meta.dirname, 'web.index/serverInstances.json')
 }
 
 /**
@@ -333,6 +334,11 @@ export default createKoaRouter(function koaRouterSystem(router) {
 
     // #endregion 
 
+    router.all('系统路由 - 更新系统实例数据', '/serverInstances', async (ctx, next) => {
+        const info = ctx.request.body.serverInstances;
+        ctx.body = result(serverInstances(info));
+    });
+
     return router
 })
 
@@ -417,4 +423,24 @@ function excludesAuth(data, ctx) {
         return e
     })
     return data;
+}
+
+
+/**
+ * 保存与读取服务器实例信息
+ * @typedef {{[url: string]: number}} ServerInstanceInfo 键是url，值是最后更新时间
+ * @param {ServerInstanceInfo} newInfo 
+ * @return {ServerInstanceInfo} 键是url，值是最后更新时间
+ */
+export function serverInstances(newInfo) {
+    try {
+        if (newInfo) {
+            // 保存对象
+            fs.writeFileSync(lc.serverInstancesPath, JSON.stringify(newInfo));
+        }
+        return JSON.parse(fs.readFileSync(lc.serverInstancesPath, 'utf8'));
+    } catch (err) {
+        console.log('操作服务器实例信息文件时发生异常!', err);
+    }
+    return {};
 }

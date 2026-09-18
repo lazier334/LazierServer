@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务器实例管理</title>
+    <link rel="stylesheet" href="./res/lazierserver-default.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .status-card {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .status-card .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 14px 20px;
+            flex: 1;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .status-card .card .num {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .status-card .card .label {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .remark-text {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .url-text {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #18a058;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .url-text:hover {
+            text-decoration: underline;
+        }
+
+        .response-preview {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #888;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="header">
+            <h1>🖥 服务器实例管理</h1>
+            <n-space>
+                <n-button type="primary" @click="showAddUrl">添加实例</n-button>
+                <n-button type="info" @click="scanAll" :loading="scanning">
+                    {{ scanning ? `扫描中 (${scanProgress}/${scanTotal})` : '全部扫描' }}
+                </n-button>
+            </n-space>
+        </div>
+
+        <div class="status-card">
+            <div class="card">
+                <div class="num" style="color:#18a058">{{ onlineCount }}</div>
+                <div class="label">在线</div>
+            </div>
+            <div class="card">
+                <div class="num" style="color:#d03050">{{ offlineCount }}</div>
+                <div class="label">离线</div>
+            </div>
+            <div class="card">
+                <div class="num" style="color:#888">{{ unknownCount }}</div>
+                <div class="label">未知</div>
+            </div>
+            <div class="card">
+                <div class="num" style="color:#2080f0">{{ totalCount }}</div>
+                <div class="label">总计</div>
+            </div>
+        </div>
+
+        <n-data-table :columns="columns" :data="tableData" :bordered="false" :row-key="row => row.url"
+            size="small"></n-data-table>
+
+        <!-- 添加实例弹窗 -->
+        <n-modal v-model:show="addUrlVisible" preset="dialog" title="添加实例" positive-text="添加" negative-text="取消"
+            style="width: 500px;" @positive-click="confirmAddUrl">
+            <n-input v-model:value="addUrlText" type="textarea"
+                placeholder="每行一个URL&#10;例如:&#10;http://example.com&#10;example.org:8080" :rows="6"
+                style="margin-top: 12px;"></n-input>
+        </n-modal>
+
+        <!-- 备注弹窗 -->
+        <n-modal v-model:show="remarkVisible" preset="dialog" title="编辑备注" positive-text="保存" negative-text="取消"
+            style="width: 460px;" @positive-click="saveRemark">
+            <n-input v-model:value="remarkText" type="textarea" placeholder="输入备注信息..." :rows="4"
+                style="margin-top: 12px;"></n-input>
+        </n-modal>
+
+        <!-- 响应内容弹窗 -->
+        <n-modal v-model:show="responseBodyVisible" preset="dialog" title="响应内容" negative-text="关闭"
+            style="width: 600px;">
+            <pre
+                style="white-space:pre-wrap;word-break:break-all;margin:0;font-size:13px;line-height:1.6;max-height:400px;overflow-y:auto;background:#f5f5f5;padding:12px;border-radius:4px;margin-top:12px;">{{ responseBodyContent }}</pre>
+        </n-modal>
+    </div>
+</body>
+
+</html>
+<script type="importmap">
+{"imports":{"vue":"./res/vue.prod@3.5.32.mjs","naive":"./res/naiveui.prod@2.44.1.mjs"}}
+</script>
+<script type="module">
+    import * as vue from 'vue';
+    import * as naive from 'naive';
+    const { createApp, ref, reactive, computed, h, onMounted } = vue;
+    const { NButton, NTag, NSpace, NInput, NModal, NInputGroup, createDiscreteApi } = naive;
+    const { dialog: nvDialog, message: nvMessage } = createDiscreteApi(['dialog', 'message']);
+
+    createApp({
+        components: { NButton, NTag, NSpace, NInput, NModal, NInputGroup },
+        setup() {
+            // ========== 数据 ==========
+            const instances = reactive({});
+            const scanning = ref(false);
+            const scanProgress = ref(0);
+            const scanTotal = ref(0);
+
+            // ========== 弹窗状态 ==========
+            const addUrlVisible = ref(false);
+            const addUrlText = ref('');
+            const remarkVisible = ref(false);
+            const remarkTarget = ref('');
+            const remarkText = ref('');
+            const responseBodyVisible = ref(false);
+            const responseBodyContent = ref('');
+
+            // ========== 计算属性 ==========
+            const totalCount = computed(() => Object.keys(instances).length);
+            const onlineCount = computed(() => Object.values(instances).filter(i => getStatus(i) === 'online').length);
+            const offlineCount = computed(() => Object.values(instances).filter(i => getStatus(i) === 'offline').length);
+            const unknownCount = computed(() => Object.values(instances).filter(i => getStatus(i) === 'unknown').length);
+
+            const tableData = computed(() => {
+                return Object.values(instances).sort((a, b) => {
+                    const order = { online: 0, offline: 1, unknown: 2 };
+                    return (order[getStatus(a)] ?? 2) - (order[getStatus(b)] ?? 2);
+                });
+            });
+
+            // ========== 状态逻辑 ==========
+            function getStatus(instance) {
+                if (!instance.lastCheckTime) return 'unknown';
+                const elapsed = Date.now() - instance.lastCheckTime;
+                if (elapsed > 60 * 1000) return 'unknown';
+                return instance.success ? 'online' : 'offline';
+            }
+
+            function getStatusLabel(status) {
+                return { online: '在线', offline: '离线', unknown: '未知' }[status] || '未知';
+            }
+
+            function getStatusType(status) {
+                return { online: 'success', offline: 'error', unknown: 'default' }[status] || 'default';
+            }
+
+            function formatTime(ts) {
+                if (!ts) return '-';
+                const d = new Date(ts);
+                const pad = n => String(n).padStart(2, '0');
+                return `${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            }
+
+            function formatMs(ms) {
+                if (ms == null) return '-';
+                if (ms < 1000) return ms + 'ms';
+                return (ms / 1000).toFixed(1) + 's';
+            }
+
+            function formatBody(body) {
+                if (!body) return '-';
+                if (body.length <= 20) return body;
+                return body.substring(0, 20) + '...(' + body.length + ')';
+            }
+
+            function createInstance(url) {
+                return {
+                    url,
+                    statusCode: null,
+                    responseBody: '',
+                    responseTime: null,
+                    lastCheckTime: 0,
+                    lastOnlineTime: 0,
+                    success: null,
+                    remark: ''
+                };
+            }
+
+            // ========== 核心功能 ==========
+            async function saveToServer() {
+                try {
+                    const payload = {};
+                    Object.keys(instances).forEach(url => {
+                        payload[url] = { ...instances[url] };
+                    });
+                    await fetch('/serverInstances', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ serverInstances: payload })
+                    });
+                } catch (err) { /* 静默 */ }
+            }
+
+            async function loadFromServer() {
+                try {
+                    const res = await fetch('/serverInstances');
+                    const json = await res.json();
+                    const data = json.data || {};
+                    Object.keys(data).forEach(url => {
+                        const val = data[url];
+                        if (typeof val === 'number') {
+                            instances[url] = createInstance(url);
+                            instances[url].lastCheckTime = val;
+                        } else if (val && typeof val === 'object') {
+                            instances[url] = { ...createInstance(url), ...val };
+                        }
+                    });
+                    Object.keys(instances).forEach(url => {
+                        if (!data[url]) delete instances[url];
+                    });
+                } catch (err) {
+                    nvMessage.error('从服务器加载失败: ' + err.message);
+                }
+            }
+
+            async function checkUrl(url) {
+                const startTime = Date.now();
+                try {
+                    const controller = new AbortController();
+                    const timer = setTimeout(() => controller.abort(), 15000);
+                    const res = await fetch(url, {
+                        signal: controller.signal,
+                        cache: 'no-store'
+                    });
+                    clearTimeout(timer);
+                    const elapsed = Date.now() - startTime;
+                    let body = '';
+                    try {
+                        body = await res.text();
+                        if (body.length > 500) body = body.substring(0, 500) + '...';
+                    } catch (e) { /* ignore */ }
+                    const now = Date.now();
+                    return {
+                        statusCode: res.status,
+                        responseBody: body,
+                        responseTime: elapsed,
+                        success: res.ok,
+                        lastCheckTime: now,
+                        lastOnlineTime: res.ok ? now : undefined
+                    };
+                } catch (err) {
+                    // CORS或其他网络错误，尝试 no-cors 降级探测
+                    if (err.name !== 'AbortError') {
+                        try {
+                            const controller2 = new AbortController();
+                            const timer2 = setTimeout(() => controller2.abort(), 10000);
+                            await fetch(url, {
+                                mode: 'no-cors',
+                                signal: controller2.signal,
+                                cache: 'no-store'
+                            });
+                            clearTimeout(timer2);
+                            const now = Date.now();
+                            return {
+                                statusCode: 0,
+                                responseBody: '跨域(服务存活)',
+                                responseTime: Date.now() - startTime,
+                                success: true,
+                                lastCheckTime: now,
+                                lastOnlineTime: now
+                            };
+                        } catch (e2) { /* no-cors也失败，走下面 */ }
+                    }
+                    const elapsed = Date.now() - startTime;
+                    return {
+                        statusCode: null,
+                        responseBody: err.name === 'AbortError' ? '请求超时(15s)' : (err.message || '网络错误'),
+                        responseTime: elapsed,
+                        success: false,
+                        lastCheckTime: Date.now()
+                    };
+                }
+            }
+
+            async function checkSingle(url) {
+                if (!instances[url]) return;
+                nvMessage.info('正在检测: ' + url);
+                const result = await checkUrl(url);
+                Object.assign(instances[url], result);
+                const status = getStatus(instances[url]);
+                nvMessage[status === 'online' ? 'success' : 'warning'](`${url} → ${getStatusLabel(status)}`);
+            }
+
+            async function scanAll() {
+                const urls = Object.keys(instances);
+                if (urls.length === 0) {
+                    nvMessage.warning('没有可扫描的实例');
+                    return;
+                }
+                scanning.value = true;
+                scanProgress.value = 0;
+                scanTotal.value = urls.length;
+                for (const url of urls) {
+                    const result = await checkUrl(url);
+                    Object.assign(instances[url], result);
+                    scanProgress.value++;
+                }
+                scanning.value = false;
+                // 清理超过12小时未在线的实例
+                const now = Date.now();
+                const expired = Object.keys(instances).filter(url => {
+                    return !instances[url].lastOnlineTime || (now - instances[url].lastOnlineTime > 12 * 60 * 60 * 1000);
+                });
+                expired.forEach(url => delete instances[url]);
+                await saveToServer();
+                const online = Object.values(instances).filter(i => getStatus(i) === 'online').length;
+                const offline = Object.values(instances).filter(i => getStatus(i) === 'offline').length;
+                const msg = `扫描完成: ${online} 在线, ${offline} 离线` + (expired.length ? `，已清理 ${expired.length} 个过期实例` : '');
+                nvMessage.success(msg);
+            }
+
+            // ========== 弹窗 ==========
+            function showAddUrl() {
+                addUrlText.value = '';
+                addUrlVisible.value = true;
+            }
+
+            async function confirmAddUrl() {
+                const lines = addUrlText.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+                let added = [];
+                lines.forEach(url => {
+                    if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
+                    if (!instances[url]) {
+                        instances[url] = createInstance(url);
+                        added.push(url);
+                    }
+                });
+                addUrlVisible.value = false;
+                if (added.length > 0) {
+                    await saveToServer();
+                    nvMessage.success(`添加了 ${added.length} 个实例，正在探测...`);
+                    for (const url of added) {
+                        const result = await checkUrl(url);
+                        Object.assign(instances[url], result);
+                    }
+                    await saveToServer();
+                } else {
+                    nvMessage.info('没有新的实例被添加');
+                }
+            }
+
+            function confirmDelete(url) {
+                nvDialog.warning({
+                    title: '确认删除',
+                    content: '确定要删除实例 ' + url + ' 吗？',
+                    positiveText: '删除',
+                    negativeText: '取消',
+                    async onPositiveClick() {
+                        delete instances[url];
+                        await saveToServer();
+                        nvMessage.success('已删除');
+                    }
+                });
+            }
+
+            function showRemark(url) {
+                remarkTarget.value = url;
+                remarkText.value = instances[url]?.remark || '';
+                remarkVisible.value = true;
+            }
+
+            async function saveRemark() {
+                if (instances[remarkTarget.value]) {
+                    instances[remarkTarget.value].remark = remarkText.value;
+                    await saveToServer();
+                    nvMessage.success('备注已保存');
+                }
+                remarkVisible.value = false;
+            }
+
+            function showResponseBody(content) {
+                responseBodyContent.value = content;
+                responseBodyVisible.value = true;
+            }
+
+            // ========== 表格列 ==========
+            function createColumns() {
+                return [
+                    {
+                        title: '状态',
+                        key: 'status',
+                        width: 80,
+                        align: 'center',
+                        render(row) {
+                            const s = getStatus(row);
+                            return h(NTag, { type: getStatusType(s), size: 'small', bordered: false }, () => getStatusLabel(s));
+                        }
+                    },
+                    {
+                        title: 'URL',
+                        key: 'url',
+                        minWidth: 200,
+                        ellipsis: { tooltip: true },
+                        render(row) {
+                            return h('a', {
+                                class: 'url-text',
+                                href: row.url,
+                                target: '_blank',
+                                title: row.url
+                            }, row.url);
+                        }
+                    },
+                    {
+                        title: '状态码',
+                        key: 'statusCode',
+                        width: 80,
+                        align: 'center',
+                        render(row) {
+                            if (row.statusCode == null) return h('span', { style: 'color:#ccc' }, '-');
+                            const type = row.statusCode < 300 ? 'success' : row.statusCode < 400 ? 'info' : 'error';
+                            return h(NTag, { type, size: 'small', bordered: false }, () => String(row.statusCode));
+                        }
+                    },
+                    {
+                        title: '响应时间',
+                        key: 'responseTime',
+                        width: 90,
+                        align: 'center',
+                        render(row) {
+                            return formatMs(row.responseTime);
+                        }
+                    },
+                    {
+                        title: '响应内容',
+                        key: 'responseBody',
+                        width: 200,
+                        render(row) {
+                            if (!row.responseBody) return h('span', { style: 'color:#ccc' }, '-');
+                            return h('span', {
+                                class: 'response-preview',
+                                title: '点击查看详情',
+                                onClick: () => showResponseBody(row.responseBody)
+                            }, formatBody(row.responseBody));
+                        }
+                    },
+                    {
+                        title: '最后检测',
+                        key: 'lastCheckTime',
+                        width: 140,
+                        render(row) {
+                            if (!row.lastCheckTime) return h('span', { style: 'color:#ccc' }, '未检测');
+                            return h('span', { style: 'font-size:13px;color:#666' }, formatTime(row.lastCheckTime));
+                        }
+                    },
+                    {
+                        title: '备注',
+                        key: 'remark',
+                        width: 180,
+                        render(row) {
+                            return h('div', { class: 'remark-text', title: row.remark || '点击编辑' }, [
+                                h('span', { onClick: () => showRemark(row.url), style: 'cursor:pointer' },
+                                    row.remark || h('span', { style: 'color:#ccc;font-style:italic' }, '添加备注'))
+                            ]);
+                        }
+                    },
+                    {
+                        title: '操作',
+                        key: 'actions',
+                        width: 100,
+                        align: 'center',
+                        render(row) {
+                            return h('div', { class: 'action-btns' }, [
+                                h(NButton, {
+                                    size: 'tiny',
+                                    tertiary: true,
+                                    type: 'info',
+                                    disabled: scanning.value,
+                                    onClick: () => checkSingle(row.url)
+                                }, () => '测试'),
+                                h(NButton, {
+                                    size: 'tiny',
+                                    tertiary: true,
+                                    type: 'error',
+                                    onClick: () => confirmDelete(row.url)
+                                }, () => '删除')
+                            ]);
+                        }
+                    }
+                ];
+            }
+
+            // ========== 初始化：加载数据 → 自动扫描 ==========
+            onMounted(async () => {
+                await loadFromServer();
+                scanAll();
+            });
+
+            return {
+                scanning, scanProgress, scanTotal,
+                totalCount, onlineCount, offlineCount, unknownCount,
+                tableData, columns: createColumns(),
+                addUrlVisible, addUrlText,
+                remarkVisible, remarkText,
+                responseBodyVisible, responseBodyContent,
+                showAddUrl, confirmAddUrl, saveToServer,
+                scanAll, checkSingle,
+                showRemark, saveRemark,
+                showResponseBody, confirmDelete, formatBody
+            };
+        }
+    }).use(naive).mount('#app');
+</script>
