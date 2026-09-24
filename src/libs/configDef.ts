@@ -542,7 +542,7 @@ export default createKoaPlugin(async function koaPluginDemo(ctx, next) {
     ctx.body = 'hello world! -- by demo';
     return await next();
 })
-`, 'koaRouter-1-demo.js': `
+`, 'koaRouter-2-demo.js': `
 import { createKoaRouter } from 'lazierserver/types';
 // 可以自己选择提示类型，或者直接使用 all
 import { warpKoaCtxAll, warpKoaCtxByWeb, warpKoaCtxByHar } from 'lazierserver';
@@ -553,7 +553,9 @@ import { warpKoaCtxAll, warpKoaCtxByWeb, warpKoaCtxByHar } from 'lazierserver';
 export default createKoaRouter(function koaRouterDemo(router) {
     // 测试接口
     router.all('/demo', async (ctx, next) => {
-        // 可以用于读取流转 har 与 web 后的提示信息
+        // 可以用于读取流转 har 与 web 后的提示信息，
+        // 必须在插件 koaRouter-1-scanHar.js 和 koaRouter-1.1-scanWeb.js 
+        // 之后运行此处接口才能读取到附加的信息，这就是把插件文件名序号设置为 2 的原因 koaRouter-2-demo.js
         const ectx = warpKoaCtxAll(ctx);
         ctx.body = 'hello demo';
         return next();
