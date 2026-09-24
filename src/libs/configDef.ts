@@ -558,7 +558,7 @@ export default createKoaRouter(function koaRouterDemo(router) {
         ctx.body = 'hello demo';
         return next();
     });
-    router.all(/^\/demo.*$/, async (ctx, next) => {
+    router.all(/^\\/demo.*$/, async (ctx, next) => {
         ctx.body = (ctx.body ?? '') + ' hello demo2';
         return next();
     });

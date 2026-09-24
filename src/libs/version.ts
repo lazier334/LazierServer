@@ -1,5 +1,5 @@
 export default Object.fromEntries(Object.entries({
-    "1.3.16-26091801": `+ 增加实例测试
+    "1.3.16-26092402": `+ 增加实例测试
 - 取消启动时检测版本
 = 优化构建har
 = 优化系统
