@@ -9,16 +9,16 @@ LazierServer文档: https://lazier334.github.io/res/lazierserver/
 
 ## 快速启动
 
-* **1. 下载项目** 使用全局安装命令: `npm i -g lazierserver`
-* **2. 启动项目** 在项目文件夹运行命令启动: `ls334`
+* **1. 下载LS** 使用全局安装命令: `npm i -g lazierserver`
+* **2. 启动项目** 在你自己的项目文件夹运行命令启动: `ls334`
 * **3. 查看帮助** 命令: `ls334 help`
 
 ### 快速开发
 
-1. 完成上述全局安装
-2. 从从文件夹里使用 `ls334` 命令启动服务器（**该文件夹不能位于当前项目LazierServer的文件夹内**），会把当前文件夹作为web与plugins的共用文件夹使用
-4. 然后先使用 `npm i lazierserver` 安装提示模块（非必须，但没有提示会很难写，已针对'lazierserver/types'模块进行兼容，未安装模块也可以运行）
-6. 创建一个插件 **可以通过导入 `lazierserver/types` 来获得提示信息**。现在可以在部署后直接从`模版列表页面 /template.html`里直接复制模版
+#### 手动方式
+1. **初始化:** 打开你的项目文件夹 *(可以是空文件夹)*
+2. **安装模块:** 然后使用 `npm i lazierserver` 安装提示模块 *(非必须，但没有提示会很难写，已针对 'lazierserver/types' 模块进行兼容，未安装模块也可以运行)*
+3. **开发:** 创建一个插件 **可以通过导入 `lazierserver/types` 或 `lazierserver` 来获得提示信息**。现在可以在部署后直接从 `模版列表页面(/template.html)` 里直接复制模版
     ```js
     import { createKoaRouter } from 'lazierserver/types';
 
@@ -29,7 +29,13 @@ LazierServer文档: https://lazier334.github.io/res/lazierserver/
         return router
     })
     ```
-7. 创建一个静态资源文件夹 `a.b` 并把静态资源放进文件夹内，例如: `a.b/index.html` ，可通过 `switch.scanWebOnlyDoamin` 进行配置是否使用`.`作为筛选，**默认情况下文件夹必须至少含有一个 `.` 才能被识别为web资源**
+4. **开发:** 可以创建一个静态资源文件夹 `a.b` 并把静态资源放进文件夹内，例如: `a.b/index.html` ，可通过 `switch.scanWebOnlyDomain` 进行配置是否使用`.`作为筛选，**默认情况下文件夹必须至少含有一个 `.` 才能被识别为web资源**
+5. **运行:** 从项目文件夹里使用 `ls334` 命令启动服务器 **(该文件夹不能位于当前项目LazierServer的文件夹内)**，启动后会把当前文件夹作为 web 和 plugins 的共享文件夹使用
+
+#### 模版方式
+1. **初始化:** 在你要创建项目的地方运行命令 `ls334 c [项目名]` *(项目名不能包含特殊字符)*
+2. **开发:** 在生成的项目文件夹里继续开发
+3. **运行:** 从项目文件夹里使用 `ls334` 命令启动服务器
 
 ## docker
 
@@ -39,7 +45,7 @@ LazierServer文档: https://lazier334.github.io/res/lazierserver/
 **方式二: 自行编译**
 1. 拉取仓库 `git clone https://github.com/lazier334/LazierServer.git` 
 2. 安装模块 `npm i`
-3. 构建项目 `npm run build`
+3. 构建LS `npm run build`
 4. 编译镜像 `docker-compose up -d`
 
 ## 文件夹说明
@@ -72,7 +78,9 @@ LazierServer/
 │     ├─ configDef.ts       // 默认配置
 │     ├─ initKoa.ts         // 初始化koa
 │     ├─ plugins.ts         // 阶段插件核心
-│     └─ utils.ts           // 系统工具
+│     ├─ program.ts         // 全局命令模块
+│     ├─ utils.ts           // 系统工具
+│     └─ version.ts         // 版本信息
 ├─ tests/                   // 测试项
 └─ *.*                      // 其他文件用于其他辅助功能，比如docker
 ```
