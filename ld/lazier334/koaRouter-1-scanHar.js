@@ -83,11 +83,11 @@ async function sendEntries(ctx, entries, next) {
     } catch (err) {
         console.warn('Har设置响应内容失败', err)
     }
-    ctx.entry = entry;
-    ctx.entryResponse = entryResponse;
-    ctx.notCompleteFile = true;
+    ctx.ls.entry = entry;
+    ctx.ls.entryResponse = entryResponse;
+    ctx.ls.notCompleteFile = true;
     let re = await next();
-    // 如果还没有被响应，那么就使用 ctx.entryResponse 的数据进行响应，其他路由可以修改 ctx.entryResponse 
+    // 如果还没有被响应，那么就使用 ctx.ls?.entryResponse 的数据进行响应，其他路由可以修改 ctx.ls?.entryResponse 
     // 如果要改变响应头也可以修改entry里面的响应头
     if (ctx.body === undefined && !ctx.res.headersSent) {
         try {
@@ -99,7 +99,7 @@ async function sendEntries(ctx, entries, next) {
         } catch (err) {
             console.warn('Har设置响应头失败', err)
         }
-        re = ctx.body = ctx.entryResponse;
+        re = ctx.body = ctx.ls?.entryResponse;
     }
     return re;
 }

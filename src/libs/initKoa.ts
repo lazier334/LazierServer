@@ -26,6 +26,8 @@ export { initKoa, bindWebSocketServer };
 async function initKoa(app: Koa): Promise<void> {
     // 添加路由
     app.use(async (ctx: Koa.DefaultContext, next: Koa.Next) => {
+        // 初始化额外信息挂载对象
+        ctx.ls = {};
         return await koaCompose((await plugins('koaPlugin')).data)(ctx as any, next)
     }).use(async (ctx: Koa.DefaultContext, next: Koa.Next) => {
         // 动态路由

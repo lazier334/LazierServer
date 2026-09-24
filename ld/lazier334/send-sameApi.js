@@ -21,7 +21,7 @@ export default createSend(async function sendSameApi(sendOptions) {
         if (dataMap) {
             const api = calcApiData(dataMap, lc.dataCache, ctx, filename, opts);
             if (api) {
-                ctx.sendFileFromPath = path.join(opts.root, path.basename(api.path));
+                ctx.ls.sendFileFromPath = path.join(opts.root, path.basename(api.path));
                 sendOptions.filename = path.basename(api.path);
             }
         }

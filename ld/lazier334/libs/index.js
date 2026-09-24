@@ -18,14 +18,13 @@ const CtxOtherType = {
  * 引入提示信息
  * @typedef {import('../koaRouter-1.1-scanWeb').SendFileType} SendFileType
  * @typedef {import('../koaRouter-1-scanHar').SendEntryType} SendEntryType
- * @typedef {SendFileType & SendEntryType} extendTypes
  */
 
 /**
  * 给 ctx 增加流转 scanWeb 与 scanHar 后的提示信息
  * @template T
  * @param {T} ctx 
- * @returns {T & extendTypes & CtxOtherType}
+ * @returns {T & { ls: SendFileType & SendEntryType & CtxOtherType}}
  */
 function warpKoaCtxAll(ctx) {
     return ctx;
@@ -35,7 +34,7 @@ function warpKoaCtxAll(ctx) {
  * 给 ctx 增加流转 scanWeb 后的提示信息
  * @template T
  * @param {T} ctx 
- * @returns {T & SendFileType & CtxOtherType}
+ * @returns {T & { ls: SendFileType & CtxOtherType }}
  */
 function warpKoaCtxByWeb(ctx) {
     return ctx;
@@ -45,7 +44,7 @@ function warpKoaCtxByWeb(ctx) {
  * 给 ctx 增加流转 scanHar 后的提示信息
  * @template T
  * @param {T} ctx 
- * @returns {T & SendEntryType & CtxOtherType}
+ * @returns {T & { ls: SendEntryType & CtxOtherType }}
  */
 function warpKoaCtxByHar(ctx) {
     return ctx;

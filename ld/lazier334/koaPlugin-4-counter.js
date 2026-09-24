@@ -54,8 +54,8 @@ export default createKoaPlugin(async function koaPluginCounter(ctx, next) {
             data: err.message
         }
     }
-    if (ctx.sendFileFromPath) ctx.set(config.headerNames.fileFrom, encodeURI(ctx.sendFileFromPath));
-    if (config.logger.resp) console.log(`<-${400 <= ctx.status ? "x" : "-"}- [${ctx.status} ${ctx.method} ${Date.now() - start}ms] ${ctx.url}${ctx.sendFileFromPath ? ` (from: ${ctx.sendFileFromPath})` : ""}`);
+    if (ctx.ls?.sendFileFromPath) ctx.set(config.headerNames.fileFrom, encodeURI(ctx.ls?.sendFileFromPath));
+    if (config.logger.resp) console.log(`<-${400 <= ctx.status ? "x" : "-"}- [${ctx.status} ${ctx.method} ${Date.now() - start}ms] ${ctx.url}${ctx.ls?.sendFileFromPath ? ` (from: ${ctx.ls?.sendFileFromPath})` : ""}`);
     if (400 <= ctx.status) {
         if (!cacheErrorApis[ctx.status]) {
             cacheErrorApis[ctx.status] = {};

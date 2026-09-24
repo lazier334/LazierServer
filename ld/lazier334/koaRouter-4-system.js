@@ -27,10 +27,10 @@ export default createKoaRouter(function koaRouterSystem(router) {
 
     router.all('接口: 如果是访问首页则检测权限并返回对应的版本', '/index.html', async (ctx, next) => {
         const ectx = warpKoaCtxByWeb(ctx);
-        if (ectx.sendOptions?.opts.root.replaceAll('\\', '/').endsWith('web/web.index')) {
+        if (ectx.ls?.sendOptions?.opts.root.replaceAll('\\', '/').endsWith('web/web.index')) {
             if (!authUser(ctx)?.superAdmin) {
                 // 用户版为把 'isAdmin: true,' 改成 'isAdmin: false,' 
-                let html = fs.readFileSync(path.join(ectx.sendOptions.opts.root, ectx.sendOptions.filename), 'utf8');
+                let html = fs.readFileSync(path.join(ectx.ls?.sendOptions.opts.root, ectx.ls?.sendOptions.filename), 'utf8');
                 ctx.type = 'text/html; charset=utf-8';
                 ctx.body = html.replaceAll('isAdmin: true,', 'isAdmin: false,');
             }
@@ -49,7 +49,7 @@ export default createKoaRouter(function koaRouterSystem(router) {
 
     // 接口: 自动补全编辑页的文件匹配 /edit/vs/*
     router.all('接口: 自动补全编辑页的文件匹配', /^\/edit\/vs\/.*$/, async (ctx, next) => {
-        if (ctx.notCompleteFile) return await next();
+        if (ctx.ls?.notCompleteFile) return await next();
         const filepath = path.join(config.tempDownDir, ctx.url);
         const url = 'https://unpkg.com/monaco-editor@0.33.0/min/vs' + ctx.url.substring(ctx.url.indexOf('/vs') + '/vs'.length);
         const fp = await downloadFileToPath(url, filepath);
@@ -304,9 +304,9 @@ export default createKoaRouter(function koaRouterSystem(router) {
     router.all('系统路由 - 版权主页面文件处理', '/system/copyright', async (ctx, next) => {
         /** @type {ctx & T} */
         const ectx = ctx;
-        if (!ectx.sendFileFromPath) return;
+        if (!ectx.ls?.sendFileFromPath) return;
         ctx.type = 'text/html; charset=utf-8';
-        ctx.body = fs.readFileSync(ectx.sendFileFromPath, 'utf8').replaceAll('YYYY', new Date().getFullYear())
+        ctx.body = fs.readFileSync(ectx.ls?.sendFileFromPath, 'utf8').replaceAll('YYYY', new Date().getFullYear())
             .replaceAll('公司名称', config.copyright.copyright ?? config.copyright.companyName)
             .replaceAll('备案号', config.copyright.icp);
         if (config.copyright.icp === '') {
@@ -316,20 +316,20 @@ export default createKoaRouter(function koaRouterSystem(router) {
     router.all('系统路由 - 版权联系方式文件处理', '/system/contact', async (ctx, next) => {
         /** @type {ctx & T} */
         const ectx = ctx;
-        if (!ectx.sendFileFromPath) return;
-        ctx.body = fs.readFileSync(ectx.sendFileFromPath, 'utf8').replaceAll('lazier334@lazier334.com', config.copyright.contact)
+        if (!ectx.ls?.sendFileFromPath) return;
+        ctx.body = fs.readFileSync(ectx.ls?.sendFileFromPath, 'utf8').replaceAll('lazier334@lazier334.com', config.copyright.contact)
     });
     router.all('系统路由 - 版权隐私政策文件处理', '/system/privacy', async (ctx, next) => {
         /** @type {ctx & T} */
         const ectx = ctx;
-        if (!ectx.sendFileFromPath) return;
-        ctx.body = fs.readFileSync(ectx.sendFileFromPath, 'utf8').replaceAll('隐私政策', config.copyright.privacy)
+        if (!ectx.ls?.sendFileFromPath) return;
+        ctx.body = fs.readFileSync(ectx.ls?.sendFileFromPath, 'utf8').replaceAll('隐私政策', config.copyright.privacy)
     });
     router.all('系统路由 - 版权使用条款文件处理', '/system/terms', async (ctx, next) => {
         /** @type {ctx & T} */
         const ectx = ctx;
-        if (!ectx.sendFileFromPath) return;
-        ctx.body = fs.readFileSync(ectx.sendFileFromPath, 'utf8').replaceAll('使用条款', config.copyright.terms)
+        if (!ectx.ls?.sendFileFromPath) return;
+        ctx.body = fs.readFileSync(ectx.ls?.sendFileFromPath, 'utf8').replaceAll('使用条款', config.copyright.terms)
     });
 
     // #endregion 

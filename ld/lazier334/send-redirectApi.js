@@ -18,7 +18,7 @@ export default createSend(async function sendRedirectApi(sendOptions) {
             const url = fs.readFileSync(fp300, 'utf-8');
             console.log('接口重定向', ctx.url, '->', url);
             ctx.redirect(url);
-            ctx.sendFileFromPath = fp300;
+            ctx.ls.sendFileFromPath = fp300;
             return true;
         }
     } catch (error) {

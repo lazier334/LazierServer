@@ -1,7 +1,7 @@
 {
   "name": "lazierserver",
-  "version": "1.3.16-26092406",
-  "description": "+ 增加实例测试\n- 取消启动时检测版本\n= 优化构建har\n= 优化系统",
+  "version": "1.3.17-26092400",
+  "description": "= ctx 的附加对象全部转移到 ctx.ls\n= 优化系统",
   "homepage": "https://github.com/lazier334/LazierServer#readme",
   "bugs": {
     "url": "https://github.com/lazier334/LazierServer/issues"

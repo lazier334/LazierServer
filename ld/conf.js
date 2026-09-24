@@ -150,8 +150,8 @@ export default types.createKoaRouter(function koaRouterDemo(router) {
         // 如果是需要自定义响应内容，直接修改 ctx.body 不为 undefined 即可
         router.all('/demo.txt', async (ctx, next) => {
             const ectx = warpKoaCtxByWeb(ctx)
-            ectx.sendOptions.filename = '_' + ectx.sendOptions.filename;
-            console.log(ectx.sendOptions.filename)
+            ectx.ls.sendOptions.filename = '_' + ectx.ls?.sendOptions.filename;
+            console.log(ectx.ls?.sendOptions.filename)
         });
     }
     return router
