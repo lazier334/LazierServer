@@ -102,7 +102,7 @@ const files: Record<string, string> = {
         .replace('项目名称', '{directory}')
         .replace('备注信息', '选项 - {directory}')
         .replace('#跳转地址', '/{directory}'),
-    'koaRouter-1-temp.js': defConfig.template['koaRouter-1-demo.js'].trim()
+    'koaRouter-1-temp.js': defConfig.template['koaRouter-2-demo.js'].trim()
         .replace('的demo', '')
         .replace('koaRouterDemo', 'koaRouter{Directory}')
         .replace('/demo', '/{directory}')

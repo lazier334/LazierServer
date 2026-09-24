@@ -1,6 +1,6 @@
 {
   "name": "lazierserver",
-  "version": "1.3.16-26092405",
+  "version": "1.3.16-26092406",
   "description": "+ 增加实例测试\n- 取消启动时检测版本\n= 优化构建har\n= 优化系统",
   "homepage": "https://github.com/lazier334/LazierServer#readme",
   "bugs": {
