@@ -13,8 +13,19 @@
 export {
     parseBinaryWSMsgs,
     base64ToUint8Array,
-    arrayBufferToBase64
+    arrayBufferToBase64,
+    filterReceive
 };
+
+/**
+ * 过滤出 receive 类型的消息，会改变原始数组
+ * @param {Msg[]} msgs 参数数据示例 
+ * @returns {Msg[]} 返回数据示例 
+ */
+function filterReceive(msgs) {
+    msgs.splice(1, msgs.length, ...msgs.filter(e => e.type == 'receive'));
+    return msgs;
+}
 
 /**
  * 解析二进制的消息内容
