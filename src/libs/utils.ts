@@ -255,23 +255,27 @@ function runCmdAsync(command: string, args: string[], no1sResolve: boolean = fal
         if (!no1sResolve) child.on('spawn', () => setTimeout(resolve, 1000));
     });
 }
-type Version = { next: string, latest: string, now: string, update: boolean };
+type Version = { next: string, latest: string, now: string, update: boolean | string };
 /**
  * 检查最新版本并检测 latest 版本是否有更新
  */
 async function checkVersion(): Promise<Version | undefined> {
     let re = { update: false } as Version;
     try {
+        // 读取本地版本
         const packageJSON = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, '../../package.json'), 'utf8'));
         const version = packageJSON.version;
         re.now = version;
+        // 获取在线版本
         const res = await fetch('https://registry.npmjs.org/-/package/lazierserver/dist-tags');
         const verData = await res.json() as { "next": "1.3.6-26072700", "latest": "1.3.5" };
         console.info('当前版本:', version, '最新版本:', verData);
         re.next = verData.next;
         re.latest = verData.latest;
-        // 检测 latest 是否需要更新版本
-        re.update = Number(re.now.split('-').shift()?.replaceAll('.', '')) < Number(re.latest.split('-').shift()?.replaceAll('.', ''));
+        // 检测是否需要更新版本
+        const verNum = (str: string) => Number(str.replace(/[-.]/g, ''));
+        if (verNum(re.now) < verNum(re.latest)) re.update = 'latest';
+        if (verNum(re.now) < verNum(re.next)) re.update = 'next';
     } catch (err) {
         console.error('检查版本时出现异常:', err)
     }

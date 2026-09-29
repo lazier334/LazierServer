@@ -1,6 +1,6 @@
 {
   "name": "lazierserver",
-  "version": "1.3.17-26092901",
+  "version": "1.3.17-26092902",
   "description": "+ 更改导入模块时的兜底机制\n= ctx 的附加对象全部转移到 ctx.ls\n= 优化系统",
   "homepage": "https://github.com/lazier334/LazierServer#readme",
   "bugs": {

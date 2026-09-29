@@ -197,35 +197,25 @@ export default createKoaRouter(function koaRouterSystem(router) {
         const { tag, update } = ectx.query;
         // 检查版本，然后运行更新脚本
         const ver = await checkVersion();
-        let verTag = 'latest';
-        if (tag == 'next') {
-            ver.update = Number(ver.now.replace(/[-.]/g, '')) < Number(ver.next.replace(/[-.]/g, ''));
-            verTag = 'next';
-        }
+        let verTag = tag == 'next' ? 'next' : 'latest';
 
+        // 通过接口更新时强制更新，因为有重装的需求，版本检测已在前端制作
         if (update && authUser(ctx)?.superAdmin) {
-            // 通过接口更新时强制更新，因为有重装的需求，版本检测已在前端制作
-            if (true || ver.update) {
-                // 运行 update.js 脚本
-                const scriptFile = path.join(config.dataPath, 'scripts/update.js');
-                if (fs.existsSync(scriptFile)) {
-                    ctx.body = result(ver, `正在尝试更新系统版本到 ${verTag} 版本! 更新成功后将重启系统`);
-                    setTimeout(() => {
-                        runCmdAsync('node', [
-                            scriptFile,
-                            '--tag=' + verTag,
-                            // 将当前的启动命令转成base64带过去
-                            '--run=' + Buffer.from(JSON.stringify(process.argv), 'utf8').toString('base64')
-                        ]).then(() => process.exit(0));
-                    }, 2000);
-                } else {
-                    ctx.body = result(ver, '更新脚本不存在!');
-                }
+            // 运行 update.js 脚本
+            const scriptFile = path.join(config.dataPath, 'scripts/update.js');
+            if (fs.existsSync(scriptFile)) {
+                ctx.body = result(ver, `正在尝试更新系统版本到 ${verTag} 版本! 更新成功后将重启系统`);
+                setTimeout(() => runCmdAsync('node', [
+                    scriptFile,
+                    '--tag=' + verTag,
+                    // 将当前的启动命令转成base64带过去
+                    '--run=' + Buffer.from(JSON.stringify(process.argv), 'utf8').toString('base64')
+                ]).then(() => process.exit(0)), 2000);
             } else {
-                ctx.body = result(ver, '当前已经是最新版本!');
+                ctx.body = result(ver, '更新脚本不存在!');
             }
         } else {
-            ctx.body = result(ver, ver.update ? '存在新版本!' : '当前已经是最新版本!');
+            ctx.body = result(ver, ver.update ? ver.update + '存在新版本!' : '当前已经是最新版本!');
         }
     });
 
