@@ -275,7 +275,7 @@ async function checkVersion(): Promise<Version | undefined> {
         // 检测是否需要更新版本
         const verNum = (str: string) => Number(str.replace(/[-.]/g, ''));
         if (verNum(re.now) < verNum(re.latest)) re.update = 'latest';
-        if (verNum(re.now) < verNum(re.next)) re.update = 'next';
+        else if (verNum(re.now) < verNum(re.next)) re.update = 'next';
     } catch (err) {
         console.error('检查版本时出现异常:', err)
     }
