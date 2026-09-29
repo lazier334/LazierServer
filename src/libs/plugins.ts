@@ -105,41 +105,15 @@ export {
 async function importWarp(filepath: string, timestamp?: number): Promise<Object | Function> {
     try {
         // 解决文件路径异常的问题
-        let filepathURL = pathToFileURL(filepath);
+        const filepathURL = pathToFileURL(filepath);
         // 读取文件的更新时间，将更新时间作为后缀，如果是特殊插件会无法使用 fs 读取，所以就将其包裹起来
         if (timestamp == null) timestamp = getPlguinUpdateTime(filepathURL);
-        let importFilepath = filepathURL + '?timestamp=' + timestamp;
+        const importFilepath = filepathURL + '?timestamp=' + timestamp;
         console.debug('导入插件', importFilepath);
         // 使用文件修改时间作为查询参数动态导入插件模块
-        let pluginModule;
-        try {
-            pluginModule = await import(importFilepath);
-        } catch (err) {
-            console.log('导入模块失败! 模块:', importFilepath);
-            if (err instanceof Error && err?.message?.includes("Cannot find package 'lazierserver' imported from")) {
-                // 默认是全局引入
-                let moduleName = 'lazierserver';
-                const code = fs.readFileSync(filepath, 'utf8');
-                if (code.includes(moduleName)) {
-                    const typesModuleName = 'lazierserver/types';
-                    let modulePath = 'lazier334/libs/index.js';
-                    if (code.includes(typesModuleName)) {
-                        // types 引入
-                        modulePath = 'lazier334/types/index.js';
-                        moduleName = typesModuleName;
-                    }
-                    // 动态计算出模块位置并将其包装成url
-                    const typePath = pathToFileURL(path.join(config.dataPath, modulePath));
-                    const base64 = Buffer.from(code.replace(moduleName, typePath.href) + `//# sourceURL=${filepath}\n`).toString('base64');
-                    const url = `data:text/javascript;base64,${base64}`;
-                    pluginModule = await import(url);
-                    console.log('已修复导入异常');
-                } else throw err;
-            } else throw err;
-        }
+        const pluginModule = await import(importFilepath);
         // 处理默认导出：优先使用 default 导出
-        const plugin = pluginModule.default || pluginModule;
-        return plugin;
+        return pluginModule.default !== undefined ? pluginModule.default : pluginModule;
     } catch (error) {
         console.error(`加载插件失败: ${filepath}`, error);
         throw error; // 向上抛出异常
