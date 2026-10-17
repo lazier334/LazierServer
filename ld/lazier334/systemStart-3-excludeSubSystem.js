@@ -16,7 +16,7 @@ export default createSystemStart(async function systemStartDemo({ fs, path, conf
             avatarText: "/ld",
             text: "打开数据目录",
             tooltip: "尝试使用文件管理器打开数据目录（主要用于windows系统）",
-            fun: `this.openPage('/system/openCwd?filepath=${import.meta.dirname.replaceAll("\\", "/")}')`
+            fun: `this.openPage('/system/openCwd?filepath=${config.ldDirName.replaceAll("\\", "/")}')`
         })
     }
 
