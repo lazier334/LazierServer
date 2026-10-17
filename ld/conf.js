@@ -90,12 +90,12 @@ export const userConfig = {
         },
     ],
     otherWebPath: [
-        "{/ldDirName/}/lazier334",
+        "{ldDirName}/lazier334",
         ...serverDir
     ],
     pluginDirs: [
-        "{/ldDirName/}/plugins",
-        "{/ldDirName/}/lazier334",
+        "{ldDirName}/plugins",
+        "{ldDirName}/lazier334",
         ...serverDir
     ],
     copyright: {

@@ -205,7 +205,7 @@ const config = {
         const oldName = this.ldDirName;
         if (!forceRefresh && (typeof newLdDirName != 'string' || newLdDirName == '' || oldName == newLdDirName)) return false;
         const replaceAllStr = (str: string) => {
-            return str.replaceAll(oldName, newLdDirName).replaceAll('{/ldDirName/}', newLdDirName);
+            return str.replaceAll(oldName, newLdDirName).replaceAll('{ldDirName}', newLdDirName);
         }
         /** ld 文件夹名称 */
         this.ldDirName = newLdDirName;
@@ -241,7 +241,7 @@ const config = {
     /** 版本信息 */
     version: version || { "1.0.0(25081400)": `一个可以快速搭建的服务器` },
     /** 输入路径 */
-    rootDir: `{/ldDirName/}/web`,
+    rootDir: `{ldDirName}/web`,
     /** 输出路径 */
     outdir: "dist",
     /** 本地开发环境中插入的代码, 代码会插入到 index.html 文件中<body>标签内的开头 */
@@ -370,7 +370,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     /** 插件目录列表 */
     pluginDirs: [] as string[],
     /** 外部配置路径, 改文件所在的 ld 目录也用于存放自定义插件 */
-    ldConfigPath: `{/ldDirName/}/conf.js`,
+    ldConfigPath: `{ldDirName}/conf.js`,
     /** 数据路径 */
     dataPath: ldDirName,
     /** 加密时使用的key */
@@ -493,7 +493,7 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
         setStack: 'ls-set-stack',
     },
     /** 临时下载的文件的目录 */
-    tempDownDir: `{/ldDirName/}/web/web.temporary`,
+    tempDownDir: `{ldDirName}/web/web.temporary`,
     /**
      * koa的对象
      * @type {import('koa')}
