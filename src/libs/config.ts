@@ -17,9 +17,11 @@ if (!config) {
      */
     defConfig.ldConfigPath = path.join(__dirname, '../../ld/conf.js');
     const dataPath = path.dirname(defConfig.ldConfigPath);
-    if (!fs.existsSync(dataPath)) {
-        fs.mkdirSync(dataPath);
-    }
+    if (!fs.existsSync(dataPath)) fs.mkdirSync(dataPath);
+    // 设置数据文件夹
+    defConfig.updateLdDirName(dataPath, true);
+    // 尝试恢复备份的配置
+    defConfig.recoveryConf(defConfig.ldConfigPath);
 
     // 1. 读取 ld 的配置文件进行合并，配置选择优先级 运行路径的配置文件 > 项目的配置文件 > 默认配置
     const getConfig = async (filepath: string): Promise<Partial<ConfigType> | undefined> => {
@@ -33,6 +35,7 @@ if (!config) {
         }
     }
     const cwdConfigPath = path.join(process.cwd(), 'conf.js');
+    // 读取用户配置
     let conf = await getConfig(cwdConfigPath);
     if (!conf) {
         conf = await getConfig(defConfig.ldConfigPath);
@@ -41,20 +44,17 @@ if (!config) {
             console.info('使用系统默认配置');
         } else console.info('使用配置文件:', defConfig.ldConfigPath);
     } else console.info('使用配置文件:', cwdConfigPath);
+    // 将用户配置信息附加到系统配置中
+    Object.assign(config, conf);
 
-    config = { ...(config), ...conf };
+    // 2. 将系统(用户)配置合并到默认配置中
+    config = defConfig.useConfig(config, defConfig);
 
     // 3. 读取 banner.txt 文件内容
     const bannerPath = path.join(dataPath, 'banner.txt');
     if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
         config.versionBanner = fs.readFileSync(bannerPath, 'utf8')
     }
-
-    // 使用配置
-    config = defConfig.useConfig(config, defConfig);
-
-    // 设置数据文件夹
-    config.updateLdDirName(dataPath, true);
 
     /**
      * 添加config到全局

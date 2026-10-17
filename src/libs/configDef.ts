@@ -1,6 +1,7 @@
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import version from './version.ts';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 // #region 类型定义
 type NullObject = { [key: string]: any; };
@@ -44,6 +45,7 @@ type ConfigUtilsType = {
     selectConfig: typeof readObj;
     readVersion: typeof readVersion;
     isMainModule: typeof isMainModule;
+    recoveryConf: typeof recoveryConf;
     getNowFileStorage: typeof getNowFileStorage;
 };
 
@@ -62,6 +64,7 @@ const ConfigUtils: ConfigUtilsType = {
     selectConfig: readObj,
     readVersion,
     isMainModule,
+    recoveryConf,
     getNowFileStorage,
 }
 /** ld 文件夹名称 */
@@ -887,5 +890,41 @@ function getNowFileStorage(filepath: string = import.meta.filename): NullObject 
         if (typeof process.LSStorage[fn] != 'object' || process.LSStorage[fn] == null) process.LSStorage[fn] = {};
     }
     return process.LSStorage[fn];
+}
+
+/**
+ * 恢复备份的配置文件，备份的配置文件固定位于包名外 `同名+.bak` 文件夹内。  
+ * 恢复成功后会清除该备份文件（若文件夹内没有其他文件则同时删除备份文件夹）
+ * @param confPath 系统配置路径
+ * @returns 
+ */
+function recoveryConf(confPath: string): boolean {
+    if (confPath) {
+        // 项目目录
+        const projectDir = path.join(import.meta.dirname, '../../');
+        const bakConfPath = path.join(projectDir.replace(/[\\/]+$/, '') + '.bak', 'conf.js');
+
+        if (fs.existsSync(bakConfPath) && fs.statSync(bakConfPath).isFile()) {
+            console.warn('检测到备份的配置文件, 正在恢复备份的配置文件, 恢复成功后会清理备份文件');
+            fs.copyFileSync(bakConfPath, confPath);
+            if (fs.readFileSync(confPath, 'utf8') == fs.readFileSync(bakConfPath, 'utf8')) {
+                console.warn('系统配置已恢复, 正在清理备份的配置文件');
+                fs.rmSync(bakConfPath);
+                try {
+                    fs.rmdirSync(path.dirname(bakConfPath));
+                } catch (err) {
+                    console.warn('清理备份配置所在目录失败! 可能存在其他文件, 可手动进行删除, 目录为:', path.dirname(bakConfPath));
+                    console.log('具体错误信息为:', err);
+                }
+                return true;
+            } else {
+                console.error('恢复备份配置失败! 请手动将备份配置文件移动并覆盖到当前系统配置文件!');
+                console.log('备份配置的文件路径:', bakConfPath);
+                console.log('系统配置的文件路径:', confPath);
+            }
+        }
+    } else console.error('需要系统配置路径参数!');
+
+    return false;
 }
 // #endregion 

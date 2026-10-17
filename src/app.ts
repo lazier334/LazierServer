@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import "./libs/checkBakConf.ts";
 import { callback, runfile } from './libs/program.ts';
 import Koa from 'koa';
 import http from 'http';
