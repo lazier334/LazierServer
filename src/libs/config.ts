@@ -51,10 +51,12 @@ if (!config) {
     config = defConfig.useConfig(config, defConfig);
 
     // 3. 读取 banner.txt 文件内容
-    const bannerPath = path.join(dataPath, 'banner.txt');
+    const bannerPath = path.join(config.ldDirName, 'banner.txt');
     if (fs.existsSync(bannerPath) && fs.statSync(bannerPath).isFile()) {
         config.versionBanner = fs.readFileSync(bannerPath, 'utf8')
     }
+    // 4. 更新路径信息
+    defConfig.updateLdDirName(config.ldDirName, true);
 
     /**
      * 添加config到全局
