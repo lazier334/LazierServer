@@ -15,7 +15,7 @@ import path from 'path';
 import { execSync } from 'child_process';
 
 // 项目目录
-const projectDir = path.join(import.meta.dirname, '../');
+const projectDir = path.join(import.meta.dirname, '../../');
 // 需要检查并删除的文件夹（绝对路径或相对路径）
 const foldersToClean = [projectDir];
 // 启动

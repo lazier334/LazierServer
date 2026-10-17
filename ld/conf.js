@@ -209,8 +209,4 @@ export default createSystemStart(async function systemStartDemo({ fs, path, conf
     },
 };
 
-if (false) {
-
-}
-
 export default userConfig;

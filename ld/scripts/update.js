@@ -14,12 +14,17 @@ import path from 'path';
 import { execSync, spawn } from 'child_process';
 
 // 项目目录
-const projectDir = path.join(import.meta.dirname, '../');
+const projectDir = path.join(import.meta.dirname, '../../');
+const configName = 'conf.js'
 // 需要检查并删除的文件夹（绝对路径或相对路径）
 const foldersToClean = [projectDir];
 const lc = {
+    confPath: path.join(path.join(import.meta.dirname, '../'), configName),
+    tempConfigPath: path.join(projectDir.replace(/[\\/]+$/, '') + '.bak', configName),
     updateLogPath: path.join(import.meta.dirname, 'update.log'),
 };
+console.log('projectDir:', projectDir)
+console.log('lc:', lc)
 var verTag = 'latest';
 var runcode;
 anyArgs();
@@ -30,10 +35,12 @@ function anyArgs() {
     const args = process.argv.slice(2);
     args.forEach(param => {
         if (param.startsWith(tagChar)) {
+            // 处理 tag 命令
             if (param.replace(tagChar, '').trim() == 'next') {
                 verTag = 'next';
             }
         } else if (param.startsWith(runChar)) {
+            // 处理 run 命令
             param = param.replace(runChar, '').trim();
             runcode = {
                 cmd: JSON.parse(Buffer.from(param, 'base64').toString('utf8')),
@@ -72,16 +79,20 @@ async function main() {
         status = runcode;
     }
 
-    // 2. 更新全局包（同步等待完成）
-    console.log('正在全局安装包 lazierserver ...');
-    try {
-        // 执行安装，输出打印到控制台
-        const log = execSync('npm install -g lazierserver@' + verTag, { stdio: 'inherit' });
-        console.log('安装命令执行完成:', log);
-    } catch (error) {
-        console.error('安装失败（可能原程序未停止或权限不足）');
-    }
 
+    if (backupConf()) {
+        // 2. 更新全局包（同步等待完成）
+        console.log('正在全局安装包 lazierserver ...');
+        try {
+            // 执行安装，输出打印到控制台
+            const log = execSync('npm install -g lazierserver@' + verTag, { stdio: 'inherit' });
+            console.log('安装命令执行完成:', log);
+        } catch (error) {
+            console.error('安装失败（可能原程序未停止或权限不足）');
+        }
+    } else console.warn('备份配置失败! 即将重启系统!')
+
+    // 3. 重启系统
     if (status?.cmd) {
         // 使用新的独立进程启动命令
         console.log('=== 正在重启系统 ===');
@@ -91,6 +102,23 @@ async function main() {
     console.log('更新脚本执行完毕\n\n');
 }
 
+/**
+ * 备份配置到指定路径
+ * @param {string} topath 备份配置的路径
+ * @returns {boolean} 返回是否备份成功
+ */
+function backupConf(topath = lc.tempConfigPath) {
+    const todir = path.dirname(topath);
+    // 创建
+    if (!fs.existsSync(todir)) fs.mkdirSync(todir, { recursive: true });
+    fs.copyFileSync(lc.confPath, topath);
+    if (fs.existsSync(topath) && fs.statSync(topath).isFile()) {
+        if (fs.readFileSync(lc.confPath, 'utf8') == fs.readFileSync(topath, 'utf8')) {
+            return true
+        } else console.error('配置备份失败! 备份后的文件内容与原始配置不一致!')
+    } else console.error('配置备份失败! 文件未成功备份!');
+    return false
+}
 /**
  * 
  * @param {string} command 命令
