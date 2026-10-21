@@ -68,7 +68,11 @@ export default createIndexData(async function indexDataDemo(arr) {
                         },
                         {
                             text: "wk调试命令",
-                            url: "#ios浏览器调试协议的启动命令: remotedebug_ios_webkit_adapter --port 9000"
+                            url: "#ios浏览器调试协议的启动node模块的命令: remotedebug_ios_webkit_adapter --port 9000 安装主程序的命令: scoop install ios-webkit-debug-proxy"
+                        },
+                        {
+                            text: "wk调试教程",
+                            url: "https://www.cnblogs.com/zhubayi/articles/19343866"
                         }
                     ],
                 },
