@@ -65,6 +65,10 @@ export default createIndexData(async function indexDataDemo(arr) {
                         {
                             text: "关闭",
                             url: "/system/systemProxy?openApi=true"
+                        },
+                        {
+                            text: "wk调试命令",
+                            url: "#ios浏览器调试协议的启动命令: remotedebug_ios_webkit_adapter --port 9000"
                         }
                     ],
                 },
