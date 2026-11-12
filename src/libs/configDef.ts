@@ -437,8 +437,8 @@ EqYmow8H3i2N5ChIsMytR0jShPQgXnwEx7PjvFiUGs7AtZQ=
     times: {
         /** 自动补全超时时间 */
         timeout: 30 * 1000,
-        /** koaRouter 插件的新版本扫描间隔 */
-        koaRouterPlugin: 10 * 1000,
+        /** koaRouter 插件的新版本扫描间隔，间隔越小更新频率越快，越消耗性能 */
+        koaRouterPlugin: 3 * 1000,
         /** 插件的阶段自动更新时间间隔 10 分钟 */
         pluginStagesUpdateStep: 10 * 60 * 1000,
     },

@@ -163,7 +163,7 @@ async function readKoaRouters(): Promise<Router> {
         refresh = apList.join() != ls.apListCache.join();
     }
 
-    // 检测路由文件更新时间是否有变动，为了降低性能消耗，10秒钟扫描一次
+    // 检测路由文件更新时间是否有变动，如果为了降低性能消耗，可以设置10秒钟扫描一次
     if (ls.lastRefreshTime + config.times.koaRouterPlugin < Date.now()) {
         const alm = ls.apListMap;
         ls.apListMap = {};
@@ -172,6 +172,7 @@ async function readKoaRouters(): Promise<Router> {
             if (alm[fp] != time) refresh = true;
             ls.apListMap[fp] = time;
         });
+        ls.lastRefreshTime = Date.now();
     }
 
     // 刷新路由
