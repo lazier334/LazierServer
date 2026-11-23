@@ -5,6 +5,9 @@
  * 03 当前主版本号的第几次发布  
  */
 export default Object.fromEntries(Object.entries({
+    "1.3.19-26112300": `+ 增加传递ws连接建立的消息给ws的api插件, 可以这样检查是否是连接建立的消息 \`message === null\`
+= 优化系统
+`,
     "1.3.18-26101703": `+ 增加自定义配置备份
 = 优化系统
 `,

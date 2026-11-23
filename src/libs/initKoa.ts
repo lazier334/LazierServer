@@ -140,6 +140,8 @@ function bindWebSocketServer(WS: Server): Server {
             console.error('WebSocket 错误:', err)
         });
 
+        // 传递连接建立的消息，在api里可以这样检查是否是连接成功的消息 `message === null`  
+        plugins('websocketApis').then(mod => mod.use('connect', null, ws, req));
         // 连接上之后自动响应数据
         const data: WebSocketMessage[] = [];
         await (await plugins('websocketMsgs')).use(data);
