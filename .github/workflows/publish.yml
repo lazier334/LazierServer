@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write   # 用于 OIDC 认证
+      id-token: write
 
     steps:
       - name: Checkout code
@@ -31,6 +31,10 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org/'
+
+      # 确保 npm CLI 版本支持 dist-tag 的 OIDC 认证（>= 11.21.0）
+      - name: Ensure npm version
+        run: npm install -g npm@^11.21.0
 
       # ---- promote：将 latest 指向当前 next 的版本 ----
       - name: Promote latest to next
@@ -47,8 +51,6 @@ jobs:
           echo "Next version: $NEXT_VERSION"
           npm dist-tag add "$PACKAGE_NAME@$NEXT_VERSION" latest
           echo "Done: latest now points to $NEXT_VERSION"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # ---- publish：发布新版本 ----
       - name: Install dependencies
